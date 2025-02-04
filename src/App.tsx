@@ -11,6 +11,7 @@ import Album from './components/Album';
 import RelationshipStats from './components/RelationshipStats';
 import MemoriesPage from './pages/MemoriesPage';
 import PinAuthentication from './pages/PinAuthentication';
+import ElegantVideoGallery from './components/ElegantVideoGallery';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -43,6 +44,7 @@ function App() {
                     <RelationshipStats />
                     <MemoryList memories={memories} />
                     <StorySection />
+                    <ElegantVideoGallery />
                   </>
                 </ProtectedRoute>
               }

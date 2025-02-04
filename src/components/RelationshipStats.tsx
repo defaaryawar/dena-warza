@@ -11,7 +11,7 @@ const Countdown: React.FC<CountdownProps> = ({ targetDate, label }) => {
     const calculateTimeLeft = () => {
         const difference = +new Date(targetDate) - +new Date();
         const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
-        return `${days} day`;  
+        return `${days} hari`;  
     };
 
     return (
@@ -42,7 +42,7 @@ const RelationshipStats: React.FC = () => {
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden">
                 {/* Profile Section */}
                 <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4 sm:p-6 text-white">
-                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Our Journey</h2>
+                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6">Perjalanan Kami</h2>
                     <div className="flex justify-center gap-4 sm:gap-8">
                         {/* Defano Profile */}
                         <div className="text-center">
@@ -125,7 +125,7 @@ const RelationshipStats: React.FC = () => {
                                     onClick={() => setIsNotebookOpen(true)}
                                     className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 cursor-pointer transition-all duration-300 text-sm sm:text-base w-full sm:w-auto"
                                 >
-                                    Open Notebook
+                                    Buka Notebook
                                 </button>
                             </div>
                             <p className="text-gray-600 text-sm sm:text-base">
@@ -137,7 +137,7 @@ const RelationshipStats: React.FC = () => {
                         <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-xl transform transition-all duration-300 shadow-sm">
                             <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2 mb-4">
                                 <Star className="w-5 h-5 text-purple-500" />
-                                Special Moments
+                                Momen Spesial
                             </h3>
                             <div className="space-y-3">
                                 <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm transform transition-all duration-300">

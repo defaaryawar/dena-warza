@@ -14,3 +14,9 @@ export interface Memory {
     media: MediaItem[];
     tags: string[];
 }
+
+export interface VideoWithMemoryInfo extends MediaItem {
+    type: 'video';
+    memoryTitle: string;
+    memoryDate: string;
+}

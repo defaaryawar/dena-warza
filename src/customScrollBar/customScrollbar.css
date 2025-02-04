@@ -1,0 +1,83 @@
+/* customScrollbar.css */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(219, 234, 254, 0.1);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6));
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
+}
+
+/* Dark variant for the image gallery section */
+.custom-scrollbar-dark {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(147, 51, 234, 0.5) transparent;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-track {
+    background: rgba(219, 234, 254, 0.05);
+    border-radius: 10px;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(147, 51, 234, 0.6), rgba(59, 130, 246, 0.6));
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.custom-scrollbar-dark::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(147, 51, 234, 0.8), rgba(59, 130, 246, 0.8));
+}
+
+/* Horizontal scrollbar styles for thumbnail strip */
+.custom-scrollbar-horizontal {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(147, 51, 234, 0.5) transparent;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar-track {
+    background: rgba(219, 234, 254, 0.05);
+    border-radius: 10px;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.6), rgba(147, 51, 234, 0.6));
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.custom-scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
+    box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+}
+
+/* Smooth scrolling for all scrollable elements */
+* {
+    scroll-behavior: smooth;
+}

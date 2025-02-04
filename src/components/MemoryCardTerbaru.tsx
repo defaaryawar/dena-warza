@@ -120,7 +120,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
                     <Link
                         to={`/memory/${memory.id}`}
                         className="text-xs sm:text-sm text-blue-500 hover:text-blue-600 hover:underline
-                                 font-medium transition-colors"
+                        font-medium transition-colors"
                     >
                         Lihat Detail
                     </Link>

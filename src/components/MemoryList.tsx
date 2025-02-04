@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import MemoryCard from './MemoryCard';
+import MemoryCard from './MemoryCardTerbaru';
 import { Memory } from '../types/Memory';
+import { Link } from 'react-router-dom';
 
 const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -56,11 +57,13 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
     return (
         <div className="relative group px-4 sm:px-6 md:px-8">
             {/* Title Section */}
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-0">
                 <h2 className="text-lg sm:text-xl font-medium text-gray-800">
                     Kenangan Terbaru
                 </h2>
-                {/* Optional: Add view all button here */}
+                <Link to="galleryall" 
+                className='text-blue-600 font-semibold underline cursor-pointer text-xs z-1000'>
+                Lihat lebih banyak</Link>
             </div>
 
             {/* Gradient overlays with responsive widths */}

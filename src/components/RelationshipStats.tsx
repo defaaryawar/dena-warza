@@ -11,7 +11,7 @@ const Countdown: React.FC<CountdownProps> = ({ targetDate, label }) => {
     const calculateTimeLeft = () => {
         const difference = +new Date(targetDate) - +new Date();
         const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
-        return `${days} hari`;
+        return `${days} day`;
     };
 
     return (
@@ -96,7 +96,7 @@ const RelationshipStats: React.FC = () => {
                             </div>
                             <Countdown
                                 targetDate={getNextDate(10, 13)}
-                                label="Ultah Defano"
+                                label="Menuju Ultah Defano Arya Wardhana"
                             />
                         </div>
 
@@ -107,7 +107,7 @@ const RelationshipStats: React.FC = () => {
                             </div>
                             <Countdown
                                 targetDate={getNextDate(5, 17)}
-                                label="Ultah Najmita"
+                                label="Menuju Ultah Najmita Zahira Dirgantoro"
                             />
                         </div>
                     </div>

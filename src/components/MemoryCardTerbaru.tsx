@@ -42,7 +42,8 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
                 duration-300 
                 group 
                 overflow-hidden 
-                hover:shadow-lg
+                md:hover:shadow-lg
+                flex flex-col
                 ${className}
             `}
         >
@@ -51,7 +52,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
                 <img
                     src={firstMedia.type === 'video' ? firstMedia.thumbnail || firstMedia.url : firstMedia.url}
                     alt={memory.title}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="w-full h-full object-cover"
                 />
 
                 {/* Media Type Icon */}
@@ -79,9 +80,9 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
             </div>
 
             {/* Content Section */}
-            <div className="relative p-3 sm:p-4 flex flex-col min-h-[160px] sm:min-h-[180px]">
+            <div className="relative p-3 sm:p-4 flex flex-col flex-1"> {/* Gunakan flex-1 di sini */}
                 {/* Main Content */}
-                <div className="flex-1">
+                <div className="flex-1"> {/* Konten utama akan mengambil ruang yang tersedia */}
                     {/* Title */}
                     <h2 className="text-md sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-2">
                         {memory.title}
@@ -112,14 +113,14 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between mt-auto">
+                <div className="pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between mt-auto"> {/* Gunakan mt-auto di sini */}
                     <div className="flex items-center text-xs sm:text-sm text-gray-500">
                         <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                         <span>{formatDate(memory.date)}</span>
                     </div>
                     <Link
                         to={`/memory/${memory.id}`}
-                        className="text-xs sm:text-sm text-blue-500 hover:text-blue-600 hover:underline
+                        className="text-xs sm:text-sm text-blue-600 md:hover:text-blue-600 md:hover:underline
                         font-medium transition-colors"
                     >
                         Lihat Detail

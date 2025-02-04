@@ -65,7 +65,7 @@ const AlbumHeader: React.FC<AlbumHeaderProps> = ({
     };
 
     return (
-        <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-50">
+        <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-990">
             <div className="container mx-auto px-4 py-4">
                 {/* Main Header Row */}
                 <div className="flex flex-col md:flex-row gap-4 items-center">

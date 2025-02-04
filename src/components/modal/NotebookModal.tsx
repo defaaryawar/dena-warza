@@ -200,7 +200,7 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
                                 {selectedMemory && (
                                     <div className="h-full flex flex-col">
                                         {/* Main Image */}
-                                        <div className="relative flex-1 flex items-center justify-center bg-black min-h-0">
+                                        <div className="relative flex-1 flex items-center justify-center bg-gray-100 backdrop-blur-md min-h-0">
                                             {isLoading && (
                                                 <div className="absolute inset-0 flex items-center justify-center">
                                                     <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -235,7 +235,7 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
                                         </div>
 
                                         {/* Thumbnails */}
-                                        <div className="bg-gray-800 p-4">
+                                        <div className="bg-gradient-to-b from-red-100 via-red-200 to-red-300 p-4">
                                             <div className="flex gap-2 p-0.5 overflow-x-auto custom-scrollbar">
                                                 {selectedMemory.media.map((media, index) => (
                                                     <button

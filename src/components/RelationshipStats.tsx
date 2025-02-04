@@ -79,7 +79,7 @@ const RelationshipStats: React.FC = () => {
                 <div className="p-4 sm:p-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                         {/* Anniversary Countdown */}
-                        <div className="bg-blue-50 p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 transform transition-all duration-300 hover:shadow-md">
+                        <div className="bg-blue-50 p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 transform transition-all duration-300 shadow-sm">
                             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
@@ -90,7 +90,7 @@ const RelationshipStats: React.FC = () => {
                         </div>
 
                         {/* Defano's Birthday */}
-                        <div className="bg-purple-50 p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 transform transition-all duration-300 hover:shadow-md">
+                        <div className="bg-purple-50 p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 transform transition-all duration-300 shadow-sm">
                             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
@@ -101,7 +101,7 @@ const RelationshipStats: React.FC = () => {
                         </div>
 
                         {/* Najmita's Birthday */}
-                        <div className="bg-pink-50 p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 transform transition-all duration-300 hover:shadow-md">
+                        <div className="bg-pink-50 p-4 sm:p-6 rounded-xl flex items-center gap-3 sm:gap-4 transform transition-all duration-300 shadow-sm">
                             <div className="w-10 h-10 sm:w-12 sm:h-12 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
@@ -115,7 +115,7 @@ const RelationshipStats: React.FC = () => {
                     {/* Special Features */}
                     <div className="mt-6 sm:mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                         {/* Notebook */}
-                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 sm:p-6 rounded-xl transform transition-all duration-300 hover:shadow-lg">
+                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 sm:p-6 rounded-xl transform transition-all duration-300 shadow-sm">
                             <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
                                 <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
                                     <Book className="w-5 h-5 text-orange-500" />
@@ -134,13 +134,13 @@ const RelationshipStats: React.FC = () => {
                         </div>
 
                         {/* Special Moments */}
-                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-xl transform transition-all duration-300 hover:shadow-lg">
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-xl transform transition-all duration-300 shadow-sm">
                             <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2 mb-4">
                                 <Star className="w-5 h-5 text-purple-500" />
                                 Special Moments
                             </h3>
                             <div className="space-y-3">
-                                <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm transform transition-all duration-300 hover:shadow-md">
+                                <div className="bg-white p-3 sm:p-4 rounded-lg shadow-sm transform transition-all duration-300">
                                     <div className="text-xs sm:text-sm font-medium text-purple-600">Hari Jadi</div>
                                     <div className="text-sm sm:text-base text-gray-600">27 September 2024</div>
                                 </div>

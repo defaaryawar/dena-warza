@@ -9,6 +9,12 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
+    const sortedMemories = [...memories].sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    const latestMemories = sortedMemories.slice(0, 10);
+
     const checkScrollability = () => {
         if (scrollRef.current) {
             const { clientWidth, scrollWidth, scrollLeft } = scrollRef.current;
@@ -62,7 +68,7 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
                     Kenangan Terbaru
                 </h2>
                 <Link to="galleryall" 
-                className='text-blue-600 font-semibold underline cursor-pointer text-xs z-1000'>
+                className='text-blue-600 font-semibold underline cursor-pointer text-xs z-100'>
                 Lihat lebih banyak</Link>
             </div>
 
@@ -123,7 +129,7 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
                 ref={scrollRef}
                 className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth px-2 no-scrollbar py-4 sm:py-6"
             >
-                {memories.map(memory => (
+                {latestMemories.map(memory => (
                     <MemoryCard
                         key={memory.id}
                         memory={memory}

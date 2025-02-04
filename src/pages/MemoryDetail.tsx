@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { memories } from '../data/dataImage';
-import { ArrowLeft, Image as ImageIcon, Video, Calendar, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 
 const MediaDisplay = ({ media }: { media: { type: string; url: string; thumbnail?: string } }) => {
     if (media.type === 'video') {
+        // Pisahkan base URL Cloudinary dari transformasi
+        const baseUrl = media.url.replace(`${import.meta.env.VITE_CLOUDINARY_BASE_URL}`, '');
+        const [version, filename] = baseUrl.split('/');
+
+        // Konstruksi ulang URL dengan transformasi
+        const cloudinaryUrl = `${import.meta.env.VITE_CLOUDINARY_URL}/${version}/${filename}`;
+
+        const thumbnailUrl = media.thumbnail;
+
         return (
             <div className="relative w-full h-[80vh]">
                 <video
                     controls
+                    poster={thumbnailUrl}
                     className="absolute inset-0 w-full h-full object-contain bg-black/95"
-                    poster={media.thumbnail}
                 >
-                    <source src={media.url} type="video/mp4" />
-                    Your browser does not support the video tag.
+                    <source src={cloudinaryUrl} type="video/mp4" />
+                    <p>Your browser does not support the video tag.</p>
                 </video>
             </div>
         );
@@ -22,7 +31,7 @@ const MediaDisplay = ({ media }: { media: { type: string; url: string; thumbnail
         <div className="relative w-full h-[80vh]">
             <img
                 src={media.url}
-                alt=""
+                alt="media"
                 className="absolute inset-0 w-full h-full object-contain bg-black/95"
             />
         </div>
@@ -80,7 +89,7 @@ const MemoryDetail: React.FC = () => {
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                     <button
                         onClick={() => navigate(-1)}
-                        className="inline-flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-full transition-all"
+                        className="inline-flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-full transition-all cursor-pointer"
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Kembali
@@ -111,20 +120,20 @@ const MemoryDetail: React.FC = () => {
                         <div className="space-y-6">
                             {/* Main Media Display with Navigation */}
                             <div className="relative group">
-                                <div className="bg-black rounded-2xl overflow-hidden">
-                                    <MediaDisplay media={memory.media[selectedMediaIndex]} />
+                                <div className="bg-black rounded-2xl overflow-hidden cursor-pointer">
+                                    <MediaDisplay key={memory.media[selectedMediaIndex].url} media={memory.media[selectedMediaIndex]} />
                                 </div>
 
                                 {/* Navigation Arrows */}
                                 <button
                                     onClick={() => navigateMedia('prev')}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white cursor-pointer"
                                 >
                                     <ChevronLeft className="w-6 h-6" />
                                 </button>
                                 <button
                                     onClick={() => navigateMedia('next')}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white cursor-pointer"
                                 >
                                     <ChevronRight className="w-6 h-6" />
                                 </button>
@@ -134,18 +143,18 @@ const MemoryDetail: React.FC = () => {
                             <div className="flex justify-center gap-3">
                                 <button
                                     onClick={() => setFilter('all')}
-                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all ${filter === 'all'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all cursor-pointer ${filter === 'all'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
                                     <span>All ({memory.media.length})</span>
                                 </button>
                                 <button
                                     onClick={() => setFilter('photo')}
-                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all ${filter === 'photo'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all cursor-pointer ${filter === 'photo'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
                                     <ImageIcon className="w-4 h-4" />
@@ -153,9 +162,9 @@ const MemoryDetail: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={() => setFilter('video')}
-                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all ${filter === 'video'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all cursor-pointer ${filter === 'video'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-white text-gray-700 hover:bg-gray-50'
                                         }`}
                                 >
                                     <Video className="w-4 h-4" />
@@ -172,19 +181,19 @@ const MemoryDetail: React.FC = () => {
                                             key={index}
                                             onClick={() => setSelectedMediaIndex(originalIndex)}
                                             className={`relative aspect-square rounded-xl overflow-hidden group transition-all hover:scale-105 ${originalIndex === selectedMediaIndex
-                                                    ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
-                                                    : ''
+                                                ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
+                                                : ''
                                                 }`}
                                         >
                                             <img
                                                 src={item.type === 'video' ? item.thumbnail || item.url : item.url}
-                                                alt=""
-                                                className="w-full h-full object-cover"
+                                                alt="media-thumbnail"
+                                                className="w-full h-full object-cover cursor-pointer"
                                             />
                                             {item.type === 'video' && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors">
-                                                    <div className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center">
-                                                        <Video className="w-4 h-4 text-blue-600" />
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors cursor-pointer">
+                                                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                                                        <Play className="w-6 h-6 text-blue-600" /> {/* Ikon Play */}
                                                     </div>
                                                 </div>
                                             )}
@@ -197,13 +206,12 @@ const MemoryDetail: React.FC = () => {
 
                     {/* Tags */}
                     {memory.tags && memory.tags.length > 0 && (
-                        <div className="mt-8 flex flex-wrap justify-center gap-2">
+                        <div className="mt-8 flex flex-wrap gap-2 justify-center">
                             {memory.tags.map((tag, index) => (
                                 <span
                                     key={index}
-                                    className="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-700 shadow-sm hover:bg-gray-50 transition-colors"
+                                    className="text-sm font-medium text-gray-600 border border-gray-300 rounded-full px-4 py-1"
                                 >
-                                    <Tag className="w-4 h-4 mr-2 text-blue-500" />
                                     {tag}
                                 </span>
                             ))}

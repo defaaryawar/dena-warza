@@ -242,11 +242,11 @@ export const memories: Memory[] = [
                 type: 'photo',
                 url: '/images/ngedate/ragunan-date/ragunan-date4.webp'
             },
-            // {
-            //     type: 'video',
-            //     url: '/videos/ngedate/cafe-moment.mp4',
-            //     thumbnail: '/images/ngedate/cafe-thumb.webp'
-            // }
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738698962/vidio-1_hppfxg.mp4',
+                thumbnail: '/images/ngedate/ragunan-date/ragunan-date.webp'
+            }
         ],
         tags: ['adventure', 'zoo', 'quality-time', 'fun', 'love']
     },
@@ -328,7 +328,27 @@ export const memories: Memory[] = [
             {
                 type: 'photo',
                 url: '/images/ngedate/nako-date/nako-date11.webp'
-            }
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699100/vidio-1_dv180e.mp4',
+                thumbnail: '/images/ngedate/nako-date/nako-date.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699101/vidio-2_atuwm4.mp4',
+                thumbnail: '/images/ngedate/nako-date/nako-date6.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699099/vidio-3_oug9xl.mp4',
+                thumbnail: '/images/ngedate/nako-date/nako-date10.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699099/vidio-4_rfe16e.mp4',
+                thumbnail: '/images/ngedate/nako-date/nako-date11.webp'
+            },
         ],
         tags: ['coffee', 'relax', 'date', 'quality-time', 'love']
     },
@@ -369,7 +389,42 @@ export const memories: Memory[] = [
             {
                 type: 'photo',
                 url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
-            }
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699022/vidio-1_a24fkc.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699021/vidi0-2_lpyagv.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699021/vidi0-2_lpyagv.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699027/vidi0-4_jkyqzu.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699091/vidi0-5_liew8b.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699057/vidi0-6_xzghhi.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699080/vidi0-7_qhsk60.mp4',
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+            },
         ],
         tags: ['coffee', 'nature', 'relax', 'quality-time', 'love']
     },
@@ -444,6 +499,11 @@ export const memories: Memory[] = [
             {
                 type: 'photo',
                 url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date.webp'
+            },
+            {
+                type: 'video',
+                url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699015/vidio-1_ius321.mp4',
+                thumbnail: '/images/ngedate/jalan-jalan-date/jalan-jalan-date2.webp'
             },
         ],
         tags: ['tradition', 'love', 'food', 'moment', 'culture']

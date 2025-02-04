@@ -8,7 +8,6 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
 
-    // Fungsi untuk memeriksa kemampuan scroll
     const checkScrollability = () => {
         if (scrollRef.current) {
             const { clientWidth, scrollWidth, scrollLeft } = scrollRef.current;
@@ -17,15 +16,16 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
         }
     };
 
-    // Gunakan useEffect untuk memeriksa scroll pertama kali dan saat resize
     useEffect(() => {
         checkScrollability();
 
-        const handleResize = () => checkScrollability();
-        window.addEventListener('resize', handleResize);
+        const handleResize = () => {
+            checkScrollability();
+        };
 
-        // Tambahkan event listener untuk scroll
+        window.addEventListener('resize', handleResize);
         const currentScrollRef = scrollRef.current;
+
         if (currentScrollRef) {
             currentScrollRef.addEventListener('scroll', checkScrollability);
         }
@@ -38,87 +38,93 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
         };
     }, [memories]);
 
-    // Fungsi scroll dengan logika yang lebih baik
     const scroll = (direction: 'left' | 'right') => {
         if (!scrollRef.current) return;
 
         const { clientWidth } = scrollRef.current;
-        // Kurangi sedikit scroll amount agar tidak langsung mentok
-        const scrollAmount = clientWidth * 0.4;
+        // Adjust scroll amount based on screen size
+        const scrollAmount = window.innerWidth < 640 ? clientWidth * 0.8 : clientWidth * 0.4;
 
         scrollRef.current.scrollBy({
             left: direction === 'left' ? -scrollAmount : scrollAmount,
             behavior: 'smooth'
         });
 
-        // Tunggu sedikit untuk memastikan scroll selesai
         setTimeout(checkScrollability, 300);
     };
 
     return (
-        <div className="relative group">
-            {/* Gradient Overlay Kiri */}
+        <div className="relative group px-4 sm:px-6 md:px-8">
+            {/* Title Section */}
+            <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg sm:text-xl font-medium text-gray-800">
+                    Kenangan Terbaru
+                </h2>
+                {/* Optional: Add view all button here */}
+            </div>
+
+            {/* Gradient overlays with responsive widths */}
             {canScrollLeft && (
                 <div
-                    className="absolute -left-0.5 top-0 bottom-0 w-24 z-10 pointer-events-none"
+                    className="absolute -left-0.5 top-0 bottom-0 w-12 sm:w-24 z-10 pointer-events-none"
                     style={{
                         background: 'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)'
                     }}
                 />
             )}
-            <p className='text-black font-medium text-lg'>kenangan Terbaru</p>
-            {/* Gradient Overlay Kanan */}
+
             {canScrollRight && (
                 <div
-                    className="absolute -right-0.5 top-0 bottom-0 w-24 z-10 pointer-events-none"
+                    className="absolute -right-0.5 top-0 bottom-0 w-12 sm:w-24 z-10 pointer-events-none"
                     style={{
                         background: 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)'
                     }}
                 />
             )}
 
-            {/* Tombol Scroll Kiri */}
+            {/* Scroll buttons with responsive positioning and sizing */}
             {canScrollLeft && (
-                <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20">
+                <div className="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-20">
                     <button
                         onClick={() => scroll('left')}
-                        className="p-2 bg-white/70 backdrop-blur-sm rounded-full shadow-lg hover:bg-gray-50 hover:scale-105 transition-all group duration-300"
+                        className="p-1.5 sm:p-2 bg-white/70 backdrop-blur-sm rounded-full shadow-lg 
+                        hover:bg-gray-50 hover:scale-105 transition-all duration-300
+                        focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label="Scroll Left"
                     >
                         <ChevronLeft
-                            className="text-gray-600 cursor-pointer group-hover:text-gray-800 transition-colors"
-                            size={24}
+                            className="text-gray-600 group-hover:text-gray-800 transition-colors w-4 h-4 sm:w-6 sm:h-6"
                         />
                     </button>
                 </div>
             )}
 
-            {/* Tombol Scroll Kanan */}
             {canScrollRight && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20">
+                <div className="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-20">
                     <button
                         onClick={() => scroll('right')}
-                        className="p-2 bg-white/70 backdrop-blur-sm rounded-full shadow-lg hover:bg-gray-50 hover:scale-105 transition-all group duration-300"
+                        className="p-1.5 sm:p-2 bg-white/70 backdrop-blur-sm rounded-full shadow-lg 
+                        hover:bg-gray-50 hover:scale-105 transition-all duration-300
+                        focus:outline-none focus:ring-2 focus:ring-blue-500"
                         aria-label="Scroll Right"
                     >
                         <ChevronRight
-                            className="text-gray-600 cursor-pointer group-hover:text-gray-800 transition-colors"
-                            size={24}
+                            className="text-gray-600 group-hover:text-gray-800 transition-colors w-4 h-4 sm:w-6 sm:h-6"
                         />
                     </button>
                 </div>
             )}
 
-            {/* Kontainer Gulir */}
+            {/* Scrollable container with responsive card sizes */}
             <div
                 ref={scrollRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-0 py-6"
+                className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth px-2 no-scrollbar py-4 sm:py-6"
             >
                 {memories.map(memory => (
                     <MemoryCard
                         key={memory.id}
                         memory={memory}
-                        className="flex-shrink-0 w-full sm:w-80 md:w-96 lg:w-[calc(25%-1rem)]"
+                        className="flex-shrink-0 w-[200px] sm:w-[250px] md:w-[270px] lg:w-[300px]"
                     />
                 ))}
             </div>

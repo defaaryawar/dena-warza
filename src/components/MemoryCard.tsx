@@ -9,10 +9,7 @@ interface MemoryCardProps {
 }
 
 const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
-    // Ambil media pertama untuk thumbnail
     const firstMedia = memory.media[0];
-
-    // Pilih ikon berdasarkan tipe media pertama
     const TypeIcon = firstMedia.type === 'photo'
         ? Image
         : firstMedia.type === 'video'
@@ -20,7 +17,6 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
             : MapPin;
 
     const formatDate = (dateString: string) => {
-        console.log('Formatting date:', dateString);
         try {
             const [year, month, day] = dateString.split('-').map(num => parseInt(num, 10));
             const date = new Date(year, month - 1, day);
@@ -39,73 +35,75 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
         <div
             className={`
                 relative
-                w-full sm:w-80 md:w-96 lg:w-[calc(25%-1rem)]
                 bg-white 
-                rounded-2xl 
-                shadow-lg 
+                rounded-xl sm:rounded-2xl 
+                shadow-md 
                 transition-all 
                 duration-300 
                 group 
                 overflow-hidden 
+                hover:shadow-lg
                 ${className}
             `}
         >
-            <div className="relative aspect-video overflow-hidden">
+            {/* Image Container */}
+            <div className="relative aspect-[4/3] sm:aspect-video overflow-hidden">
                 <img
                     src={firstMedia.type === 'video' ? firstMedia.thumbnail || firstMedia.url : firstMedia.url}
                     alt={memory.title}
                     className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm rounded-full p-2">
-                    <TypeIcon className="text-blue-500" size={20} />
+
+                {/* Media Type Icon */}
+                <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/80 backdrop-blur-sm rounded-full p-1.5 sm:p-2">
+                    <TypeIcon className="text-blue-500 w-4 h-4 sm:w-5 sm:h-5" />
                 </div>
+
+                {/* Media Count */}
                 {memory.media.length > 1 && (
-                    <div className="absolute top-4 left-4 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-medium text-blue-500">
-                        {memory.media.length} media
+                    <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-white/80 backdrop-blur-sm rounded-full px-2 sm:px-3 py-0.5 sm:py-1">
+                        <span className="text-xs sm:text-sm font-medium text-blue-500">
+                            {memory.media.length} media
+                        </span>
                     </div>
                 )}
+
+                {/* Video Play Button */}
                 {firstMedia.type === 'video' && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center">
-                            <Video className="w-6 h-6 text-blue-500" />
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center">
+                            <Video className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Konten Memori */}
-            <div className="relative p-4 flex flex-col min-h-[180px]">
-                {/* Konten Utama */}
+            {/* Content Section */}
+            <div className="relative p-3 sm:p-4 flex flex-col min-h-[160px] sm:min-h-[180px]">
+                {/* Main Content */}
                 <div className="flex-1">
-                    {/* Judul */}
-                    <h2 className="text-xl font-bold text-gray-800 mb-2">{memory.title}</h2>
+                    {/* Title */}
+                    <h2 className="text-md sm:text-xl font-bold text-gray-800 mb-1 sm:mb-2 line-clamp-2">
+                        {memory.title}
+                    </h2>
 
-                    {/* Deskripsi */}
+                    {/* Description */}
                     {memory.description && (
-                        <p className="text-gray-600 line-clamp-none mb-3">{memory.description}</p>
+                        <p className="text-xs sm:text-base text-gray-600 line-clamp-2 mb-2 sm:mb-3">
+                            {memory.description}
+                        </p>
                     )}
 
-                    {/* Tag Memori */}
+                    {/* Tags */}
                     {memory.tags && memory.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-2 sm:mb-3">
                             {memory.tags.map(tag => (
                                 <span
                                     key={tag}
-                                    className="
-                                        inline-flex 
-                                        items-center 
-                                        px-2 
-                                        py-1 
-                                        bg-blue-100 
-                                        text-blue-600
-                                        rounded-full 
-                                        text-[10px] 
-                                        font-medium
-                                        gap-1
-                                        mb-3
-                                    "
+                                    className="inline-flex items-center px-2 py-0.5 sm:py-1 bg-blue-100 text-blue-600
+                                    rounded-full text-[9px] sm:text-xs font-medium gap-1"
                                 >
-                                    <Tag className="w-3 h-3 mr-1" />
+                                    <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                                     {tag}
                                 </span>
                             ))}
@@ -113,13 +111,17 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
                     )}
                 </div>
 
-                {/* Footer - Selalu di bawah */}
-                <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                    <div className="flex items-center text-sm text-gray-500">
-                        <Calendar className="w-4 h-4 mr-2" />
+                {/* Footer */}
+                <div className="pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between mt-auto">
+                    <div className="flex items-center text-xs sm:text-sm text-gray-500">
+                        <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
                         <span>{formatDate(memory.date)}</span>
                     </div>
-                    <Link to={`/memory/${memory.id}`} className="text-blue-500 hover:underline text-xs">
+                    <Link
+                        to={`/memory/${memory.id}`}
+                        className="text-xs sm:text-sm text-blue-500 hover:text-blue-600 hover:underline
+                                 font-medium transition-colors"
+                    >
                         Lihat Detail
                     </Link>
                 </div>

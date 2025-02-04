@@ -11,7 +11,7 @@ const Countdown: React.FC<CountdownProps> = ({ targetDate, label }) => {
     const calculateTimeLeft = () => {
         const difference = +new Date(targetDate) - +new Date();
         const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
-        return `${days} day`;
+        return `${days} day`; 
     };
 
     return (

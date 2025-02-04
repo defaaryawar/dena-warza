@@ -112,7 +112,7 @@ const MemoryList: React.FC<{ memories: Memory[] }> = ({ memories }) => {
             {/* Kontainer Gulir */}
             <div
                 ref={scrollRef}
-                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-2 py-6"
+                className="flex gap-4 overflow-x-auto scroll-smooth no-scrollbar px-0 py-6"
             >
                 {memories.map(memory => (
                     <MemoryCard

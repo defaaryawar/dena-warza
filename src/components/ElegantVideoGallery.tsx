@@ -24,7 +24,6 @@ const ModernVideoGallery = () => {
         setVideos(getAllVideos());
     }, []);
 
-    // Effect untuk mengatur scroll saat modal terbuka
     useEffect(() => {
         if (selectedVideo) {
             document.body.style.overflow = 'hidden';
@@ -131,7 +130,7 @@ const ModernVideoGallery = () => {
                 {selectedVideo && (
                     <div className="fixed inset-0 z-992 bg-black/20 backdrop-blur-xs flex items-center justify-center p-4">
                         <div
-                            className={`relative bg-black/80 rounded-lg overflow-hidden ${isFullScreen ? 'w-full h-full' : 'w-full max-w-3xl aspect-video'
+                            className={`relative bg-black/80 rounded-lg overflow-hidden transition-all duration-500 ease-in-out ${isFullScreen ? 'w-full h-full' : 'w-full max-w-3xl aspect-video'
                                 }`}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -156,15 +155,16 @@ const ModernVideoGallery = () => {
                             </div>
 
                             {/* Video Player with Contained Aspect Ratio */}
-                            <div className="relative w-full h-full flex items-center justify-center bg-black">
+                            <div className="relative w-full h-full flex items-center justify-center bg-black/50">
                                 <video
                                     controls
                                     autoPlay
-                                    className="max-w-full max-h-full object-contain"
+                                    className="max-w-full max-h-full object-contain cursor-pointer"
                                     style={{
                                         width: 'auto',
                                         height: 'auto',
-                                        maxHeight: isFullScreen ? '100vh' : '80vh'
+                                        maxHeight: isFullScreen ? '100vh' : '80vh',
+                                        transition: 'all 0.8s ease-in-out'
                                     }}
                                 >
                                     <source src={selectedVideo.url} type="video/mp4" />

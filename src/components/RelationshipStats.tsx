@@ -133,7 +133,7 @@ const RelationshipStats: React.FC = () => {
                             <div className="space-y-3">
                                 <div className="bg-white p-4 rounded-lg shadow-sm">
                                     <div className="text-sm font-medium text-purple-600">Hari Jadi</div>
-                                    <div className="text-gray-600">27 September 2023</div>
+                                    <div className="text-gray-600">27 September 2024</div>
                                 </div>
                                 {/* <div className="bg-white p-4 rounded-lg shadow-sm transform hover:scale-105 transition-transform">
                                     <div className="text-sm font-medium text-purple-600">First Date</div>

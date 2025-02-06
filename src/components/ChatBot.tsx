@@ -58,7 +58,7 @@ const ChatbotUI = () => {
 
     return (
         <div className="max-w-7xl mx-auto py-3 md:py-8 mt-3">
-            <div className="bg-gradient-to-br from-violet-50 to-pink-50 shadow-lg rounded-lg">
+            <div className="bg-gradient-to-br from-violet-50 to-pink-50 rounded-lg">
                 <div className="p-4 md:p-6">
                     <motion.div
                         initial={{ opacity: 0, y: -10 }}

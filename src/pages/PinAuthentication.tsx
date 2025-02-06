@@ -152,7 +152,7 @@ const PinAuthentication: React.FC = () => {
 
                     {/* Success Indicator */}
                     <div className="h-6 text-center">
-                        {success && (
+                        {success && showCheckmark && (
                             <div className="text-green-600 flex items-center justify-center">
                                 <Check className="mr-2 w-6 h-6 text-green-500" />
                                 <span className="text-sm font-medium">

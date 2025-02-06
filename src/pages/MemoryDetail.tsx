@@ -5,13 +5,9 @@ import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRig
 
 const MediaDisplay = ({ media }: { media: { type: string; url: string; thumbnail?: string } }) => {
     if (media.type === 'video') {
-        // Pisahkan base URL Cloudinary dari transformasi
         const baseUrl = media.url.replace(`${import.meta.env.VITE_CLOUDINARY_BASE_URL}`, '');
         const [version, filename] = baseUrl.split('/');
-
-        // Konstruksi ulang URL dengan transformasi
         const cloudinaryUrl = `${import.meta.env.VITE_CLOUDINARY_URL}/${version}/${filename}`;
-
         const thumbnailUrl = media.thumbnail;
 
         return (
@@ -57,7 +53,7 @@ const MemoryDetail: React.FC = () => {
                     <h2 className="text-2xl font-semibold text-gray-700 mb-4">Memory not found</h2>
                     <button
                         onClick={() => navigate(-1)}
-                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all transform hover:scale-105"
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full md:hover:bg-blue-700 transition-all transform md:hover:scale-105"
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Kembali
@@ -84,12 +80,11 @@ const MemoryDetail: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            {/* Header Bar */}
             <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
                     <button
-                        onClick={() => navigate(-1)}
-                        className="inline-flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-full transition-all cursor-pointer"
+                        onClick={() => navigate('/')}
+                        className="inline-flex items-center px-4 py-2 text-gray-700 md:hover:bg-gray-100 rounded-full transition-all cursor-pointer"
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Kembali
@@ -104,9 +99,7 @@ const MemoryDetail: React.FC = () => {
             </div>
 
             <div className="pt-16 pb-8">
-                {/* Main Content */}
                 <div className="max-w-7xl mx-auto px-4">
-                    {/* Title Section */}
                     <div className="text-center mb-6 pt-4">
                         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
                             {memory.title}
@@ -118,61 +111,57 @@ const MemoryDetail: React.FC = () => {
 
                     {memory.media && memory.media.length > 0 && (
                         <div className="space-y-6">
-                            {/* Main Media Display with Navigation */}
                             <div className="relative group">
                                 <div className="bg-black rounded-2xl overflow-hidden cursor-pointer">
                                     <MediaDisplay key={memory.media[selectedMediaIndex].url} media={memory.media[selectedMediaIndex]} />
                                 </div>
 
-                                {/* Navigation Arrows */}
                                 <button
                                     onClick={() => navigateMedia('prev')}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white cursor-pointer"
+                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 md:group-hover:opacity-100 transition-opacity md:hover:bg-white cursor-pointer"
                                 >
                                     <ChevronLeft className="w-6 h-6" />
                                 </button>
                                 <button
                                     onClick={() => navigateMedia('next')}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white cursor-pointer"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 md:group-hover:opacity-100 transition-opacity md:hover:bg-white cursor-pointer"
                                 >
                                     <ChevronRight className="w-6 h-6" />
                                 </button>
                             </div>
 
-                            {/* Filter Buttons */}
                             <div className="flex justify-center gap-3">
                                 <button
                                     onClick={() => setFilter('all')}
-                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all cursor-pointer ${filter === 'all'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'all'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                            : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
-                                    <span>All ({memory.media.length})</span>
+                                    <span className='md:text-xl text-xs'>All ({memory.media.length})</span>
                                 </button>
                                 <button
                                     onClick={() => setFilter('photo')}
-                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all cursor-pointer ${filter === 'photo'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'photo'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                            : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
                                     <ImageIcon className="w-4 h-4" />
-                                    <span>Photos ({photoCount})</span>
+                                    <span className='md:text-xl text-xs'>Photos ({photoCount})</span>
                                 </button>
                                 <button
                                     onClick={() => setFilter('video')}
-                                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 transition-all cursor-pointer ${filter === 'video'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                                    className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'video'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                            : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
                                     <Video className="w-4 h-4" />
-                                    <span>Videos ({videoCount})</span>
+                                    <span className='md:text-xl text-xs'>Videos ({videoCount})</span>
                                 </button>
                             </div>
 
-                            {/* Media Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
                                 {filteredMedia.map((item, index) => {
                                     const originalIndex = memory.media.indexOf(item);
@@ -180,9 +169,9 @@ const MemoryDetail: React.FC = () => {
                                         <button
                                             key={index}
                                             onClick={() => setSelectedMediaIndex(originalIndex)}
-                                            className={`relative aspect-square rounded-xl overflow-hidden group transition-all hover:scale-105 ${originalIndex === selectedMediaIndex
-                                                ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
-                                                : ''
+                                            className={`relative aspect-square rounded-xl overflow-hidden group transition-all md:hover:scale-105 ${originalIndex === selectedMediaIndex
+                                                    ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
+                                                    : ''
                                                 }`}
                                         >
                                             <img
@@ -191,9 +180,9 @@ const MemoryDetail: React.FC = () => {
                                                 className="w-full h-full object-cover cursor-pointer"
                                             />
                                             {item.type === 'video' && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/40 transition-colors cursor-pointer">
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 md:group-hover:bg-black/40 transition-colors cursor-pointer">
                                                     <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
-                                                        <Play className="w-6 h-6 text-blue-600" /> {/* Ikon Play */}
+                                                        <Play className="w-6 h-6 text-blue-600" />
                                                     </div>
                                                 </div>
                                             )}
@@ -204,7 +193,6 @@ const MemoryDetail: React.FC = () => {
                         </div>
                     )}
 
-                    {/* Tags */}
                     {memory.tags && memory.tags.length > 0 && (
                         <div className="mt-8 flex flex-wrap gap-2 justify-center">
                             {memory.tags.map((tag, index) => (

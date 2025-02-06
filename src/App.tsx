@@ -12,6 +12,8 @@ import RelationshipStats from './components/RelationshipStats';
 import MemoriesPage from './pages/MemoriesPage';
 import PinAuthentication from './pages/PinAuthentication';
 import ModernVideoGallery from './components/ElegantVideoGallery';
+import ScrollToTop from './hooks/useScrollToTop';
+import ChatbotUI from './components/ChatBot';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -28,9 +30,12 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 function App() {
   return (
     <Router>
+      <ScrollToTop />
+
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 py-0">
         <div className="container mx-auto max-w-7xl">
           <Routes>
+
             {/* Rute untuk Autentikasi PIN */}
             <Route path="/pin" element={<PinAuthentication />} />
 
@@ -45,6 +50,7 @@ function App() {
                     <MemoryList memories={memories} />
                     <StorySection />
                     <ModernVideoGallery />
+                    <ChatbotUI />
                   </>
                 </ProtectedRoute>
               }

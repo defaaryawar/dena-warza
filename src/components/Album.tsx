@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { memories } from '../data/dataImage';
-import AlbumHeader from './AlbumHeader';
+import AlbumHeader from './Navbar';
 
 const Album: React.FC = () => {
     const [filters, setFilters] = useState({

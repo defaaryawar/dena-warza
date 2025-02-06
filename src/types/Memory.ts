@@ -13,6 +13,7 @@ export interface Memory {
     date: string;
     media: MediaItem[];
     tags: string[];
+    type: any;
 }
 
 export interface VideoWithMemoryInfo extends MediaItem {

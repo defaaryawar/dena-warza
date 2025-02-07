@@ -3,9 +3,15 @@
     "outputDirectory": "dist",
     "framework": "vite",
     "routes": [
-      { "src": "/(.*)", "dest": "/" }
+      {
+        "src": "/(.*)",
+        "dest": "/index.html"
+      }
     ],
     "rewrites": [
-      { "source": "/(.*)", "destination": "/" }
+      {
+        "source": "/(.*)",
+        "destination": "/index.html"
+      }
     ]
   }

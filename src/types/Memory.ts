@@ -20,3 +20,31 @@ export interface VideoWithMemoryInfo extends MediaItem {
     memoryTitle: string;
     memoryDate: string;
 }
+
+export type GameMode = 'menu' | 'quiz' | 'memory' | 'message' | 'timeCapsule' | 'achievements';
+
+export interface MemoryCard {
+    id: number;
+    content: string;
+    isFlipped: boolean;
+    isMatched: boolean;
+    category: string;
+}
+
+export interface Message {
+    id: string;
+    text: string;
+    sender: 'user' | 'partner';
+    timestamp: string;
+    isLiked: boolean;
+}
+
+export interface QuizStage {
+    id: number;
+    title: string;
+    question: string;
+    options: string[];
+    correctAnswer: number;
+    hint: string;
+    image?: string;
+}

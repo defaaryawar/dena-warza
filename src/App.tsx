@@ -14,6 +14,7 @@ import PinAuthentication from './pages/PinAuthentication';
 import ModernVideoGallery from './components/ElegantVideoGallery';
 import ScrollToTop from './hooks/useScrollToTop';
 import ChatbotUI from './components/ChatBot';
+import LoveAdventureGame from './components/LoveJourneyGame';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -51,6 +52,7 @@ function App() {
                     <StorySection />
                     <ModernVideoGallery />
                     <ChatbotUI />
+                    <LoveAdventureGame />
                   </>
                 </ProtectedRoute>
               }

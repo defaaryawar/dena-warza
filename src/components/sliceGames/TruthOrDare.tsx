@@ -6,14 +6,14 @@ import { BaseGameProps, Question } from '../../types/types';
 import { truthQuestions, dareQuestions } from '../learning/gameQuestion';
 
 interface TruthOrDareProps extends BaseGameProps {
-    gameHistory: string[];
+    // gameHistory: string[];
 }
 
 const TruthOrDare: React.FC<TruthOrDareProps> = ({
     onExperienceGain,
     onAddAlert,
     onGameModeChange,
-    gameHistory
+    // gameHistory
 }) => {
     const [currentQuestionType, setCurrentQuestionType] = React.useState<'truth' | 'dare' | null>(null);
     const [currentTruthDare, setCurrentTruthDare] = React.useState<Question | null>(null);
@@ -107,7 +107,7 @@ const TruthOrDare: React.FC<TruthOrDareProps> = ({
                                 </Button>
                             </div>
                         </div>
-                        <div className="mt-6">
+                        {/* <div className="mt-6">
                             <h4 className="text-lg font-medium mb-2">Game History:</h4>
                             <div className="max-h-40 overflow-y-auto space-y-2">
                                 {gameHistory.map((history, index) => (
@@ -119,7 +119,7 @@ const TruthOrDare: React.FC<TruthOrDareProps> = ({
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 )}
             </CardContent>

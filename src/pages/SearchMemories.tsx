@@ -1,7 +1,10 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { memories } from '../data/dataImage';
 import { Search, ArrowLeft, Calendar, Heart, Tag, GridIcon, List, Settings2, X } from 'lucide-react';
+import { useQuery, useQueryClient } from 'react-query';
+import { Memory } from '../types/Memory'; // Sesuaikan path-nya
+
+const API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const SearchMemories = () => {
     const [searchParams] = useSearchParams();
@@ -12,6 +15,44 @@ const SearchMemories = () => {
     const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
     const [selectedDate, setSelectedDate] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const queryClient = useQueryClient();
+
+    // Menggunakan useQuery dari react-query untuk fetch dan cache data
+    const {
+        data: memories,
+        isLoading: loading,
+        error,
+    } = useQuery<Memory[], Error>(
+        ['search_memories', API_URL], // Key untuk query
+        async () => {
+            const response = await fetch(`${API_URL}/api/memories`);
+            if (!response.ok) throw new Error('Failed to fetch data');
+            return response.json();
+        },
+        {
+            staleTime: 120 * 60 * 1000, // Data dianggap fresh selama 2 jam
+            cacheTime: 120 * 60 * 1000, // Data disimpan di cache selama 2 jam
+            refetchOnWindowFocus: false, // Tidak refetch saat window focus
+            refetchOnReconnect: false, // Tidak refetch saat reconnect
+            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            select: (newData) => {
+                // Dapatkan data cache saat ini
+                const cachedData = queryClient.getQueryData<Memory[]>(['search_memories', API_URL]);
+
+                // Jika tidak ada data cache, kembalikan data baru
+                if (!cachedData) return newData;
+
+                // Bandingkan data cache dengan data baru
+                const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
+
+                // Jika data tidak berubah, kembalikan data cache
+                if (!isDataChanged) return cachedData;
+
+                // Jika data berubah, kembalikan data baru
+                return newData;
+            }
+        }
+    );
 
     useEffect(() => {
         const closeDropdown = (e: MouseEvent) => {
@@ -28,7 +69,10 @@ const SearchMemories = () => {
         return () => document.removeEventListener('mousedown', closeDropdown);
     }, [isDropdownOpen]);
 
+    // Filter dan sort data
     const filteredMemories = useMemo(() => {
+        if (!memories) return [];
+
         let filtered = [...memories];
 
         if (searchQuery) {
@@ -51,14 +95,34 @@ const SearchMemories = () => {
                 dateB.getTime() - dateA.getTime() :
                 dateA.getTime() - dateB.getTime();
         });
-    }, [searchQuery, selectedDate, sortBy]);
+    }, [memories, searchQuery, selectedDate, sortBy]);
+
+    // Loading state
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading memories...</p>
+            </div>
+        </div>
+    );
+
+    // Error state
+    if (error) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center text-red-500">
+                <p className="text-xl font-semibold mb-2">Failed to load memories</p>
+                <p className="text-sm text-gray-600">{error.message}</p>
+            </div>
+        </div>
+    );
 
     return (
         <div className="container mx-auto max-w-7xl">
+            {/* Search Bar and Filters */}
             <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-50 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-50"></div>
                 <div className="container mx-auto px-4 py-4 relative">
-                    {/* Main Search Bar */}
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => navigate('/')}
@@ -110,7 +174,7 @@ const SearchMemories = () => {
                                 <span className={`flex items-center justify-center transition-transform duration-300 ${isDropdownOpen ? 'rotate-90' : 'rotate-0'
                                     }`}>
                                     {isDropdownOpen ? (
-                                        <X className='h-5 w-5 text-blue-600'/>
+                                        <X className='h-5 w-5 text-blue-600' />
                                     ) : (
                                         <Settings2 className="w-5 h-5 text-gray-600" />
                                     )}
@@ -130,7 +194,7 @@ const SearchMemories = () => {
                                             <h3 className="font-semibold text-gray-700">Filter & Sort</h3>
                                         </div>
 
-                                        {/* Rest of dropdown content with cursor-pointer added */}
+                                        {/* Filter by Date */}
                                         <div>
                                             <h3 className="font-medium mb-2 text-gray-700">Filter by Date</h3>
                                             <div className="relative cursor-pointer">
@@ -144,6 +208,7 @@ const SearchMemories = () => {
                                             </div>
                                         </div>
 
+                                        {/* Sort Order */}
                                         <div>
                                             <h3 className="font-medium mb-2 text-gray-700">Sort Order</h3>
                                             <div className="grid grid-cols-2 gap-2">

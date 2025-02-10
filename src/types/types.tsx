@@ -50,3 +50,18 @@ export interface Alert {
     title: string;
     message: string;
 }
+
+export interface MemoryFormErrors {
+    title?: string;
+    description?: string;
+    date?: string;
+    media?: string;
+    server?: string;
+}
+
+export interface FormFieldProps {
+    value: string;
+    onChange: (value: string) => void;
+    error?: string;
+    clearError: () => void;
+}

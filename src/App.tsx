@@ -1,20 +1,25 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
+import { QueryClient, QueryClientProvider } from 'react-query'
+
+const queryClient = new QueryClient()
 
 // Import your components
-import MemoryList from './components/MemoryList';
-import StorySection from './components/StorySection';
-import { memories } from './data/dataImage';
+// import MemoryList from './components/MemoryList';
+// import StorySection from './components/StorySection';
+// import { memories } from './data/dataImage';
 import MemoryDetail from './pages/MemoryDetail';
 import SearchMemories from './pages/SearchMemories';
-import Album from './components/Album';
-import RelationshipStats from './components/RelationshipStats';
+// import Album from './components/Album';
+// import RelationshipStats from './components/RelationshipStats';
 import MemoriesPage from './pages/MemoriesPage';
 import PinAuthentication from './pages/PinAuthentication';
-import ModernVideoGallery from './components/ElegantVideoGallery';
+// import ModernVideoGallery from './components/ElegantVideoGallery';
 import ScrollToTop from './hooks/useScrollToTop';
-import ChatbotUI from './components/ChatBot';
-import LoveAdventureGame from './components/LoveJourneyGame';
+// import ChatbotUI from './components/ChatBot';
+// import LoveAdventureGame from './components/LoveJourneyGame';
+import Home from './components/Home';
+import TambahKenangan from './pages/AddMemoryPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
@@ -30,68 +35,71 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
 function App() {
   return (
-    <Router>
-      <ScrollToTop />
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <ScrollToTop />
 
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 py-0">
-        <div className="container mx-auto max-w-7xl">
-          <Routes>
+        <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 py-0">
+          <div className="container mx-auto max-w-7xl">
+            <Routes>
 
-            {/* Rute untuk Autentikasi PIN */}
-            <Route path="/pin" element={<PinAuthentication />} />
+              {/* Rute untuk Autentikasi PIN */}
+              <Route path="/pin" element={<PinAuthentication />} />
 
-            {/* Rute Beranda yang Dilindungi */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <>
-                    <Album />
-                    <RelationshipStats />
-                    <MemoryList memories={memories} />
-                    <StorySection />
-                    <ModernVideoGallery />
-                    <ChatbotUI />
-                    <LoveAdventureGame />
-                  </>
-                </ProtectedRoute>
-              }
-            />
+              {/* Rute Beranda yang Dilindungi */}
+              <Route
+                path="/"
+                element={
+                  <ProtectedRoute>
+                    <>
+                      <Home />
+                    </>
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Rute Detail yang Dilindungi */}
-            <Route
-              path="/memory/:id"
-              element={
-                <ProtectedRoute>
-                  <MemoryDetail />
-                </ProtectedRoute>
-              }
-            />
+              {/* Rute Detail yang Dilindungi */}
+              <Route
+                path="/memory/:id"
+                element={
+                  <ProtectedRoute>
+                    <MemoryDetail />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/search"
-              element={
-                <ProtectedRoute>
-                  <SearchMemories />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/search"
+                element={
+                  <ProtectedRoute>
+                    <SearchMemories />
+                  </ProtectedRoute>
+                }
+              />
 
-            <Route
-              path="/galleryall"
-              element={
-                <ProtectedRoute>
-                  <MemoriesPage />
-                </ProtectedRoute>
-              }
-            />
+              <Route
+                path="/galleryall"
+                element={
+                  <ProtectedRoute>
+                    <MemoriesPage />
+                  </ProtectedRoute>
+                }
+              />
 
-            {/* Redirect ke halaman PIN jika tidak ada rute yang cocok */}
-            <Route path="*" element={<Navigate to="/pin" replace />} />
-          </Routes>
+              <Route
+                path="/add-memory"
+                element={
+                  <TambahKenangan />
+                }
+              />
+
+              {/* Redirect ke halaman PIN jika tidak ada rute yang cocok */}
+              <Route path="*" element={<Navigate to="/pin" replace />} />
+            </Routes>
+          </div>
         </div>
-      </div>
-    </Router>
+      </Router>
+    </QueryClientProvider>
   );
 }
 

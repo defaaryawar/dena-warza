@@ -1,23 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { memories } from '../data/dataImage';
 import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { useQuery, useQueryClient } from 'react-query';
+import { Memory, MediaItem } from '../types/Memory';
 
-const MediaDisplay = ({ media }: { media: { type: string; url: string; thumbnail?: string } }) => {
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
+const generateVideoThumbnail = (videoUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.crossOrigin = 'anonymous';
+        video.src = videoUrl;
+        video.currentTime = 1; // Set to 1 second
+
+        video.addEventListener('loadeddata', () => {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    throw new Error('Could not get canvas context');
+                }
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const thumbnailUrl = canvas.toDataURL('image/jpeg');
+                video.remove();
+                resolve(thumbnailUrl);
+            } catch (error) {
+                reject(error);
+            }
+        });
+
+        video.addEventListener('error', (error) => {
+            reject(error);
+        });
+
+        video.load();
+    });
+};
+
+interface MediaDisplayProps {
+    media: MediaItem;
+}
+
+const MediaDisplay: React.FC<MediaDisplayProps> = ({ media }) => {
+    const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (media.type === 'video') {
+            generateVideoThumbnail(media.url)
+                .then((thumbnail: string) => setVideoThumbnail(thumbnail))
+                .catch(err => console.error('Error generating thumbnail:', err));
+        }
+    }, [media.url, media.type]);
+
     if (media.type === 'video') {
-        const baseUrl = media.url.replace(`${import.meta.env.VITE_CLOUDINARY_BASE_URL}`, '');
-        const [version, filename] = baseUrl.split('/');
-        const cloudinaryUrl = `${import.meta.env.VITE_CLOUDINARY_URL}/${version}/${filename}`;
-        const thumbnailUrl = media.thumbnail;
-
         return (
             <div className="relative w-full h-[80vh]">
                 <video
                     controls
-                    poster={thumbnailUrl}
+                    poster={videoThumbnail || media.thumbnail}
                     className="absolute inset-0 w-full h-full object-contain bg-black/95"
                 >
-                    <source src={cloudinaryUrl} type="video/mp4" />
+                    <source src={media.url} type="video/mp4" />
                     <p>Your browser does not support the video tag.</p>
                 </video>
             </div>
@@ -37,11 +82,82 @@ const MediaDisplay = ({ media }: { media: { type: string; url: string; thumbnail
 const MemoryDetail: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
-    const memory = memories.find(mem => mem.id === id);
+    const queryClient = useQueryClient();
     const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
     const [filter, setFilter] = useState<'all' | 'photo' | 'video'>('all');
+    const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 
-    if (!memory) {
+    // Menggunakan useQuery untuk fetch dan cache data
+    const {
+        data: memory,
+        isLoading: loading,
+        error,
+    } = useQuery<Memory, Error>(
+        ['memory', id], // Key untuk query
+        async () => {
+            if (!id) throw new Error('No memory ID provided');
+            const response = await fetch(`${API_URL}/api/memories/${id}`);
+            if (!response.ok) throw new Error('Memory not found');
+            return response.json();
+        },
+        {
+            staleTime: 120 * 60 * 1000, // Data dianggap fresh selama 2 jam
+            cacheTime: 120 * 60 * 1000, // Data disimpan di cache selama 2 jam
+            refetchOnWindowFocus: false, // Tidak refetch saat window focus
+            refetchOnReconnect: false, // Tidak refetch saat reconnect
+            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            select: (newData) => {
+                // Dapatkan data cache saat ini
+                const cachedData = queryClient.getQueryData<Memory>(['memory', id]);
+
+                // Jika tidak ada data cache, kembalikan data baru
+                if (!cachedData) return newData;
+
+                // Bandingkan data cache dengan data baru
+                const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
+
+                // Jika data tidak berubah, kembalikan data cache
+                if (!isDataChanged) return cachedData;
+
+                // Jika data berubah, kembalikan data baru
+                return newData;
+            }
+        }
+    );
+
+    useEffect(() => {
+        if (memory) {
+            // Generate thumbnails for all videos
+            const videoPromises = memory.media
+                .filter((item): item is MediaItem & { type: 'video' } => item.type === 'video')
+                .map(async video => {
+                    try {
+                        const thumbnail = await generateVideoThumbnail(video.url);
+                        setThumbnails(prev => ({
+                            ...prev,
+                            [video.url]: thumbnail
+                        }));
+                    } catch (error) {
+                        console.error('Error generating thumbnail:', error);
+                    }
+                });
+
+            Promise.all(videoPromises);
+        }
+    }, [memory]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                <div className="text-center">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading memory...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !memory) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center px-4">
@@ -78,6 +194,15 @@ const MemoryDetail: React.FC = () => {
         }
     };
 
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
             <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
@@ -92,7 +217,7 @@ const MemoryDetail: React.FC = () => {
                     <div className="flex items-center gap-4">
                         <span className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="w-4 h-4" />
-                            {memory.date}
+                            {formatDate(memory.date)}
                         </span>
                     </div>
                 </div>
@@ -113,7 +238,7 @@ const MemoryDetail: React.FC = () => {
                         <div className="space-y-6">
                             <div className="relative group">
                                 <div className="bg-black rounded-2xl overflow-hidden cursor-pointer">
-                                    <MediaDisplay key={memory.media[selectedMediaIndex].url} media={memory.media[selectedMediaIndex]} />
+                                    <MediaDisplay media={memory.media[selectedMediaIndex]} />
                                 </div>
 
                                 <button
@@ -138,7 +263,7 @@ const MemoryDetail: React.FC = () => {
                                             : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
-                                    <span className='md:text-xl text-xs'>All ({memory.media.length})</span>
+                                    <span className="md:text-xl text-xs">All ({memory.media.length})</span>
                                 </button>
                                 <button
                                     onClick={() => setFilter('photo')}
@@ -148,7 +273,7 @@ const MemoryDetail: React.FC = () => {
                                         }`}
                                 >
                                     <ImageIcon className="w-4 h-4" />
-                                    <span className='md:text-xl text-xs'>Photos ({photoCount})</span>
+                                    <span className="md:text-xl text-xs">Photos ({photoCount})</span>
                                 </button>
                                 <button
                                     onClick={() => setFilter('video')}
@@ -158,7 +283,7 @@ const MemoryDetail: React.FC = () => {
                                         }`}
                                 >
                                     <Video className="w-4 h-4" />
-                                    <span className='md:text-xl text-xs'>Videos ({videoCount})</span>
+                                    <span className="md:text-xl text-xs">Videos ({videoCount})</span>
                                 </button>
                             </div>
 
@@ -175,7 +300,7 @@ const MemoryDetail: React.FC = () => {
                                                 }`}
                                         >
                                             <img
-                                                src={item.type === 'video' ? item.thumbnail || item.url : item.url}
+                                                src={item.type === 'video' ? thumbnails[item.url] || item.thumbnail || item.url : item.url}
                                                 alt="media-thumbnail"
                                                 className="w-full h-full object-cover cursor-pointer"
                                             />

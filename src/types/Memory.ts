@@ -7,18 +7,24 @@ export interface MediaItem {
 }
 
 export interface Memory {
+    updatedAt: any;
     id: string;
     title: string;
     description: string;
     date: string;
-    media: MediaItem[];
     tags: string[];
+    media: {
+        type: 'photo' | 'video';
+        url: string;
+        thumbnail?: string;
+    }[];
 }
 
 export interface VideoWithMemoryInfo extends MediaItem {
     type: 'video';
     memoryTitle: string;
     memoryDate: string;
+    description: string;
 }
 
 export type GameMode = 'menu' | 'quiz' | 'memory' | 'message' | 'timeCapsule' | 'achievements';

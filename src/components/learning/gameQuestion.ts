@@ -274,36 +274,3 @@ export const coupleDrawingPrompts = [
     "Gambar rencana masa depan kita",
     "Gambar hal yang paling disukai pasangan"
 ];
-
-export const memeTemplates = [
-    {
-        id: '1',
-        name: "Couple Goals",
-        url: "/memes/couple-goals.jpg",
-        boxCount: 2
-    },
-    {
-        id: '2',
-        name: "Sweet Moments",
-        url: "/memes/sweet-moments.jpg",
-        boxCount: 2
-    },
-    {
-        id: '3',
-        name: "Love Story",
-        url: "/memes/love-story.jpg",
-        boxCount: 3
-    },
-    {
-        id: '4',
-        name: "Relationship Goals",
-        url: "/memes/relationship-goals.jpg",
-        boxCount: 2
-    },
-    {
-        id: '5',
-        name: "Perfect Match",
-        url: "/memes/perfect-match.jpg",
-        boxCount: 2
-    }
-];

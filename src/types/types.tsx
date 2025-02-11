@@ -1,4 +1,4 @@
-export type GameMode = 'menu' | 'truthOrDare' | 'coupleQuiz' | 'drawTogether' | 'musicGuess' | 'memeGenerator' | 'memories';
+export type GameMode = 'menu' | 'truthOrDare' | 'coupleQuiz' | 'drawTogether' | 'musicGuess' | 'loveQuiz' | 'memories';
 
 export type AlertType = 'success' | 'error' | 'info' | 'warning' | 'achievement' | 'reward' | 'love' | 'milestone';
 
@@ -29,13 +29,6 @@ export interface DrawingData {
     path: string;
     color: string;
     width: number;
-}
-
-export interface MemeTemplate {
-    id: string;
-    name: string;
-    url: string;
-    boxCount: number;
 }
 
 export interface BaseGameProps {

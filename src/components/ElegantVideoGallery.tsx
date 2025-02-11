@@ -220,13 +220,7 @@ const ModernVideoGallery = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50">
-            {/* Decorative Background */}
-            <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
-                <div className="absolute top-0 right-0 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-                <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
-            </div>
+        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50">  
 
             <div className="relative max-w-7xl mx-auto px-4 py-12">
                 {/* Header Section */}

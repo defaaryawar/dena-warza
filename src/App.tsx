@@ -39,7 +39,7 @@ function App() {
       <Router>
         <ScrollToTop />
 
-        <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 px-4 py-0">
+        <div className="min-h-screen px-4 py-0">
           <div className="container mx-auto max-w-7xl">
             <Routes>
 

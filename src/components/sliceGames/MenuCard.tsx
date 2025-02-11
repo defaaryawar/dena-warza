@@ -44,7 +44,7 @@ const MenuCard: React.FC<MenuCardProps> = ({
             xp: 20
         },
         {
-            mode: 'memeGenerator' as GameMode,
+            mode: 'loveQuiz' as GameMode,
             icon: Smile,
             title: 'Couple Memes',
             desc: 'Create funny memories',

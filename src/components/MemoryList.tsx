@@ -199,7 +199,7 @@ const MemoryList: React.FC = () => {
                         />
                     ))
                 ) : (
-                    <div className="w-full text-center py-8 text-gray-500">
+                    <div className="w-full text-center md:py-8 py-6 text-gray-800">
                         Belum ada kenangan tersimpan
                     </div>
                 )}

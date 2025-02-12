@@ -10,8 +10,7 @@ const PinAuthentication: React.FC = () => {
     const [showCheckmark, setShowCheckmark] = useState(false);
     const navigate = useNavigate();
 
-    const CORRECT_PIN = import.meta.env.VITE_CORRECT_PIN;
-    const SECRET_TOKEN = import.meta.env.VITE_SECRRET_TOKEN;
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     // Sound effects initialization
     const buttonSound = new Audio('/sounds/pop.mp3');
@@ -75,33 +74,51 @@ const PinAuthentication: React.FC = () => {
         };
     }, [success, navigate]);
 
-    const handlePinSubmit = () => {
-        if (pin === CORRECT_PIN) {
-            setSuccess(true);
-            setShowCheckmark(true);
-            const token = SECRET_TOKEN;
-            sessionStorage.setItem('authToken', token);
-            setCountdown(2);
-            playSound(successSound);
-            if (typeof window !== 'undefined') {
-                import('canvas-confetti').then(confetti => {
-                    confetti.default({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
+    const handlePinSubmit = async () => {
+        if (pin.length === 6) {
+            try {
+                const response = await fetch(`${BASE_URL}/api/users/authenticate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pin }),
                 });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    setSuccess(true);
+                    setShowCheckmark(true);
+                    sessionStorage.setItem('authToken', data.token); // Simpan token di sessionStorage
+                    setCountdown(2);
+                    playSound(successSound);
+
+                    if (typeof window !== 'undefined') {
+                        import('canvas-confetti').then(confetti => {
+                            confetti.default({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                            });
+                        });
+                    }
+                } else {
+                    setError(true);
+                    playSound(errorSound);
+                    const container = document.querySelector('.pin-container');
+                    container?.classList.add('shake');
+                    setTimeout(() => {
+                        container?.classList.remove('shake');
+                        setError(false);
+                        setPin('');
+                    }, 600);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                setError(true);
+                playSound(errorSound);
             }
-        } else {
-            setError(true);
-            playSound(errorSound);
-            const container = document.querySelector('.pin-container');
-            container?.classList.add('shake');
-            setTimeout(() => {
-                container?.classList.remove('shake');
-                setError(false);
-                setPin('');
-            }, 600);
         }
     };
 

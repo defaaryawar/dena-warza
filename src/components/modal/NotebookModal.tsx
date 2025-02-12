@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Heart, Book, ChevronLeft, ChevronRight, Image, Play } from 'lucide-react';
+import { X, Heart, Book, ChevronLeft, ChevronRight, Image, Play, AlertTriangle } from 'lucide-react';
 import { useQuery, useQueryClient } from 'react-query';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import '../styles/modal.css';
 import '../styles/customScrollbar.css';
 import type { Memory } from '../../types/Memory';
@@ -19,6 +21,7 @@ interface Message {
 }
 
 const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
+    const navigate = useNavigate();
     const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,44 +30,83 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
     const videoRefs = useRef<Record<string, HTMLVideoElement>>({});
     const queryClient = useQueryClient();
 
-    // Menggunakan useQuery untuk fetch dan cache data
+    // Enhanced error handling for fetch
+    const handleFetchError = (error: Error) => {
+        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
+            sessionStorage.removeItem('authToken');
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+            navigate('/pin', { replace: true });
+            return null;
+        }
+
+        if (error.message.includes('500')) {
+            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
+            return null;
+        }
+
+        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+            return null;
+        }
+
+        toast.error(`Gagal memuat kenangan: ${error.message}`);
+        return null;
+    };
+
+    // Fetch memories with comprehensive error handling
     const {
         data: memories,
         isLoading: memoriesLoading,
         error: memoriesError,
+        refetch
     } = useQuery<Memory[], Error>(
-        ['memories'], // Key untuk query
+        ['memories'],
         async () => {
-            const response = await fetch(`${API_URL}/api/memories`);
-            if (!response.ok) throw new Error('Failed to fetch memories');
-            return response.json();
+            const token = sessionStorage.getItem('authToken');
+            
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/memories`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                return response.json();
+            } catch (err) {
+                return handleFetchError(err as Error);
+            }
         },
         {
-            staleTime: 5 * 60 * 1000, // Data dianggap fresh selama 5 menit
-            cacheTime: 10 * 60 * 1000, // Data disimpan di cache selama 10 menit
-            refetchOnWindowFocus: false, // Tidak refetch saat window focus
-            refetchOnReconnect: false, // Tidak refetch saat reconnect
-            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            staleTime: 5 * 60 * 1000,
+            cacheTime: 10 * 60 * 1000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            refetchOnMount: false,
+            onError: (err: Error) => {
+                handleFetchError(err);
+            },
             select: (newData) => {
-                // Dapatkan data cache saat ini
                 const cachedData = queryClient.getQueryData<Memory[]>(['memories']);
 
-                // Jika tidak ada data cache, kembalikan data baru
                 if (!cachedData) return newData;
 
-                // Bandingkan data cache dengan data baru
                 const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
 
-                // Jika data tidak berubah, kembalikan data cache
-                if (!isDataChanged) return cachedData;
-
-                // Jika data berubah, kembalikan data baru
-                return newData;
+                return isDataChanged ? newData : cachedData;
             }
         }
     );
 
-    // Fungsi untuk menghasilkan thumbnail dari video
+    // Thumbnail generation functions
     const generateThumbnail = (video: HTMLVideoElement, videoUrl: string) => {
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -74,14 +116,14 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
         setThumbnails(prev => ({ ...prev, [videoUrl]: thumbnail }));
     };
 
-    // Fungsi untuk memuat video dan menghasilkan thumbnail
     const handleVideoLoad = (video: HTMLVideoElement, videoUrl: string) => {
-        video.currentTime = 1; // Set waktu ke detik pertama
+        video.currentTime = 1;
         video.addEventListener('seeked', () => {
             generateThumbnail(video, videoUrl);
         }, { once: true });
     };
 
+    // Prevent body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -94,8 +136,8 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
         };
     }, [isOpen]);
 
+    // Generate video thumbnails
     useEffect(() => {
-        // Memuat video dan menghasilkan thumbnail
         if (memories) {
             memories.forEach(memory => {
                 memory.media.forEach(media => {
@@ -204,18 +246,27 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
                     <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
                 </div>
             </div>
-        );
+        );  
     }
 
     if (memoriesError) {
         return (
             <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm">
                 <div className="bg-white p-6 rounded-lg shadow-xl text-center">
-                    <p className="text-red-500">Failed to load memories. Please try again later.</p>
+                    <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                    <p className="text-red-500 mb-4">Gagal memuat kenangan. Silakan coba lagi.</p>
+                    <button
+                        onClick={() => refetch()}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                        Coba Lagi
+                    </button>
                 </div>
             </div>
         );
     }
+
+    if (!isOpen) return null;
 
     return (
         <>

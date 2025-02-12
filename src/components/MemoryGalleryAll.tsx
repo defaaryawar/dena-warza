@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import MemoryCard from './MemoryCardTerbaru';
 import { Memory } from '../types/Memory';
 import { useQuery, useQueryClient } from 'react-query';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,49 +14,87 @@ const MemoryGalleryAll: React.FC = () => {
     const [displayCount, setDisplayCount] = useState(8);
     const [isFilterExpanded, setIsFilterExpanded] = useState(false);
 
-    // Dapatkan query client
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
+
+    // Enhanced error handling function
+    const handleFetchError = (error: Error) => {
+        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
+            sessionStorage.removeItem('authToken');
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+            navigate('/pin', { replace: true });
+            return null;
+        }
+
+        if (error.message.includes('500')) {
+            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
+            return null;
+        }
+
+        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+            return null;
+        }
+
+        toast.error(`Gagal memuat kenangan: ${error.message}`);
+        return null;
+    };
 
     // Fungsi untuk membandingkan data cache dengan data baru
     const compareMemories = (cachedData: Memory[], newData: Memory[]): boolean => {
-        if (cachedData.length !== newData.length) return true; // Jika panjang berbeda, data berubah
+        if (cachedData.length !== newData.length) return true;
         return newData.some((memory, index) => memory.updatedAt !== cachedData[index]?.updatedAt);
     };
 
-    // Menggunakan useQuery dari react-query untuk fetch dan cache data
+    // Fetch memories with comprehensive error handling
     const {
         data: memories,
         isLoading: loading,
         error,
         refetch: refresh
     } = useQuery<Memory[], Error>(
-        ['memories', API_URL], // Key untuk query
+        ['memories', API_URL],
         async () => {
-            const response = await fetch(`${API_URL}/api/memories`);
-            if (!response.ok) throw new Error('Failed to fetch data');
-            return response.json();
+            const token = sessionStorage.getItem('authToken');
+
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/memories`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                return response.json();
+            } catch (err) {
+                return handleFetchError(err as Error);
+            }
         },
         {
-            staleTime: 120 * 60 * 1000, // Data dianggap fresh selama 2 jam
-            cacheTime: 120 * 60 * 1000, // Data disimpan di cache selama 2 jam
-            refetchOnWindowFocus: false, // Tidak refetch saat window focus
-            refetchOnReconnect: false, // Tidak refetch saat reconnect
-            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            staleTime: 120 * 60 * 1000,
+            cacheTime: 120 * 60 * 1000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            refetchOnMount: false,
+            onError: (err: Error) => {
+                handleFetchError(err);
+            },
             select: (newData) => {
-                // Dapatkan data cache saat ini
                 const cachedData = queryClient.getQueryData<Memory[]>(['memories', API_URL]);
 
-                // Jika tidak ada data cache, kembalikan data baru
                 if (!cachedData) return newData;
 
-                // Bandingkan data cache dengan data baru
                 const isDataChanged = compareMemories(cachedData, newData);
 
-                // Jika data tidak berubah, kembalikan data cache
-                if (!isDataChanged) return cachedData;
-
-                // Jika data berubah, kembalikan data baru
-                return newData;
+                return isDataChanged ? newData : cachedData;
             }
         }
     );
@@ -116,7 +156,7 @@ const MemoryGalleryAll: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading memories...</p>
+                <p className="text-gray-600">Memuat kenangan...</p>
             </div>
         </div>
     );
@@ -125,13 +165,14 @@ const MemoryGalleryAll: React.FC = () => {
     if (error && !sortedMemories?.length) return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="text-center text-red-500">
-                <p className="text-xl font-semibold mb-2">Failed to load memories</p>
+                <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                <p className="text-xl font-semibold mb-2">Gagal Memuat Kenangan</p>
                 <p className="text-sm text-gray-600">{error.message}</p>
                 <button
                     onClick={() => refresh()}
                     className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                    Try Again
+                    Coba Lagi
                 </button>
             </div>
         </div>
@@ -146,7 +187,7 @@ const MemoryGalleryAll: React.FC = () => {
                     <div className="relative flex-grow">
                         <input
                             type="text"
-                            placeholder="Search memories by title, description, or tags..."
+                            placeholder="Cari kenangan berdasarkan judul, deskripsi, atau tag..."
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
@@ -179,7 +220,7 @@ const MemoryGalleryAll: React.FC = () => {
                                 : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700 hover:text-blue-600'}`}
                     >
                         <Filter className={`w-5 h-5 ${isFilterExpanded ? 'text-blue-500' : ''}`} />
-                        Filters
+                        Filter
                         {isFilterExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
                     </button>
                 </div>
@@ -188,7 +229,7 @@ const MemoryGalleryAll: React.FC = () => {
                 {isFilterExpanded && (
                     <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 shadow-inner">
                         <div className="flex flex-wrap justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-gray-800">Filter by Tags</h3>
+                            <h3 className="text-lg font-semibold text-gray-800">Filter berdasarkan Tag</h3>
                             {(searchTerm || selectedTags.length > 0) && (
                                 <button
                                     onClick={clearAllFilters}
@@ -196,7 +237,7 @@ const MemoryGalleryAll: React.FC = () => {
                                             flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50"
                                 >
                                     <X className="w-4 h-4" />
-                                    Clear All
+                                    Hapus Semua
                                 </button>
                             )}
                         </div>
@@ -234,7 +275,7 @@ const MemoryGalleryAll: React.FC = () => {
                         {searchTerm && (
                             <div className="flex items-center bg-gray-50 text-gray-700 px-4 py-2 
                                 rounded-lg text-sm font-medium shadow-sm border border-gray-200">
-                                Search: "{searchTerm}"
+                                Pencarian: "{searchTerm}"
                                 <button onClick={() => setSearchTerm('')} className="ml-2 hover:text-gray-900">
                                     <X className="w-4 h-4" />
                                 </button>
@@ -257,8 +298,8 @@ const MemoryGalleryAll: React.FC = () => {
                 ) : (
                     <div className="col-span-full text-center py-16 bg-gray-50 rounded-2xl">
                         <Search className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                        <p className="text-xl font-semibold text-gray-700">No memories found</p>
-                        <p className="text-gray-500 mt-2">Try adjusting your search or filters</p>
+                        <p className="text-xl font-semibold text-gray-700">Tidak ada kenangan ditemukan</p>
+                        <p className="text-gray-500 mt-2">Coba sesuaikan pencarian atau filter Anda</p>
                     </div>
                 )}
             </div>
@@ -273,7 +314,7 @@ const MemoryGalleryAll: React.FC = () => {
                         active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 
                         focus:ring-offset-2 flex items-center gap-3"
                     >
-                        <span className="relative z-10">Load More Memories</span>
+                        <span className="relative z-10">Muat Lebih Banyak Kenangan</span>
                         <ChevronDown className="w-5 h-5 transition-transform duration-300 
                                             group-hover:translate-y-1 relative z-10" />
                         <div className="absolute inset-0 h-full w-0 bg-blue-600 
@@ -284,5 +325,4 @@ const MemoryGalleryAll: React.FC = () => {
         </div>
     );
 };
-
 export default MemoryGalleryAll;

@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Loader2, Save, ChevronLeft } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { TitleField, DescriptionField, DateField } from '../components/slicingTambahKenangan/FormFields';
 import { MediaUpload } from '../components/slicingTambahKenangan/MediaUpload';
 import { TagInput } from '../components/slicingTambahKenangan/TagInput';
 import { validations } from '../components/utils/validations';
 import { MemoryFormErrors } from '../types/types';
-import CustomAlert from '../components/ui/CustomAlert'; // Import CustomAlert
+import CustomAlert from '../components/ui/CustomAlert';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -31,18 +32,12 @@ const TambahKenangan: React.FC = () => {
             const maxSize = 50 * 1024 * 1024; // 50MB
 
             if (!validTypes.includes(file.type)) {
-                setErrors(prev => ({
-                    ...prev,
-                    media: `Tipe berkas tidak valid: ${file.name}`
-                }));
+                toast.error(`Tipe berkas tidak valid: ${file.name}`);
                 return false;
             }
 
             if (file.size > maxSize) {
-                setErrors(prev => ({
-                    ...prev,
-                    media: `Ukuran berkas terlalu besar: ${file.name}`
-                }));
+                toast.error(`Ukuran berkas terlalu besar: ${file.name}`);
                 return false;
             }
 
@@ -86,6 +81,13 @@ const TambahKenangan: React.FC = () => {
         setErrors(prev => ({ ...prev, server: undefined }));
 
         try {
+            const token = sessionStorage.getItem('authToken');
+            if (!token) {
+                toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+                navigate('/login');
+                return;
+            }
+
             const formData = new FormData();
 
             mediaFiles.forEach(file => {
@@ -102,8 +104,8 @@ const TambahKenangan: React.FC = () => {
 
             const response = await fetch(`${API_URL}/api/memories`, {
                 method: 'POST',
-                credentials: 'include',
                 headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Accept': 'application/json'
                 },
                 body: formData
@@ -120,7 +122,7 @@ const TambahKenangan: React.FC = () => {
                 };
             }
 
-            setAlert({ type: 'success', message: 'Kenangan berhasil disimpan!' });
+            toast.success('Kenangan berhasil disimpan!');
             setTimeout(() => {
                 navigate('/', { replace: true });
             }, 2000);
@@ -138,29 +140,15 @@ const TambahKenangan: React.FC = () => {
                         title: errorData.error || 'Judul sudah digunakan'
                     }));
                 } else if (errorData?.field === 'tags') {
-                    setErrors(prev => ({
-                        ...prev,
-                        server: 'Format label tidak valid'
-                    }));
+                    toast.error('Format label tidak valid');
                 } else {
-                    setErrors(prev => ({
-                        ...prev,
-                        server: errorData?.error || 'Data tidak valid'
-                    }));
+                    toast.error(errorData?.error || 'Data tidak valid');
                 }
             } else if (status === 413) {
-                setErrors(prev => ({
-                    ...prev,
-                    server: 'Ukuran file terlalu besar'
-                }));
+                toast.error('Ukuran file terlalu besar');
             } else {
-                setErrors(prev => ({
-                    ...prev,
-                    server: 'Terjadi kesalahan server'
-                }));
+                toast.error('Terjadi kesalahan server');
             }
-
-            setAlert({ type: 'error', message: 'Gagal menyimpan kenangan. Silakan coba lagi.' });
         }
     };
 

@@ -57,7 +57,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/pantai-date/pantai-date12.webp'
             }
         ],
-        tags: ['romantis', 'sunset-date', 'beach-love', 'moment-indah', 'kenangan']
+        tags: ['romantis', 'sunset-date', 'beach-love', 'moment-indah', 'kenangan'],
+        updatedAt: undefined
     },
     {
         id: '2',
@@ -86,7 +87,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/first-date/first-date5.webp'
             }
         ],
-        tags: ['romantis', 'date-pertama', 'mall-adventure', 'sweet-moment', 'kenangan']
+        tags: ['romantis', 'date-pertama', 'mall-adventure', 'sweet-moment', 'kenangan'],
+        updatedAt: undefined
     },
     {
         id: '3',
@@ -111,7 +113,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/mini-market-date/mini-market-date4.webp'
             }
         ],
-        tags: ['random-date', 'snack-hunting', 'moment-unik', 'love-story', 'adventure']
+        tags: ['random-date', 'snack-hunting', 'moment-unik', 'love-story', 'adventure'],
+        updatedAt: undefined
     },
     {
         id: '4',
@@ -140,7 +143,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/pecel-lele-date/pecel-lele-date5.webp'
             }
         ],
-        tags: ['date', 'indonesian-food', 'food-adventure', 'quality-time', 'love']
+        tags: ['date', 'indonesian-food', 'food-adventure', 'quality-time', 'love'],
+        updatedAt: undefined
     },
     {
         id: '5',
@@ -163,7 +167,8 @@ export const memories: Memory[] = [
             //     thumbnail: '/images/ngedate/mall-date-thumb2.webp'
             // }
         ],
-        tags: ['spontan', 'mall', 'quality-time', 'shopping', 'fun']
+        tags: ['spontan', 'mall', 'quality-time', 'shopping', 'fun'],
+        updatedAt: undefined
     },
     {
         id: '6',
@@ -197,7 +202,8 @@ export const memories: Memory[] = [
             //     thumbnail: '/images/ngedate/cafe-thumb.webp'
             // }
         ],
-        tags: ['photo-both', 'memory', 'fun', 'quality-time', 'love']
+        tags: ['photo-both', 'memory', 'fun', 'quality-time', 'love'],
+        updatedAt: undefined
     },
     {
         id: '7',
@@ -218,7 +224,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/cafe-date/cafe-date3.webp'
             },
         ],
-        tags: ['cafe', 'coffee', 'quality-time', 'intimate', 'love']
+        tags: ['cafe', 'coffee', 'quality-time', 'intimate', 'love'],
+        updatedAt: undefined
     },
     {
         id: '8',
@@ -248,7 +255,8 @@ export const memories: Memory[] = [
                 thumbnail: '/images/ngedate/ragunan-date/ragunan-date.webp'
             }
         ],
-        tags: ['adventure', 'zoo', 'quality-time', 'fun', 'love']
+        tags: ['adventure', 'zoo', 'quality-time', 'fun', 'love'],
+        updatedAt: undefined
     },
     {
         id: '9',
@@ -277,7 +285,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/bioskop-date/bioskop-date5.webp'
             }
         ],
-        tags: ['movie', 'cinema', 'date', 'fun', 'adventure']
+        tags: ['movie', 'cinema', 'date', 'fun', 'adventure'],
+        updatedAt: undefined
     },
     {
         id: '10',
@@ -350,7 +359,8 @@ export const memories: Memory[] = [
                 thumbnail: '/images/ngedate/nako-date/nako-date11.webp'
             },
         ],
-        tags: ['coffee', 'relax', 'date', 'quality-time', 'love']
+        tags: ['coffee', 'relax', 'date', 'quality-time', 'love'],
+        updatedAt: undefined
     },
     {
         id: '11',
@@ -426,7 +436,8 @@ export const memories: Memory[] = [
                 thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
             },
         ],
-        tags: ['coffee', 'nature', 'relax', 'quality-time', 'love']
+        tags: ['coffee', 'nature', 'relax', 'quality-time', 'love'],
+        updatedAt: undefined
     },
     {
         id: '12',
@@ -451,7 +462,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/wisudaan/wisudaan4.webp'
             }
         ],
-        tags: ['graduation', 'achievement', 'love', 'memory', 'success']
+        tags: ['graduation', 'achievement', 'love', 'memory', 'success'],
+        updatedAt: undefined
     },
     {
         id: '13',
@@ -480,7 +492,8 @@ export const memories: Memory[] = [
                 url: '/images/ngedate/roti-buaya-date/roti-buaya-date5.webp'
             }
         ],
-        tags: ['tradition', 'love', 'food', 'moment', 'culture']
+        tags: ['tradition', 'love', 'food', 'moment', 'culture'],
+        updatedAt: undefined
     },
     {
         id: '14',
@@ -506,6 +519,7 @@ export const memories: Memory[] = [
                 thumbnail: '/images/ngedate/jalan-jalan-date/jalan-jalan-date2.webp'
             },
         ],
-        tags: ['tradition', 'love', 'food', 'moment', 'culture']
+        tags: ['tradition', 'love', 'food', 'moment', 'culture'],
+        updatedAt: undefined
     }
 ];

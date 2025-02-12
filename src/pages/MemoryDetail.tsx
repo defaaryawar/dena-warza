@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRight, Play, AlertTriangle } from 'lucide-react';
 import { useQuery, useQueryClient } from 'react-query';
+import { toast } from 'react-hot-toast';
 import { Memory, MediaItem } from '../types/Memory';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
@@ -87,40 +88,79 @@ const MemoryDetail: React.FC = () => {
     const [filter, setFilter] = useState<'all' | 'photo' | 'video'>('all');
     const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
 
-    // Menggunakan useQuery untuk fetch dan cache data
+    // Enhanced error handling function
+    const handleFetchError = (error: Error) => {
+        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
+            sessionStorage.removeItem('authToken');
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+            navigate('/pin', { replace: true });
+            return null;
+        }
+
+        if (error.message.includes('500')) {
+            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
+            return null;
+        }
+
+        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+            return null;
+        }
+
+        toast.error(`Gagal memuat kenangan: ${error.message}`);
+        return null;
+    };
+
+    // Fetch memory with comprehensive error handling
     const {
         data: memory,
         isLoading: loading,
         error,
     } = useQuery<Memory, Error>(
-        ['memory', id], // Key untuk query
+        ['memory', id],
         async () => {
+            const token = sessionStorage.getItem('authToken');
+
             if (!id) throw new Error('No memory ID provided');
-            const response = await fetch(`${API_URL}/api/memories/${id}`);
-            if (!response.ok) throw new Error('Memory not found');
-            return response.json();
+
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/memories/${id}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                return response.json();
+            } catch (err) {
+                return handleFetchError(err as Error);
+            }
         },
         {
-            staleTime: 120 * 60 * 1000, // Data dianggap fresh selama 2 jam
-            cacheTime: 120 * 60 * 1000, // Data disimpan di cache selama 2 jam
-            refetchOnWindowFocus: false, // Tidak refetch saat window focus
-            refetchOnReconnect: false, // Tidak refetch saat reconnect
-            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            staleTime: 120 * 60 * 1000,
+            cacheTime: 120 * 60 * 1000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            refetchOnMount: false,
+            onError: (err: Error) => {
+                handleFetchError(err);
+            },
             select: (newData) => {
-                // Dapatkan data cache saat ini
                 const cachedData = queryClient.getQueryData<Memory>(['memory', id]);
 
-                // Jika tidak ada data cache, kembalikan data baru
                 if (!cachedData) return newData;
 
-                // Bandingkan data cache dengan data baru
                 const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
 
-                // Jika data tidak berubah, kembalikan data cache
-                if (!isDataChanged) return cachedData;
-
-                // Jika data berubah, kembalikan data baru
-                return newData;
+                return isDataChanged ? newData : cachedData;
             }
         }
     );
@@ -151,7 +191,7 @@ const MemoryDetail: React.FC = () => {
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center">
                     <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading memory...</p>
+                    <p className="text-gray-600">Memuat kenangan...</p>
                 </div>
             </div>
         );
@@ -161,12 +201,8 @@ const MemoryDetail: React.FC = () => {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                 <div className="text-center px-4">
-                    <div className="mb-6">
-                        <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto flex items-center justify-center">
-                            <ImageIcon className="w-10 h-10 text-gray-400" />
-                        </div>
-                    </div>
-                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">Memory not found</h2>
+                    <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">Kenangan tidak ditemukan</h2>
                     <button
                         onClick={() => navigate(-1)}
                         className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full md:hover:bg-blue-700 transition-all transform md:hover:scale-105"
@@ -259,8 +295,8 @@ const MemoryDetail: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('all')}
                                     className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'all'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                            : 'bg-white text-gray-700 md:hover:bg-gray-50'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
                                     <span className="md:text-xl text-xs">All ({memory.media.length})</span>
@@ -268,8 +304,8 @@ const MemoryDetail: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('photo')}
                                     className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'photo'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                            : 'bg-white text-gray-700 md:hover:bg-gray-50'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
                                     <ImageIcon className="w-4 h-4" />
@@ -278,8 +314,8 @@ const MemoryDetail: React.FC = () => {
                                 <button
                                     onClick={() => setFilter('video')}
                                     className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'video'
-                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                            : 'bg-white text-gray-700 md:hover:bg-gray-50'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                        : 'bg-white text-gray-700 md:hover:bg-gray-50'
                                         }`}
                                 >
                                     <Video className="w-4 h-4" />
@@ -295,8 +331,8 @@ const MemoryDetail: React.FC = () => {
                                             key={index}
                                             onClick={() => setSelectedMediaIndex(originalIndex)}
                                             className={`relative aspect-square rounded-xl overflow-hidden group transition-all md:hover:scale-105 ${originalIndex === selectedMediaIndex
-                                                    ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
-                                                    : ''
+                                                ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
+                                                : ''
                                                 }`}
                                         >
                                             <img

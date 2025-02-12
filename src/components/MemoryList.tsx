@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import MemoryCard from './MemoryCardTerbaru';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Memory } from '../types/Memory';
 import { useQuery, useQueryClient } from 'react-query';
+import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -12,46 +13,89 @@ const MemoryList: React.FC = () => {
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
+
+    // Enhanced error handling function
+    const handleFetchError = (error: Error) => {
+        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
+            sessionStorage.removeItem('authToken');
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+            navigate('/login');
+            return null;
+        }
+
+        if (error.message.includes('500')) {
+            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
+            return null;
+        }
+
+        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+            return null;
+        }
+
+        toast.error(`Gagal memuat kenangan: ${error.message}`);
+        return null;
+    };
 
     // Fungsi untuk membandingkan data cache dengan data baru
     const compareMemories = (cachedData: Memory[], newData: Memory[]): boolean => {
-        if (cachedData.length !== newData.length) return true; // Jika panjang berbeda, data berubah
+        if (cachedData.length !== newData.length) return true;
         return newData.some((memory, index) => memory.updatedAt !== cachedData[index]?.updatedAt);
     };
 
-    // Menggunakan useQuery dari react-query untuk fetch dan cache data
+    // Menggunakan useQuery dengan penanganan error yang lebih komprehensif
     const {
         data: memories,
         isLoading: loading,
         error,
+        refetch
     } = useQuery<Memory[], Error>(
-        ['latest_memories', API_URL], // Key untuk query
+        ['latest_memories', API_URL],
         async () => {
-            const response = await fetch(`${API_URL}/api/memories`);
-            if (!response.ok) throw new Error('Failed to fetch data');
-            return response.json();
+            const token = sessionStorage.getItem('authToken');
+
+            // Periksa token sebelum fetch
+            if (!token) {
+                toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+                navigate('/pin', { replace: true });
+                return null;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/memories`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                return response.json();
+            } catch (err) {
+                return handleFetchError(err as Error);
+            }
         },
         {
-            staleTime: 120 * 60 * 1000, // Data dianggap fresh selama 2 jam
-            cacheTime: 120 * 60 * 1000, // Data disimpan di cache selama 2 jam
-            refetchOnWindowFocus: false, // Tidak refetch saat window focus
-            refetchOnReconnect: false, // Tidak refetch saat reconnect
-            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            staleTime: 120 * 60 * 1000,
+            cacheTime: 120 * 60 * 1000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            refetchOnMount: false,
+            onError: (err: Error) => {
+                handleFetchError(err);
+            },
             select: (newData) => {
-                // Dapatkan data cache saat ini
                 const cachedData = queryClient.getQueryData<Memory[]>(['latest_memories', API_URL]);
 
-                // Jika tidak ada data cache, kembalikan data baru
                 if (!cachedData) return newData;
 
-                // Bandingkan data cache dengan data baru
                 const isDataChanged = compareMemories(cachedData, newData);
 
-                // Jika data tidak berubah, kembalikan data cache
-                if (!isDataChanged) return cachedData;
-
-                // Jika data berubah, kembalikan data baru
-                return newData;
+                return isDataChanged ? newData : cachedData;
             }
         }
     );
@@ -61,7 +105,7 @@ const MemoryList: React.FC = () => {
         if (!memories) return [];
         return memories
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-            .slice(0, 10); // Ambil 10 data terbaru
+            .slice(0, 10);
     }, [memories]);
 
     // Fungsi untuk memeriksa apakah scroll bisa dilakukan
@@ -110,17 +154,28 @@ const MemoryList: React.FC = () => {
         setTimeout(checkScrollability, 300);
     };
 
-    // Loading state
+    // Loading state dengan indikator yang lebih informatif
     if (loading) return (
-        <div className="min-h-[300px] flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="min-h-[300px] flex flex-col items-center justify-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600">Memuat kenangan...</p>
         </div>
     );
 
-    // Error state
+    // Error state dengan opsi untuk mencoba ulang
     if (error) return (
-        <div className="min-h-[300px] flex items-center justify-center text-red-500">
-            {error.message}
+        <div className="min-h-[300px] flex flex-col items-center justify-center text-red-500 p-4 text-center">
+            <AlertTriangle className="w-12 h-12 mb-4 text-red-500" />
+            <h3 className="text-lg font-semibold mb-2">Gagal Memuat Kenangan</h3>
+            <p className="text-sm text-gray-600 mb-4">
+                {error.message || 'Terjadi kesalahan saat memuat kenangan'}
+            </p>
+            <button
+                onClick={() => refetch()}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+                Coba Lagi
+            </button>
         </div>
     );
 

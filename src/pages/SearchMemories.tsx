@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Search, ArrowLeft, Calendar, Heart, Tag, GridIcon, List, Settings2, X } from 'lucide-react';
+import { Search, ArrowLeft, Calendar, Heart, Tag, GridIcon, List, Settings2, X, AlertTriangle } from 'lucide-react';
 import { useQuery, useQueryClient } from 'react-query';
-import { Memory } from '../types/Memory'; // Sesuaikan path-nya
+import { toast } from 'react-hot-toast';
+import { Memory } from '../types/Memory';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -17,43 +18,83 @@ const SearchMemories = () => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const queryClient = useQueryClient();
 
-    // Menggunakan useQuery dari react-query untuk fetch dan cache data
+    // Enhanced error handling function
+    const handleFetchError = (error: Error) => {
+        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
+            sessionStorage.removeItem('authToken');
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+            navigate('/login');
+            return null;
+        }
+
+        if (error.message.includes('500')) {
+            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
+            return null;
+        }
+
+        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+            return null;
+        }
+
+        toast.error(`Gagal memuat kenangan: ${error.message}`);
+        return null;
+    };
+
+    // Fetch memories with comprehensive error handling
     const {
         data: memories,
         isLoading: loading,
         error,
+        refetch
     } = useQuery<Memory[], Error>(
-        ['search_memories', API_URL], // Key untuk query
+        ['search_memories', API_URL],
         async () => {
-            const response = await fetch(`${API_URL}/api/memories`);
-            if (!response.ok) throw new Error('Failed to fetch data');
-            return response.json();
+            const token = sessionStorage.getItem('authToken');
+
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/memories`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                return response.json();
+            } catch (err) {
+                return handleFetchError(err as Error);
+            }
         },
         {
-            staleTime: 120 * 60 * 1000, // Data dianggap fresh selama 2 jam
-            cacheTime: 120 * 60 * 1000, // Data disimpan di cache selama 2 jam
-            refetchOnWindowFocus: false, // Tidak refetch saat window focus
-            refetchOnReconnect: false, // Tidak refetch saat reconnect
-            refetchOnMount: false, // Tidak refetch saat komponen di-mount ulang
+            staleTime: 120 * 60 * 1000,
+            cacheTime: 120 * 60 * 1000,
+            refetchOnWindowFocus: false,
+            refetchOnReconnect: false,
+            refetchOnMount: false,
+            onError: (err: Error) => {
+                handleFetchError(err);
+            },
             select: (newData) => {
-                // Dapatkan data cache saat ini
                 const cachedData = queryClient.getQueryData<Memory[]>(['search_memories', API_URL]);
 
-                // Jika tidak ada data cache, kembalikan data baru
                 if (!cachedData) return newData;
 
-                // Bandingkan data cache dengan data baru
                 const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
 
-                // Jika data tidak berubah, kembalikan data cache
-                if (!isDataChanged) return cachedData;
-
-                // Jika data berubah, kembalikan data baru
-                return newData;
+                return isDataChanged ? newData : cachedData;
             }
         }
     );
 
+    // Close dropdown when clicking outside
     useEffect(() => {
         const closeDropdown = (e: MouseEvent) => {
             const target = e.target as HTMLElement;
@@ -102,7 +143,7 @@ const SearchMemories = () => {
         <div className="min-h-screen flex items-center justify-center">
             <div className="text-center">
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Loading memories...</p>
+                <p className="text-gray-600">Memuat kenangan...</p>
             </div>
         </div>
     );
@@ -111,8 +152,15 @@ const SearchMemories = () => {
     if (error) return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="text-center text-red-500">
-                <p className="text-xl font-semibold mb-2">Failed to load memories</p>
+                <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                <p className="text-xl font-semibold mb-2">Gagal Memuat Kenangan</p>
                 <p className="text-sm text-gray-600">{error.message}</p>
+                <button
+                    onClick={() => refetch()}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                    Coba Lagi
+                </button>
             </div>
         </div>
     );
@@ -329,5 +377,4 @@ const SearchMemories = () => {
         </div>
     );
 };
-
 export default SearchMemories;

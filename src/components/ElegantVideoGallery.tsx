@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { X, Play, Maximize2, Minimize2, Film, Calendar, Search, ChevronDown, Heart } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { X, Play, Maximize2, Minimize2, Film, Calendar, Search, ChevronDown, Heart, AlertTriangle } from 'lucide-react';
 import { VideoWithMemoryInfo, MediaItem } from '../types/Memory';
-import { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 const VIDEOS_CACHE_KEY = 'video_gallery_cache';
@@ -54,6 +55,7 @@ const saveThumbnailsToCache = (data: Record<string, string>) => {
 };
 
 const ModernVideoGallery = () => {
+    const navigate = useNavigate();
     const [selectedVideo, setSelectedVideo] = useState<VideoWithMemoryInfo | null>(null);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [videos, setVideos] = useState<VideoWithMemoryInfo[]>([]);
@@ -64,6 +66,29 @@ const ModernVideoGallery = () => {
     const [selectedDate, setSelectedDate] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const videoRefs = useRef<Record<string, HTMLVideoElement>>({});
+
+    // Enhanced error handling for fetch
+    const handleFetchError = (error: Error) => {
+        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
+            sessionStorage.removeItem('authToken');
+            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
+            navigate('/pin', { replace: true });
+            return null;
+        }
+
+        if (error.message.includes('500')) {
+            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
+            return null;
+        }
+
+        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
+            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
+            return null;
+        }
+
+        toast.error(`Gagal memuat video: ${error.message}`);
+        return null;
+    };
 
     const generateThumbnail = (video: HTMLVideoElement, videoUrl: string) => {
         const canvas = document.createElement('canvas');
@@ -88,6 +113,11 @@ const ModernVideoGallery = () => {
     useEffect(() => {
         const fetchVideos = async () => {
             try {
+                const token = sessionStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+
                 // Cek cache untuk video
                 const cachedVideos = getVideosFromCache();
                 const cachedThumbnails = getThumbnailsFromCache();
@@ -101,8 +131,17 @@ const ModernVideoGallery = () => {
                 }
 
                 console.log('Fetching videos from API');
-                const response = await fetch(`${API_URL}/api/memories`);
-                if (!response.ok) throw new Error('Failed to fetch memories');
+                const response = await fetch(`${API_URL}/api/memories`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
                 const memories = await response.json();
 
                 const allVideos = memories.flatMap((memory: { media: any[]; title: any; date: any; }) =>
@@ -118,12 +157,10 @@ const ModernVideoGallery = () => {
                 saveVideosToCache(allVideos);
                 setVideos(allVideos);
             } catch (error) {
-                console.error('Error fetching videos:', error);
-
-                // Jika error, coba gunakan cache
-                const cachedVideos = getVideosFromCache();
-                if (cachedVideos) {
-                    setVideos(cachedVideos);
+                const handledError = handleFetchError(error as Error);
+                if (handledError === null) {
+                    // If error handling redirected or showed a toast, we might want to set an empty state
+                    setVideos([]);
                 }
             } finally {
                 setLoading(false);
@@ -131,7 +168,7 @@ const ModernVideoGallery = () => {
         };
 
         fetchVideos();
-    }, []);
+    }, [navigate]);
 
     useEffect(() => {
         videos.forEach(video => {
@@ -214,7 +251,28 @@ const ModernVideoGallery = () => {
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-rose-50 to-teal-50 flex items-center justify-center">
-                <div className="text-gray-600">Loading videos...</div>
+                <div className="text-center">
+                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-gray-600">Memuat video...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (videos.length === 0) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-rose-50 to-teal-50 flex items-center justify-center">
+                <div className="text-center">
+                    <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">Tidak ada video ditemukan</h2>
+                    <p className="text-gray-600 mb-6">Coba sesuaikan filter atau periksa koneksi Anda</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+                    >
+                        Muat Ulang
+                    </button>
+                </div>
             </div>
         );
     }

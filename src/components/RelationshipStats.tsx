@@ -1,30 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, Suspense, lazy, memo } from 'react';
 import { Calendar, Gift, Heart, Book, Star } from 'lucide-react';
-import NotebookModal from './modal/NotebookModal';
+
+// Lazy load NotebookModal
+const NotebookModal = lazy(() => import('./modal/NotebookModal'));
 
 interface CountdownProps {
     targetDate: string;
     label: string;
 }
 
-const Countdown: React.FC<CountdownProps> = ({ targetDate, label }) => {
-    const calculateTimeLeft = () => {
+// Memoized Countdown component
+const Countdown: React.FC<CountdownProps> = memo(({ targetDate, label }) => {
+    const timeLeft = useMemo(() => {
         const difference = +new Date(targetDate) - +new Date();
         const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
-        return `${days} hari`;  
-    };
+        return `${days} hari`;
+    }, [targetDate]);
 
     return (
         <div className="text-center flex-1">
-            <div className="text-xl sm:text-2xl font-bold text-blue-600">{calculateTimeLeft()}</div>
+            <div className="text-xl sm:text-2xl font-bold text-blue-600">{timeLeft}</div>
             <div className="text-xs sm:text-sm text-gray-600">{label}</div>
         </div>
     );
-};
+});
 
 const RelationshipStats: React.FC = () => {
     const [isNotebookOpen, setIsNotebookOpen] = useState(false);
 
+    // Function to get the next date
     const getNextDate = (month: number, day: number) => {
         const now = new Date();
         let year = now.getFullYear();
@@ -36,6 +40,11 @@ const RelationshipStats: React.FC = () => {
 
         return date.toISOString();
     };
+
+    // Memoize dates to avoid recalculating on every render
+    const anniversaryDate = useMemo(() => getNextDate(9, 27), []);
+    const defanoBirthday = useMemo(() => getNextDate(10, 13), []);
+    const najmitaBirthday = useMemo(() => getNextDate(5, 17), []);
 
     return (
         <div className="max-w-7xl mx-auto px-0 sm:px-4 py-0 md:mb-0 sm:mb-0 mb-8 sm:py-8">
@@ -51,6 +60,7 @@ const RelationshipStats: React.FC = () => {
                                     src="/images/photo-profil/photo-profil-defa.webp"
                                     alt="Defano"
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
                             </div>
                             <div className="text-sm sm:text-base font-medium">Defano</div>
@@ -68,6 +78,7 @@ const RelationshipStats: React.FC = () => {
                                     src="/images/photo-profil/photo-profil-nami.webp"
                                     alt="Najmita"
                                     className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
                             </div>
                             <div className="text-sm sm:text-base font-medium">Najmita</div>
@@ -84,7 +95,7 @@ const RelationshipStats: React.FC = () => {
                                 <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <Countdown
-                                targetDate={getNextDate(9, 27)}
+                                targetDate={anniversaryDate}
                                 label="Menuju Anniversary"
                             />
                         </div>
@@ -95,7 +106,7 @@ const RelationshipStats: React.FC = () => {
                                 <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <Countdown
-                                targetDate={getNextDate(10, 13)}
+                                targetDate={defanoBirthday}
                                 label="Menuju Ultah Defano Arya Wardhana"
                             />
                         </div>
@@ -106,7 +117,7 @@ const RelationshipStats: React.FC = () => {
                                 <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <Countdown
-                                targetDate={getNextDate(5, 17)}
+                                targetDate={najmitaBirthday}
                                 label="Menuju Ultah Najmita Zahira Dirgantoro"
                             />
                         </div>
@@ -150,11 +161,13 @@ const RelationshipStats: React.FC = () => {
                 </div>
             </div>
 
-            {/* Notebook Modal */}
-            <NotebookModal
-                isOpen={isNotebookOpen}
-                onClose={() => setIsNotebookOpen(false)}
-            />
+            {/* Lazy-loaded Notebook Modal */}
+            <Suspense fallback={<div>Memuat...</div>}>
+                <NotebookModal
+                    isOpen={isNotebookOpen}
+                    onClose={() => setIsNotebookOpen(false)}
+                />
+            </Suspense>
         </div>
     );
 };

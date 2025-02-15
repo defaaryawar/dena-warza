@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Search, Filter, X, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
-import MemoryCard from './MemoryCardTerbaru';
-import { Memory } from '../types/Memory';
 import { useQuery, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import MemoryCard from './MemoryCardTerbaru';
+import { Memory } from '../types/Memory';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -18,7 +18,7 @@ const MemoryGalleryAll: React.FC = () => {
     const navigate = useNavigate();
 
     // Enhanced error handling function
-    const handleFetchError = (error: Error) => {
+    const handleFetchError = useCallback((error: Error) => {
         if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
             sessionStorage.removeItem('authToken');
             toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
@@ -38,13 +38,13 @@ const MemoryGalleryAll: React.FC = () => {
 
         toast.error(`Gagal memuat kenangan: ${error.message}`);
         return null;
-    };
+    }, [navigate]);
 
     // Fungsi untuk membandingkan data cache dengan data baru
-    const compareMemories = (cachedData: Memory[], newData: Memory[]): boolean => {
+    const compareMemories = useCallback((cachedData: Memory[], newData: Memory[]): boolean => {
         if (cachedData.length !== newData.length) return true;
         return newData.some((memory, index) => memory.updatedAt !== cachedData[index]?.updatedAt);
-    };
+    }, []);
 
     // Fetch memories with comprehensive error handling
     const {
@@ -79,8 +79,8 @@ const MemoryGalleryAll: React.FC = () => {
             }
         },
         {
-            staleTime: 120 * 60 * 1000,
-            cacheTime: 120 * 60 * 1000,
+            staleTime: 120 * 60 * 1000, // 2 hours
+            cacheTime: 120 * 60 * 1000, // 2 hours
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
             refetchOnMount: false,
@@ -138,18 +138,27 @@ const MemoryGalleryAll: React.FC = () => {
     );
 
     // Event handlers
-    const handleTagToggle = (tag: string) => {
+    const handleTagToggle = useCallback((tag: string) => {
         setSelectedTags(prev => prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]);
         setDisplayCount(8);
-    };
+    }, []);
 
-    const handleLoadMore = () => setDisplayCount(prev => prev + 8);
+    const handleLoadMore = useCallback(() => setDisplayCount(prev => prev + 8), []);
 
-    const clearAllFilters = () => {
+    const clearAllFilters = useCallback(() => {
         setSearchTerm('');
         setSelectedTags([]);
         setDisplayCount(8);
-    };
+    }, []);
+
+    // Debounce search term
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDisplayCount(8);
+        }, 300);
+
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
 
     // Loading state
     if (loading) return (
@@ -189,10 +198,7 @@ const MemoryGalleryAll: React.FC = () => {
                             type="text"
                             placeholder="Cari kenangan berdasarkan judul, deskripsi, atau tag..."
                             value={searchTerm}
-                            onChange={(e) => {
-                                setSearchTerm(e.target.value);
-                                setDisplayCount(8);
-                            }}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                             className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl
                                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                                     transition-all duration-300 ease-in-out text-gray-700 bg-gray-50
@@ -325,4 +331,5 @@ const MemoryGalleryAll: React.FC = () => {
         </div>
     );
 };
-export default MemoryGalleryAll;
+
+export default React.memo(MemoryGalleryAll);

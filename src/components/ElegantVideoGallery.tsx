@@ -95,13 +95,15 @@ const ModernVideoGallery = () => {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const thumbnail = canvas.toDataURL('image/jpeg');
+        const thumbnail = canvas.toDataURL('image/webp');
+
         setThumbnails(prev => {
             const newThumbnails = { ...prev, [videoUrl]: thumbnail };
             saveThumbnailsToCache(newThumbnails);
             return newThumbnails;
         });
     };
+
 
     const handleVideoLoad = (video: HTMLVideoElement, videoUrl: string) => {
         video.currentTime = 1;
@@ -278,7 +280,7 @@ const ModernVideoGallery = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50">  
+        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50">
 
             <div className="relative max-w-7xl mx-auto px-4 py-12">
                 {/* Header Section */}

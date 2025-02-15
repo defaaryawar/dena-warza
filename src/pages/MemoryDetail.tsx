@@ -24,7 +24,7 @@ const generateVideoThumbnail = (videoUrl: string): Promise<string> => {
                     throw new Error('Could not get canvas context');
                 }
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const thumbnailUrl = canvas.toDataURL('image/jpeg');
+                const thumbnailUrl = canvas.toDataURL('image/webp');
                 video.remove();
                 resolve(thumbnailUrl);
             } catch (error) {

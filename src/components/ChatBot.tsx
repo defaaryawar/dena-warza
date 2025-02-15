@@ -1,14 +1,15 @@
-import { useState } from 'react';
-import { processQuestion } from './learning/questionProcessor';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Tab } from '@headlessui/react';
 import { User, Heart, Calendar, MessageCircle, Search } from 'lucide-react';
+import { processQuestion } from './learning/questionProcessor';
 
 const ChatbotUI = () => {
     const [selectedQuestion, setSelectedQuestion] = useState('');
     const [answer, setAnswer] = useState('');
     const [isTyping, setIsTyping] = useState(false);
 
-    const categories = {
+    // Categories and icons
+    const categories = useMemo(() => ({
         "Pribadi Defano": [
             "Ceritakan tentang Defano",
             "Apa hobi Defano?",
@@ -42,16 +43,17 @@ const ChatbotUI = () => {
             "Apa yang mereka suka lakukan bersama?",
             "Bagaimana mereka menunjukkan kasih sayang?"
         ]
-    };
+    }), []);
 
-    const categoryIcons:any = {
+    const categoryIcons = useMemo<any>(() => ({
         "Pribadi Defano": User,
         "Pribadi Najmita": User,
         "Hubungan": Heart,
         "Keseharian": Calendar
-    };
+    }), []);
 
-    const handleQuestionSelect = (question:any) => {
+    // Handle question selection
+    const handleQuestionSelect = useCallback((question: string) => {
         setSelectedQuestion(question);
         setIsTyping(true);
         setAnswer('');
@@ -61,7 +63,7 @@ const ChatbotUI = () => {
             setAnswer(processQuestion(question));
             setIsTyping(false);
         }, 1000);
-    };
+    }, []);
 
     return (
         <div className="max-w-7xl mx-auto py-3 md:py-8 px-0">
@@ -157,12 +159,14 @@ const ChatbotUI = () => {
                                                             src="/images/photo-profil/photo-profil-defa.webp"
                                                             alt="Defano"
                                                             className="w-full h-full object-cover"
+                                                            loading="lazy"
                                                         />
                                                     ) : selectedQuestion.toLowerCase().includes('najmita') ? (
                                                         <img
                                                             src="/images/photo-profil/photo-profil-nami.webp"
                                                             alt="Najmita"
                                                             className="w-full h-full object-cover"
+                                                            loading="lazy"
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full bg-gradient-to-r from-violet-500 to-pink-500 flex items-center justify-center text-white text-xs">
@@ -191,4 +195,4 @@ const ChatbotUI = () => {
     );
 };
 
-export default ChatbotUI;
+export default React.memo(ChatbotUI);

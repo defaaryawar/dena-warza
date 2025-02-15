@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image as ImageIcon, Video, Calendar, Tag, ImageOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Memory } from '../types/Memory';
-import { Link } from "react-router-dom";
 
 interface MemoryCardProps {
     memory: Memory;
@@ -9,6 +9,8 @@ interface MemoryCardProps {
 }
 
 const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
+    const [imageError, setImageError] = useState(false);
+
     // Handle null/undefined memory
     if (!memory) {
         return null;
@@ -16,20 +18,30 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
 
     const firstMedia = memory.media?.[0];
 
-    const formatDate = (dateString: string) => {
-        if (!dateString) return '';
+    // Format date using useMemo to avoid recalculating on every render
+    const formattedDate = useMemo(() => {
+        const formatDate = (dateString: string) => {
+            if (!dateString) return '';
 
-        try {
-            const date = new Date(dateString);
-            const monthNames = [
-                'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-            ];
-            return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
-        } catch (error) {
-            console.error('Invalid date format:', dateString);
-            return '';
-        }
+            try {
+                const date = new Date(dateString);
+                const monthNames = [
+                    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+                ];
+                return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+            } catch (error) {
+                console.error('Invalid date format:', dateString);
+                return '';
+            }
+        };
+
+        return formatDate(memory.date);
+    }, [memory.date]);
+
+    // Handle image load error
+    const handleImageError = () => {
+        setImageError(true);
     };
 
     return (
@@ -37,12 +49,14 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
            duration-300 group overflow-hidden md:hover:shadow-lg flex flex-col ${className}`}>
             {/* Media Section - Falls back to placeholder if no media */}
             <div className="relative aspect-[4/3] sm:aspect-video overflow-hidden bg-gray-100">
-                {firstMedia ? (
+                {firstMedia && !imageError ? (
                     <>
                         <img
                             src={firstMedia.url}
                             alt={memory.title || 'Memory image'}
                             className="w-full h-full object-cover"
+                            loading="lazy"
+                            onError={handleImageError}
                         />
 
                         <div className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-white/80 backdrop-blur-sm rounded-full p-1.5 sm:p-2">
@@ -113,7 +127,7 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
                 <div className="pt-2 sm:pt-3 border-t border-gray-100 flex items-center justify-between mt-auto">
                     <div className="flex items-center text-xs sm:text-sm text-gray-500">
                         <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
-                        <span>{formatDate(memory.date) || 'Tanggal tidak tersedia'}</span>
+                        <span>{formattedDate || 'Tanggal tidak tersedia'}</span>
                     </div>
                     {memory.id && (
                         <Link
@@ -130,4 +144,4 @@ const MemoryCard: React.FC<MemoryCardProps> = ({ memory, className }) => {
     );
 };
 
-export default MemoryCard;
+export default React.memo(MemoryCard);

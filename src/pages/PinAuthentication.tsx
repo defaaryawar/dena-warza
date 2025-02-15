@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock, Check, Delete } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import CustomAlert from '../components/ui/CustomAlert';
@@ -14,41 +14,16 @@ const PinAuthentication: React.FC = () => {
 
     const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-    // Sound effects initialization
-    const buttonSound = new Audio('/sounds/pop.mp3');
-    const deleteSound = new Audio('/sounds/delete.mp3');
-    const successSound = new Audio('/sounds/success.mp3');
-    const errorSound = new Audio('/sounds/error.mp3');
-
-    // Preload sounds
-    useEffect(() => {
-        [buttonSound, deleteSound, successSound, errorSound].forEach(sound => {
-            sound.load();
-        });
-    }, []);
-
-    // Play sound with volume adjustment
-    const playSound = useCallback((sound: HTMLAudioElement) => {
-        if (!sound.paused) {
-            sound.pause();
-            sound.currentTime = 0;
-        }
-        sound.volume = 0.3;
-        sound.play().catch(error => console.log('Audio playback prevented:', error));
-    }, []);
-
     const handleNumClick = (num: string) => {
         if (pin.length < 6) {
             setPin(prevPin => prevPin + num);
             setError(null);
-            playSound(buttonSound);
         }
     };
 
     const handleBackspace = () => {
         if (pin.length > 0) {
             setPin(prevPin => prevPin.slice(0, -1));
-            playSound(deleteSound);
         }
     };
 
@@ -89,9 +64,8 @@ const PinAuthentication: React.FC = () => {
                     setSuccess(true);
                     sessionStorage.setItem('authToken', data.token);
                     setCountdown(2);
-                    playSound(successSound);
 
-                    // Confetti effect
+                    // Lazy load confetti effect
                     if (typeof window !== 'undefined') {
                         import('canvas-confetti').then(confetti => {
                             confetti.default({
@@ -112,7 +86,6 @@ const PinAuthentication: React.FC = () => {
                     });
                 } else {
                     setError(data.message || 'PIN salah. Silakan coba lagi.');
-                    playSound(errorSound);
 
                     toast.error(data.message || 'Autentikasi Gagal', {
                         duration: 2000,

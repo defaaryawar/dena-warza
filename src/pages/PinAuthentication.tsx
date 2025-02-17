@@ -21,7 +21,7 @@ const PhotoGallery = memo(() => {
         { url: '/images/ngedate/nako-date/nako-date8.webp', caption: 'Kopi Nako Bogor 🍵' },
         { url: '/images/ngedate/pantai-date/pantai-date.webp', caption: 'Pantai Date 🌊' },
         { url: '/images/ngedate/pecel-lele-date/pecel-lele-date.webp', caption: 'Pecel Lele 🍛' },
-        { url: '/images/ngedate/photo-both/photo-both2.webp', caption: 'Photo Booth 📸' },
+        { url: '', caption: 'Photo Booth 📸' },
         { url: '/images/ngedate/ragunan-date/ragunan-date2.webp', caption: 'Ragunan 🦁' },
         { url: '/images/ngedate/roti-buaya-date/roti-buaya-date3.webp', caption: 'Roti Buaya 🐊' },
         { url: '/images/ngedate/wisudaan/wisudaan.webp', caption: 'Wisuda 🎓' },

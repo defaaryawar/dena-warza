@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import MemoryCard from './MemoryCardTerbaru';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Memory } from '../types/Memory';
 import { useQuery, useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
@@ -15,7 +15,6 @@ const MemoryList: React.FC = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    // Enhanced error handling function
     const handleFetchError = (error: Error) => {
         if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
             sessionStorage.removeItem('authToken');
@@ -38,13 +37,11 @@ const MemoryList: React.FC = () => {
         return null;
     };
 
-    // Fungsi untuk membandingkan data cache dengan data baru
     const compareMemories = (cachedData: Memory[], newData: Memory[]): boolean => {
         if (cachedData.length !== newData.length) return true;
         return newData.some((memory, index) => memory.updatedAt !== cachedData[index]?.updatedAt);
     };
 
-    // Menggunakan useQuery dengan penanganan error yang lebih komprehensif
     const {
         data: memories,
         isLoading: loading,
@@ -55,7 +52,6 @@ const MemoryList: React.FC = () => {
         async () => {
             const token = sessionStorage.getItem('authToken');
 
-            // Periksa token sebelum fetch
             if (!token) {
                 toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
                 navigate('/pin', { replace: true });
@@ -100,7 +96,6 @@ const MemoryList: React.FC = () => {
         }
     );
 
-    // Urutkan data berdasarkan tanggal terbaru dan ambil 10 data terbaru
     const latestMemories = useMemo(() => {
         if (!memories) return [];
         return memories
@@ -108,7 +103,6 @@ const MemoryList: React.FC = () => {
             .slice(0, 10);
     }, [memories]);
 
-    // Fungsi untuk memeriksa apakah scroll bisa dilakukan
     const checkScrollability = () => {
         if (scrollRef.current) {
             const { clientWidth, scrollWidth, scrollLeft } = scrollRef.current;
@@ -139,7 +133,6 @@ const MemoryList: React.FC = () => {
         };
     }, [memories]);
 
-    // Fungsi untuk melakukan scroll
     const scroll = (direction: 'left' | 'right') => {
         if (!scrollRef.current) return;
 
@@ -154,17 +147,23 @@ const MemoryList: React.FC = () => {
         setTimeout(checkScrollability, 300);
     };
 
-    // Loading state dengan indikator yang lebih informatif
+    // Enhanced Loading state with gradient animation
     if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-400 via-blue-500 to-indigo-600">
-            <div className="w-24 h-24 border-8 border-dashed border-white border-t-transparent rounded-full animate-spin mb-8 shadow-lg"></div>
-            <p className="text-3xl text-white font-bold animate-pulse">Sedang Memuat Kenangan...</p>
-            <div className="mt-4 text-lg text-gray-200 font-medium animate-bounce">Harap Tunggu Sebentar...</div>
-            <div className="absolute bottom-10 text-sm text-white opacity-70">Kami sedang mengumpulkan kenangan terbaik untukmu!</div>
+        <div className="min-h-[300px] flex flex-col items-center justify-center">
+            <div className="w-full flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth px-2 py-4 sm:py-6 relative">
+                {[...Array(4)].map((_, index) => (
+                    <div key={index} className="w-[200px] sm:w-[250px] md:w-[270px] lg:w-[300px] h-[400px] bg-gray-200 animate-pulse rounded-xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[gradientShift_2s_infinite]" />
+                        <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/70 backdrop-blur-sm p-4">
+                            <div className="h-4 bg-gray-300 rounded w-3/4 mb-2 animate-pulse" />
+                            <div className="h-4 bg-gray-300 rounded w-1/2 animate-pulse" />
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
-    );    
+    );
 
-    // Error state dengan opsi untuk mencoba ulang
     if (error) return (
         <div className="min-h-[300px] flex flex-col items-center justify-center text-red-500 p-4 text-center">
             <AlertTriangle className="w-12 h-12 mb-4 text-red-500" />
@@ -183,17 +182,6 @@ const MemoryList: React.FC = () => {
 
     return (
         <div className="relative group px-4 sm:px-6 md:px-8">
-            {/* Title Section */}
-            <div className="flex items-center justify-between mb-0">
-                <h2 className="text-lg sm:text-xl font-medium text-gray-800">
-                    Kenangan Terbaru
-                </h2>
-                <Link to="galleryall"
-                    className="text-blue-600 font-semibold underline cursor-pointer text-xs z-100">
-                    Lihat lebih banyak
-                </Link>
-            </div>
-
             {/* Gradient overlays untuk scroll indicators */}
             {canScrollLeft && (
                 <div
@@ -253,6 +241,7 @@ const MemoryList: React.FC = () => {
                             key={memory.id}
                             memory={memory}
                             className="flex-shrink-0 w-[200px] sm:w-[250px] md:w-[270px] lg:w-[300px]"
+                            isLoading={loading}
                         />
                     ))
                 ) : (

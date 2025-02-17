@@ -1,84 +1,176 @@
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-    Heart,
-    Search,
-    Plus,
-} from 'lucide-react';
+import { Heart, Search, Plus, Edit, Menu, X } from 'lucide-react';
 
 interface AlbumHeaderProps {
-    onFilterChange: (filters: {
-        type?: 'all' | 'photo' | 'video';
-        date?: string;
-        view?: 'grid' | 'list';
-        sort?: 'newest' | 'oldest';
-    }) => void;
     totalMemories: number;
-    mediaStats: {
-        total: number;
-        photos: number;
-        videos: number;
-    };
 }
 
-const AlbumHeader: React.FC<AlbumHeaderProps> = ({
-    totalMemories,
-}) => {
+const AlbumHeader: React.FC<AlbumHeaderProps> = ({ totalMemories }) => {
     const navigate = useNavigate();
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    const handleNavigateToSearch = () => {
+    // Performance optimization with useCallback
+    const handleNavigateToSearch = useCallback(() => {
         navigate('/search');
-    };
+    }, [navigate]);
 
-    const handleNavigateToAddMemory = () => {
+    const handleNavigateToAddMemory = useCallback(() => {
         navigate('/add-memory');
-    };
+        setIsDropdownOpen(false);
+        setIsMobileMenuOpen(false);
+    }, [navigate]);
+
+    const handleNavigateToEditMemory = useCallback(() => {
+        navigate('/edit-memory');
+        setIsDropdownOpen(false);
+        setIsMobileMenuOpen(false);
+    }, [navigate]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('.dropdown-container')) {
+                setIsDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Prevent body scroll when mobile menu is open
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isMobileMenuOpen]);
 
     return (
         <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-990">
             <div className="container mx-auto px-4 py-4">
-                {/* Main Header Row */}
-                <div className="flex flex-col md:flex-row gap-4 items-center">
-                    {/* Left Section: Title and Stats */}
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className="flex items-center gap-2">
-                            <h1 className="text-xl sm:text-xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                                Cerita Kita
-                            </h1>
-                            <Heart className="text-pink-500 animate-pulse" size={24} />
-                        </div>
-                        <div className="hidden md:flex items-center text-sm text-gray-500">
-                            <span className="px-2 py-1 bg-gray-100 rounded-full">
-                                {totalMemories} Memories
-                            </span>
-                        </div>
+                <div className="flex items-center justify-between">
+                    {/* Logo Section */}
+                    <div className="flex items-center gap-2">
+                        <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            Cerita Kita
+                        </h1>
+                        <Heart className="text-pink-500 animate-pulse" size={24} />
+                        <span className="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600">
+                            {totalMemories} Memories
+                        </span>
+
                     </div>
 
-                    {/* Right Section: Actions */}
-                    <div className="flex items-center gap-3 w-full md:w-auto flex-1 md:justify-end">
-                        {/* Add Memory Button */}
-                        <button 
-                            onClick={handleNavigateToAddMemory}
-                            className="bg-gradient-to-r cursor-pointer md:text-sm text-xs from-blue-500 to-purple-600 text-white py-2 md:hover:bg-gradient-to-r md:hover:from-blue-600 md:hover:to-purple-700 rounded-full flex items-center justify-center px-4"
-                            title="Tambah Kenangan Baru"
-                        >
-                            Tambah Kenangan
-                            <Plus className='md:w-5 md:h-5 w-3.5 h-3.5' />
-                        </button>
+                    {/* Desktop Navigation */}
+                    <div className="hidden md:flex items-center gap-4">
+                        {/* Desktop Dropdown */}
+                        <div className="relative dropdown-container">
+                            <button
+                                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                className="bg-gradient-to-r from-blue-500 to-purple-600 cursor-pointer text-white px-4 py-2 rounded-full flex items-center gap-2 text-sm hover:from-blue-600 hover:to-purple-700 transition-all"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Tambah Kenangan
+                            </button>
+
+                            {isDropdownOpen && (
+                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 animate-in fade-in slide-in-from-top-5">
+                                    <div className="divide-y divide-gray-100">
+                                        <button
+                                            onClick={handleNavigateToAddMemory}
+                                            className="w-full px-4 py-3 text-left text-sm cursor-pointer text-gray-700 hover:bg-gray-50 flex items-center gap-2 group transition-colors"
+                                        >
+                                            <Plus className="w-4 h-4 text-blue-500 group-hover:scale-110 transition-transform" />
+                                            Tambah Kenangan
+                                        </button>
+                                        <button
+                                            onClick={handleNavigateToEditMemory}
+                                            className="w-full px-4 py-3 text-left text-sm cursor-pointer text-gray-700 hover:bg-gray-50 flex items-center gap-2 group transition-colors"
+                                        >
+                                            <Edit className="w-4 h-4 text-purple-500 group-hover:scale-110 transition-transform" />
+                                            Edit Kenangan
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
 
                         {/* Search Bar */}
-                        <div className="relative flex-1 md:max-w-xs" onClick={handleNavigateToSearch}>
+                        <div className="relative" onClick={handleNavigateToSearch}>
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <Search className="md:w-5 md:h-5 w-3.5 h-3.5 text-gray-400" />
+                                <Search className="w-4 h-4 text-gray-400" />
                             </div>
-                            <div
-                                className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full md:text-sm text-xs cursor-pointer hover:bg-gray-100 transition-all text-gray-500"
-                            >
-                                Cari kenangan...
+                            <input
+                                type="text"
+                                placeholder="Cari kenangan..."
+                                className="w-48 pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-full text-sm cursor-pointer hover:bg-gray-100 transition-all"
+                                readOnly
+                            />
+                        </div>
+                    </div>
+
+                    {/* Mobile Menu Button */}
+                    <button
+                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                    >
+                        {isMobileMenuOpen ? (
+                            <X className="w-6 h-6" />
+                        ) : (
+                            <Menu className="w-6 h-6" />
+                        )}
+                    </button>
+                </div>
+
+                {/* Mobile Menu */}
+                {isMobileMenuOpen && (
+                    <div className="fixed inset-0 top-[73px] bg-white z-990 md:hidden animate-in slide-in-from-right">
+                        <div className="p-4 space-y-4">
+                            <div onClick={handleNavigateToSearch} className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <Search className="w-4 h-4 text-gray-400" />
+                                </div>
+                                <input
+                                    type="text"
+                                    placeholder="Cari kenangan..."
+                                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm"
+                                    readOnly
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <button
+                                    onClick={handleNavigateToAddMemory}
+                                    className="w-full px-4 py-3 text-left text-sm bg-gray-50 rounded-xl hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                                >
+                                    <Plus className="w-4 h-4 text-blue-500" />
+                                    Tambah Kenangan
+                                </button>
+                                <button
+                                    onClick={handleNavigateToEditMemory}
+                                    className="w-full px-4 py-3 text-left text-sm bg-gray-50 rounded-xl hover:bg-gray-100 flex items-center gap-2 transition-colors"
+                                >
+                                    <Edit className="w-4 h-4 text-purple-500" />
+                                    Edit Kenangan
+                                </button>
+                            </div>
+
+                            <div className="pt-2">
+                                <span className="px-3 py-1.5 bg-gray-100 rounded-full text-sm text-gray-600">
+                                    {totalMemories} Memories
+                                </span>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

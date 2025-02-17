@@ -9,6 +9,7 @@ import PinAuthentication from './pages/PinAuthentication';
 import ScrollToTop from './hooks/useScrollToTop';
 import Home from './components/Home';
 import TambahKenangan from './pages/AddMemoryPage';
+import EditMemoryPage from './pages/EditMemoryPage';
 
 const queryClient = new QueryClient();
 
@@ -17,8 +18,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <ScrollToTop />
-        <div className="min-h-screen px-4 py-0">
-          <div className="container mx-auto max-w-7xl">
+        
             <Routes>
               {/* Rute untuk Autentikasi PIN */}
               <Route path="/pin" element={<PinAuthentication />} />
@@ -30,13 +30,12 @@ function App() {
                 <Route path="/search" element={<SearchMemories />} />
                 <Route path="/galleryall" element={<MemoriesPage />} />
                 <Route path="/add-memory" element={<TambahKenangan />} />
+                <Route path="/edit-memory" element={<EditMemoryPage />} />
               </Route>
 
               {/* Redirect ke halaman PIN jika tidak ada rute yang cocok */}
               <Route path="*" element={<Navigate to="/pin" replace />} />
             </Routes>
-          </div>
-        </div>
       </Router>
     </QueryClientProvider>
   );

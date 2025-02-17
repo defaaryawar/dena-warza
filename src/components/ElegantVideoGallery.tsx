@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
+const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
 const VIDEOS_CACHE_KEY = 'video_gallery_cache';
 const THUMBNAILS_CACHE_KEY = 'video_thumbnails_cache';
 
@@ -15,7 +16,7 @@ const getVideosFromCache = (): VideoWithMemoryInfo[] | null => {
         if (cached) {
             return JSON.parse(cached);
         }
-        return null;    
+        return null;
     } catch (error) {
         console.error('Error reading videos cache:', error);
         return null;
@@ -45,11 +46,24 @@ const getThumbnailsFromCache = (): Record<string, string> => {
     }
 };
 
+// Fungsi untuk menyimpan thumbnails ke cache
 const saveThumbnailsToCache = (data: Record<string, string>) => {
     try {
         localStorage.setItem(THUMBNAILS_CACHE_KEY, JSON.stringify(data));
     } catch (error) {
         console.error('Error saving thumbnails to cache:', error);
+    }
+};
+
+// Fungsi untuk menghasilkan thumbnail menggunakan Cloudinary
+const generateThumbnail = async (videoUrl: string): Promise<string> => {
+    try {
+        // Format URL Cloudinary untuk menghasilkan thumbnail
+        const cloudinaryUrl = `${CLOUDINARY_BASE_URL}w_300,h_200,c_fill/${videoUrl}`;
+        return cloudinaryUrl;
+    } catch (error) {
+        console.error('Error generating thumbnail with Cloudinary:', error);
+        throw error;
     }
 };
 
@@ -88,22 +102,7 @@ const ModernVideoGallery = () => {
         return null;
     };
 
-    const generateThumbnail = async (videoUrl: string) => {
-        try {
-            const cloudinaryBaseUrl = import.meta.env.VITE_CLOUDINARY_BASE_URL;
-            const cloudinaryUrl = `${cloudinaryBaseUrl}w_300,h_200,c_fill/${videoUrl}`;
-
-            // Updating thumbnails state
-            setThumbnails(prev => {
-                const newThumbnails = { ...prev, [videoUrl]: cloudinaryUrl };
-                saveThumbnailsToCache(newThumbnails);
-                return newThumbnails;
-            });
-        } catch (error) {
-            console.error('Error generating thumbnail with Cloudinary:', error);
-        }
-    };
-
+    // Fetch videos from API
     useEffect(() => {
         const fetchVideos = async () => {
             try {
@@ -150,12 +149,23 @@ const ModernVideoGallery = () => {
 
                 saveVideosToCache(allVideos);
                 setVideos(allVideos);
-            } catch (error) {
-                const handledError = handleFetchError(error as Error);
-                if (handledError === null) {
-                    // If error handling redirected or showed a toast, we might want to set an empty state
-                    setVideos([]);
+
+                // Generate thumbnails for new videos
+                const newThumbnails = { ...cachedThumbnails };
+                for (const video of allVideos) {
+                    if (!newThumbnails[video.url]) {
+                        try {
+                            const thumbnailUrl = await generateThumbnail(video.url);
+                            newThumbnails[video.url] = thumbnailUrl;
+                        } catch (error) {
+                            console.error('Failed to generate thumbnail:', error);
+                        }
+                    }
                 }
+                setThumbnails(newThumbnails);
+                saveThumbnailsToCache(newThumbnails);
+            } catch (error) {
+                handleFetchError(error as Error);
             } finally {
                 setLoading(false);
             }
@@ -164,14 +174,7 @@ const ModernVideoGallery = () => {
         fetchVideos();
     }, [navigate]);
 
-    useEffect(() => {
-        videos.forEach(video => {
-            if (!thumbnails[video.url]) {
-                generateThumbnail(video.url);
-            }
-        });
-    }, [videos]);
-
+    // Handle modal open/close
     useEffect(() => {
         if (selectedVideo) {
             document.body.style.overflow = 'hidden';
@@ -201,6 +204,7 @@ const ModernVideoGallery = () => {
         setIsFilterOpen(!isFilterOpen);
     };
 
+    // Filter and sort videos
     const filteredVideos = useMemo(() => {
         let filtered = [...videos];
 
@@ -259,7 +263,6 @@ const ModernVideoGallery = () => {
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50">
-
             <div className="relative max-w-7xl mx-auto px-4 py-12">
                 {/* Header Section */}
                 <div className="text-center mb-12">
@@ -419,6 +422,7 @@ const ModernVideoGallery = () => {
                                 <video
                                     controls
                                     autoPlay
+                                    poster={thumbnails[selectedVideo.url]}
                                     className="max-w-full max-h-full"
                                     style={{
                                         width: isFullScreen ? '100%' : 'auto',

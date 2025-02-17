@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Heart, Book, ChevronLeft, ChevronRight, Image, Play, AlertTriangle } from 'lucide-react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import '../styles/modal.css';
@@ -26,11 +26,7 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [showGallery, setShowGallery] = useState(false);
-    const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
-    const videoRefs = useRef<Record<string, HTMLVideoElement>>({});
-    const queryClient = useQueryClient();
 
-    // Enhanced error handling for fetch
     const handleFetchError = useCallback((error: Error) => {
         if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
             sessionStorage.removeItem('authToken');
@@ -53,7 +49,6 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
         return null;
     }, [navigate]);
 
-    // Fetch memories with comprehensive error handling
     const {
         data: memories,
         isLoading: memoriesLoading,
@@ -93,37 +88,15 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
             refetchOnMount: false,
             onError: (err: Error) => {
                 handleFetchError(err);
-            },
-            select: (newData) => {
-                const cachedData = queryClient.getQueryData<Memory[]>(['memories']);
-
-                if (!cachedData) return newData;
-
-                const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
-
-                return isDataChanged ? newData : cachedData;
             }
         }
     );
 
-    // Thumbnail generation functions
-    const generateThumbnail = useCallback((video: HTMLVideoElement, videoUrl: string) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const thumbnail = canvas.toDataURL('image/jpeg');
-        setThumbnails(prev => ({ ...prev, [videoUrl]: thumbnail }));
-    }, []);
+    const generateCloudinaryThumbnail = (videoUrl: string): string => {
+        const cloudinaryUrl = videoUrl.replace('/upload/', '/upload/w_200,h_200,c_fill,q_auto,f_jpg/');
+        return cloudinaryUrl.replace('.mp4', '.jpg');
+    };
 
-    const handleVideoLoad = useCallback((video: HTMLVideoElement, videoUrl: string) => {
-        video.currentTime = 1;
-        video.addEventListener('seeked', () => {
-            generateThumbnail(video, videoUrl);
-        }, { once: true });
-    }, [generateThumbnail]);
-
-    // Prevent body scroll when modal is open
     useEffect(() => {
         if (isOpen) {
             document.body.style.overflow = 'hidden';
@@ -136,32 +109,7 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
         };
     }, [isOpen]);
 
-    // Generate video thumbnails
-    useEffect(() => {
-        if (memories) {
-            memories.forEach(memory => {
-                memory.media.forEach(media => {
-                    if (media.type === 'video' && !thumbnails[media.url] && !videoRefs.current[media.url]) {
-                        const videoElement = document.createElement('video');
-                        videoElement.crossOrigin = 'anonymous';
-                        videoElement.src = media.url;
-                        videoElement.load();
-                        videoRefs.current[media.url] = videoElement;
-                        videoElement.addEventListener('loadedmetadata', () => {
-                            handleVideoLoad(videoElement, media.url);
-                        });
-                    }
-                });
-            });
-        }
-
-        return () => {
-            Object.values(videoRefs.current).forEach(video => video.remove());
-            videoRefs.current = {};
-        };
-    }, [memories, thumbnails, handleVideoLoad]);
-
-    const messages: Message[] = useMemo(() => [
+    const messages: Message[] = [
         {
             date: '27 September 2024',
             content: 'Hari pertama kita resmi menjadi sepasang kekasih. Hari yang tidak akan pernah terlupakan ❤️',
@@ -197,7 +145,7 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
             content: 'Adventure seru di Ragunan, walaupun kamu ngambek tapi tetep gemesin 🦁',
             memoryId: '593e838e-a1eb-4e2c-9f33-584c3098652a'
         }
-    ], []);
+    ];
 
     const handleMemoryClick = useCallback((memoryId: string | null) => {
         if (memoryId && memories) {
@@ -427,7 +375,7 @@ const NotebookModal: React.FC<NotebookModalProps> = ({ isOpen, onClose }) => {
                                                         ) : (
                                                             <div className="relative w-full h-full">
                                                                 <img
-                                                                    src={thumbnails[media.url]}
+                                                                    src={generateCloudinaryThumbnail(media.url)}
                                                                     alt={`Thumbnail ${index + 1}`}
                                                                     className="w-full h-full object-cover"
                                                                 />

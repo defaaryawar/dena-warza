@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Play, Maximize2, Minimize2, Film, Calendar, Search, ChevronDown, Heart, AlertTriangle } from 'lucide-react';
 import { VideoWithMemoryInfo, MediaItem } from '../types/Memory';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,7 @@ const getVideosFromCache = (): VideoWithMemoryInfo[] | null => {
         if (cached) {
             return JSON.parse(cached);
         }
-        return null;
+        return null;    
     } catch (error) {
         console.error('Error reading videos cache:', error);
         return null;
@@ -45,7 +45,6 @@ const getThumbnailsFromCache = (): Record<string, string> => {
     }
 };
 
-// Fungsi untuk menyimpan thumbnails ke cache
 const saveThumbnailsToCache = (data: Record<string, string>) => {
     try {
         localStorage.setItem(THUMBNAILS_CACHE_KEY, JSON.stringify(data));
@@ -65,7 +64,6 @@ const ModernVideoGallery = () => {
     const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
     const [selectedDate, setSelectedDate] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const videoRefs = useRef<Record<string, HTMLVideoElement>>({});
 
     // Enhanced error handling for fetch
     const handleFetchError = (error: Error) => {
@@ -90,26 +88,20 @@ const ModernVideoGallery = () => {
         return null;
     };
 
-    const generateThumbnail = (video: HTMLVideoElement, videoUrl: string) => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const thumbnail = canvas.toDataURL('image/webp');
+    const generateThumbnail = async (videoUrl: string) => {
+        try {
+            const cloudinaryBaseUrl = import.meta.env.VITE_CLOUDINARY_BASE_URL;
+            const cloudinaryUrl = `${cloudinaryBaseUrl}w_300,h_200,c_fill/${videoUrl}`;
 
-        setThumbnails(prev => {
-            const newThumbnails = { ...prev, [videoUrl]: thumbnail };
-            saveThumbnailsToCache(newThumbnails);
-            return newThumbnails;
-        });
-    };
-
-
-    const handleVideoLoad = (video: HTMLVideoElement, videoUrl: string) => {
-        video.currentTime = 1;
-        video.addEventListener('seeked', () => {
-            generateThumbnail(video, videoUrl);
-        }, { once: true });
+            // Updating thumbnails state
+            setThumbnails(prev => {
+                const newThumbnails = { ...prev, [videoUrl]: cloudinaryUrl };
+                saveThumbnailsToCache(newThumbnails);
+                return newThumbnails;
+            });
+        } catch (error) {
+            console.error('Error generating thumbnail with Cloudinary:', error);
+        }
     };
 
     useEffect(() => {
@@ -174,24 +166,10 @@ const ModernVideoGallery = () => {
 
     useEffect(() => {
         videos.forEach(video => {
-            if (!videoRefs.current[video.url] && !thumbnails[video.url]) {
-                const videoElement = document.createElement('video');
-                videoElement.crossOrigin = 'anonymous';
-                videoElement.src = video.url;
-                videoElement.load();
-                videoRefs.current[video.url] = videoElement;
-                videoElement.addEventListener('loadedmetadata', () => {
-                    handleVideoLoad(videoElement, video.url);
-                });
+            if (!thumbnails[video.url]) {
+                generateThumbnail(video.url);
             }
         });
-
-        return () => {
-            Object.values(videoRefs.current).forEach(video => {
-                video.remove();
-            });
-            videoRefs.current = {};
-        };
     }, [videos]);
 
     useEffect(() => {

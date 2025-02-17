@@ -88,7 +88,7 @@ const ChatbotUI = () => {
                                             <Tab
                                                 key={category}
                                                 className={({ selected }) =>
-                                                    `flex-1 rounded-lg py-2.5 text-sm font-medium leading-5 
+                                                    `flex-1 rounded-lg py-2.5 text-sm font-medium leading-5 outline-none cursor-pointer 
                                                     flex items-center justify-center gap-2 transition-all duration-200
                                                     ${selected
                                                         ? 'bg-white text-violet-700 shadow-md'
@@ -112,7 +112,7 @@ const ChatbotUI = () => {
                                                 <button
                                                     key={qIdx}
                                                     onClick={() => handleQuestionSelect(question)}
-                                                    className={`w-full text-left p-3 rounded-lg transition-all duration-200
+                                                    className={`w-full text-left p-3 rounded-lg transition-all duration-200 cursor-pointer
                                                         ${selectedQuestion === question
                                                             ? 'bg-gradient-to-r from-violet-500 to-pink-500 text-white shadow-md'
                                                             : 'bg-violet-50 hover:bg-violet-100 text-gray-700'

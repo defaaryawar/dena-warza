@@ -156,11 +156,13 @@ const MemoryList: React.FC = () => {
 
     // Loading state dengan indikator yang lebih informatif
     if (loading) return (
-        <div className="min-h-[300px] flex flex-col items-center justify-center">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-600">Memuat kenangan...</p>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-400 via-blue-500 to-indigo-600">
+            <div className="w-24 h-24 border-8 border-dashed border-white border-t-transparent rounded-full animate-spin mb-8 shadow-lg"></div>
+            <p className="text-3xl text-white font-bold animate-pulse">Sedang Memuat Kenangan...</p>
+            <div className="mt-4 text-lg text-gray-200 font-medium animate-bounce">Harap Tunggu Sebentar...</div>
+            <div className="absolute bottom-10 text-sm text-white opacity-70">Kami sedang mengumpulkan kenangan terbaik untukmu!</div>
         </div>
-    );
+    );    
 
     // Error state dengan opsi untuk mencoba ulang
     if (error) return (

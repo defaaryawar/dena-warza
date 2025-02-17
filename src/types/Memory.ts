@@ -14,11 +14,24 @@ export interface Memory {
     date: string;
     tags: string[];
     media: {
+        id: any;
         type: 'photo' | 'video';
         url: string;
         thumbnail?: string;
     }[];
 }
+
+export type MemoryFormData = {
+    title?: string;
+    description?: string;
+    date?: string;
+    tags?: string[];
+    media?: Array<{
+        id?: string; // Tambahkan id sebagai optional
+        type: 'photo' | 'video';
+        url: string;
+    }>;
+};
 
 export interface VideoWithMemoryInfo extends MediaItem {
     type: 'video';

@@ -10,15 +10,15 @@ interface MemoryCardProps {
 export const MemoryCard: React.FC<MemoryCardProps> = ({ memory, onClick }) => {
     return (
         <Card
-            className="group cursor-pointer hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-            onClick={onClick}
+            className="group cursor-pointer hover:shadow-xl transition-all duration-300 md:hover:-translate-y-1"
         >
-            <div className="relative overflow-hidden rounded-t-xl">
+            <div className="relative overflow-hidden rounded-t-xl"
+                onClick={onClick}>
                 {memory.media && memory.media[0] && (
                     <img
                         src={memory.media[0].url}
                         alt={memory.title}
-                        className="w-full h-48 object-cover transform group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-48 object-cover transform md:group-hover:scale-105 transition-transform duration-300"
                     />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />

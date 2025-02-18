@@ -1,9 +1,11 @@
 export type MediaType = 'photo' | 'video';
 
 export interface MediaItem {
+    [x: string]: string;
+    id: string;
     type: MediaType;
     url: string;
-    thumbnail?: string;
+    thumbnail?: any;
 }
 
 export interface Memory {
@@ -27,7 +29,7 @@ export type MemoryFormData = {
     date?: string;
     tags?: string[];
     media?: Array<{
-        id?: string; // Tambahkan id sebagai optional
+        id?: string;
         type: 'photo' | 'video';
         url: string;
     }>;

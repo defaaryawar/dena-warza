@@ -150,9 +150,12 @@ const MemoryList: React.FC = () => {
     // Enhanced Loading state with gradient animation
     if (loading) return (
         <div className="min-h-[300px] flex flex-col items-center justify-center">
-            <div className="w-full flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth px-2 py-4 sm:py-6 relative">
+            <div className="w-full grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 px-2 py-4 sm:py-6">
                 {[...Array(4)].map((_, index) => (
-                    <div key={index} className="w-[200px] sm:w-[250px] md:w-[270px] lg:w-[300px] h-[400px] bg-gray-200 animate-pulse rounded-xl relative overflow-hidden">
+                    <div
+                        key={index}
+                        className="w-full h-[400px] bg-gray-200 animate-pulse rounded-xl relative overflow-hidden"
+                    >
                         <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 animate-[gradientShift_2s_infinite]" />
                         <div className="absolute bottom-0 left-0 right-0 h-20 bg-white/70 backdrop-blur-sm p-4">
                             <div className="h-4 bg-gray-300 rounded w-3/4 mb-2 animate-pulse" />
@@ -182,65 +185,67 @@ const MemoryList: React.FC = () => {
 
     return (
         <div className="relative group px-4 sm:px-6 md:px-8">
-            {/* Gradient overlays untuk scroll indicators */}
+            {/* Smooth gradient overlays */}
             {canScrollLeft && (
                 <div
-                    className="absolute -left-0.5 top-0 bottom-0 w-12 sm:w-24 z-10 pointer-events-none"
+                    className="absolute -left-0.5 top-0 bottom-0 w-12 sm:w-24 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
-                        background: 'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)'
+                        background: 'linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)'
                     }}
                 />
             )}
 
             {canScrollRight && (
                 <div
-                    className="absolute -right-0.5 top-0 bottom-0 w-12 sm:w-24 z-10 pointer-events-none"
+                    className="absolute -right-0.5 top-0 bottom-0 w-12 sm:w-24 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                     style={{
-                        background: 'linear-gradient(to left, rgba(255,255,255,1) 0%, rgba(255,255,255,0) 100%)'
+                        background: 'linear-gradient(to left, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0) 100%)'
                     }}
                 />
             )}
 
-            {/* Scroll buttons */}
+            {/* Enhanced scroll buttons with smooth transitions */}
             {canScrollLeft && (
-                <div className="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-20">
+                <div className="absolute left-0 sm:left-2 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out -translate-x-2 group-hover:translate-x-0">
                     <button
                         onClick={() => scroll('left')}
-                        className="p-1.5 sm:p-2 bg-white/70 backdrop-blur-sm rounded-full shadow-lg 
-                                 hover:bg-gray-50 hover:scale-105 transition-all duration-300
-                                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md
+                                 sm:hover:bg-white sm:hover:shadow-lg sm:hover:scale-105
+                                 transition-all duration-300 ease-in-out
+                                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                         aria-label="Scroll left"
                     >
-                        <ChevronLeft className="text-gray-600 group-hover:text-gray-800 transition-colors w-4 h-4 sm:w-6 sm:h-6" />
+                        <ChevronLeft className="text-gray-600 w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 sm:group-hover:-translate-x-0.5" />
                     </button>
                 </div>
             )}
 
             {canScrollRight && (
-                <div className="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-20">
+                <div className="absolute right-0 sm:right-2 top-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 ease-in-out translate-x-2 group-hover:translate-x-0">
                     <button
                         onClick={() => scroll('right')}
-                        className="p-1.5 sm:p-2 bg-white/70 backdrop-blur-sm rounded-full shadow-lg 
-                                 hover:bg-gray-50 hover:scale-105 transition-all duration-300
-                                 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md
+                                 sm:hover:bg-white sm:hover:shadow-lg sm:hover:scale-105
+                                 transition-all duration-300 ease-in-out
+                                 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
                         aria-label="Scroll right"
                     >
-                        <ChevronRight className="text-gray-600 group-hover:text-gray-800 transition-colors w-4 h-4 sm:w-6 sm:h-6" />
+                        <ChevronRight className="text-gray-600 w-5 h-5 sm:w-6 sm:h-6 transition-transform duration-300 sm:group-hover:translate-x-0.5" />
                     </button>
                 </div>
             )}
 
-            {/* Scrollable container */}
+            {/* Scrollable container with smooth scroll behavior */}
             <div
                 ref={scrollRef}
-                className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth px-2 no-scrollbar py-4 sm:py-6"
+                className="flex gap-3 sm:gap-4 overflow-x-auto scroll-smooth px-2 no-scrollbar py-4 sm:py-6 transition-all duration-300"
             >
                 {latestMemories.length > 0 ? (
                     latestMemories.map(memory => (
                         <MemoryCard
                             key={memory.id}
                             memory={memory}
-                            className="flex-shrink-0 w-[200px] sm:w-[250px] md:w-[270px] lg:w-[300px]"
+                            className="flex-shrink-0 w-[200px] sm:w-[250px] md:w-[270px] lg:w-[300px] md:min-h-[370px] min-h-[303px] transition-transform duration-300"
                             isLoading={loading}
                         />
                     ))

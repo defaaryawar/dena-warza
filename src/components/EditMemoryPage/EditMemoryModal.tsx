@@ -1,9 +1,9 @@
-// EditMemoryModal.tsx
-import React from 'react';
+import React, { FormEvent } from 'react';
 import { X, Loader2, AlertCircle, Camera, Upload, Tag, Calendar } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Textarea } from '../ui/TextArea';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { Memory } from '../../types/Memory';
 
 interface EditMemoryModalProps {
@@ -12,7 +12,7 @@ interface EditMemoryModalProps {
     memory: Memory | null;
     loading: boolean;
     error: string | null;
-    onSubmit: (e: React.FormEvent) => Promise<void>;
+    onSubmit: (e: FormEvent) => Promise<void>;
     title: string;
     setTitle: (value: string) => void;
     description: string;
@@ -51,61 +51,107 @@ export const EditMemoryModal: React.FC<EditMemoryModalProps> = ({
     handleRemoveMedia,
     handleAddTag,
 }) => {
-    if (!isOpen || !memory) return null;
+    if (!memory) return null;
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
+        onSubmit(e);
+    };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-            <div className="flex min-h-full items-center justify-center p-4">
-                <div className="relative w-full max-w-4xl rounded-2xl bg-white shadow-xl transform transition-all">
-                    <div className="max-h-[90vh] overflow-y-auto">
-                        <div className="p-6 sm:p-8">
-                            <div className="flex items-center justify-between mb-8">
-                                <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+        <AnimatePresence>
+            {isOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                        onClick={onClose}
+                    />
+
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                        transition={{
+                            duration: 0.3,
+                            type: "spring",
+                            bounce: 0.3
+                        }}
+                        className="relative w-full max-w-5xl h-[90vh] flex flex-col bg-white rounded-2xl shadow-xl"
+                    >
+                        <form onSubmit={handleSubmit} className="h-full flex flex-col">
+                            {/* Header */}
+                            <motion.div
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="flex items-center justify-between p-4 border-b"
+                            >
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                                     Edit Kenangan
                                 </h2>
-                                <button
+                                <motion.button
+                                    type="button"
                                     onClick={onClose}
-                                    className="rounded-full p-2 hover:bg-gray-100 transition-colors"
+                                    whileHover={{ scale: 1.1, rotate: 90 }}
+                                    whileTap={{ scale: 0.9 }}
+                                    className="rounded-full p-1.5 hover:bg-gray-100 transition-colors cursor-pointer"
                                 >
-                                    <X className="w-6 h-6 text-gray-500" />
-                                </button>
-                            </div>
+                                    <X className="w-5 h-5 text-gray-500" />
+                                </motion.button>
+                            </motion.div>
 
-                            {error && (
-                                <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-3 animate-shake">
-                                    <AlertCircle className="h-5 w-5" />
-                                    <p className="font-medium">{error}</p>
-                                </div>
-                            )}
+                            {/* Content */}
+                            <div className="flex-1 p-4 overflow-auto">
+                                <AnimatePresence>
+                                    {error && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -10 }}
+                                            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl flex items-center gap-2 text-sm"
+                                        >
+                                            <AlertCircle className="h-4 w-4" />
+                                            <p>{error}</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
-                            <form onSubmit={onSubmit} className="space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-gray-700">Judul</label>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    {/* Left Column */}
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.2 }}
+                                        className="space-y-4"
+                                    >
+                                        <motion.div whileHover={{ scale: 1.01 }} className="space-y-1">
+                                            <label className="text-sm font-medium text-gray-700">Judul</label>
                                             <Input
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
                                                 placeholder="Masukkan judul kenangan"
                                                 required
-                                                className="focus:ring-purple-500"
+                                                className="mt-1 text-sm focus:ring-2 focus:ring-purple-500 transition-all"
                                             />
-                                        </div>
+                                        </motion.div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-gray-700">Deskripsi</label>
+                                        <motion.div whileHover={{ scale: 1.01 }} className="space-y-1">
+                                            <label className="text-sm font-medium text-gray-700">Deskripsi</label>
                                             <Textarea
                                                 value={description}
                                                 onChange={(e) => setDescription(e.target.value)}
                                                 placeholder="Ceritakan kenangan Anda..."
-                                                className="min-h-[150px] focus:ring-purple-500"
+                                                className="mt-1 h-28 text-sm focus:ring-2 focus:ring-purple-500 transition-all"
                                             />
-                                        </div>
+                                        </motion.div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                                                <Calendar className="w-4 h-4 text-purple-500" />
+                                        <motion.div whileHover={{ scale: 1.01 }} className="space-y-1">
+                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                <Calendar className="w-4 h-4 text-purple-500"/>
                                                 Tanggal
                                             </label>
                                             <Input
@@ -113,117 +159,162 @@ export const EditMemoryModal: React.FC<EditMemoryModalProps> = ({
                                                 value={date}
                                                 onChange={(e) => setDate(e.target.value)}
                                                 required
-                                                className="focus:ring-purple-500"
+                                                className="mt-1 text-sm focus:ring-2 focus:ring-purple-500 transition-all"
                                             />
-                                        </div>
-                                    </div>
+                                        </motion.div>
 
-                                    <div className="space-y-6">
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                        <motion.div whileHover={{ scale: 1.01 }} className="space-y-1">
+                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                                                 <Tag className="w-4 h-4 text-purple-500" />
                                                 Tag
                                             </label>
-                                            <div className="flex flex-wrap gap-2 min-h-[44px] p-2 bg-gray-50 rounded-lg">
-                                                {tags.map(tag => (
-                                                    <span
-                                                        key={tag}
-                                                        className="px-3 py-1.5 bg-purple-100 text-purple-700 rounded-full text-sm flex items-center animate-fadeIn"
-                                                    >
-                                                        {tag}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setTags((prev: string[]) => prev.filter((t: string) => t !== tag))}
-                                                            className="ml-2 text-purple-500 hover:text-purple-700"
+                                            <motion.div layout className="mt-1 flex flex-wrap gap-1.5 min-h-[36px] p-1.5 bg-gray-50 rounded-lg">
+                                                <AnimatePresence>
+                                                    {tags.map(tag => (
+                                                        <motion.span
+                                                            key={tag}
+                                                            initial={{ opacity: 0, scale: 0.8 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            exit={{ opacity: 0, scale: 0.8 }}
+                                                            whileHover={{ scale: 1.05 }}
+                                                            className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs flex items-center"
                                                         >
-                                                            <X className="w-3 h-3" />
-                                                        </button>
-                                                    </span>
-                                                ))}
-                                            </div>
+                                                            {tag}
+                                                            <motion.button
+                                                                type="button"
+                                                                onClick={() => setTags(prev => prev.filter(t => t !== tag))}
+                                                                whileHover={{ scale: 1.2 }}
+                                                                whileTap={{ scale: 0.9 }}
+                                                                className="ml-1.5 text-purple-500 hover:text-purple-700"
+                                                            >
+                                                                <X className="w-3 h-3" />
+                                                            </motion.button>
+                                                        </motion.span>
+                                                    ))}
+                                                </AnimatePresence>
+                                            </motion.div>
                                             <Input
                                                 value={tagInput}
                                                 onChange={(e) => setTagInput(e.target.value)}
                                                 onKeyDown={handleAddTag}
                                                 placeholder="Tambah tag dan tekan Enter"
-                                                className="focus:ring-purple-500"
+                                                className="mt-2 text-sm focus:ring-2 focus:ring-purple-500 transition-all"
                                             />
-                                        </div>
+                                        </motion.div>
+                                    </motion.div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                                    {/* Right Column */}
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                        className="space-y-4"
+                                    >
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                                                 <Camera className="w-4 h-4 text-purple-500" />
                                                 Media
                                             </label>
-                                            <div className="border-2 border-dashed border-purple-200 rounded-xl p-6 bg-purple-50/50 transition-colors hover:bg-purple-50">
-                                                <div className="flex items-center justify-center">
-                                                    <label className="cursor-pointer">
-                                                        <div className="flex flex-col items-center gap-3">
-                                                            <Upload className="w-10 h-10 text-purple-400" />
-                                                            <span className="text-sm text-purple-600 font-medium">
-                                                                Klik untuk memilih foto atau video
-                                                            </span>
-                                                        </div>
-                                                        <input
-                                                            type="file"
-                                                            onChange={handleFileChange}
-                                                            accept="image/*,video/*"
-                                                            multiple
-                                                            className="hidden"
-                                                        />
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <motion.div
+                                                whileHover={{ scale: 1.02 }}
+                                                className="mt-1 border-2 border-dashed border-purple-200 rounded-lg p-4 bg-purple-50/50 hover:bg-purple-50 transition-colors"
+                                            >
+                                                <label className="cursor-pointer flex flex-col items-center gap-2">
+                                                    <motion.div
+                                                        animate={{ y: [0, -5, 0] }}
+                                                        transition={{
+                                                            repeat: Infinity,
+                                                            duration: 2,
+                                                            ease: "easeInOut"
+                                                        }}
+                                                    >
+                                                        <Upload className="w-8 h-8 text-purple-400" />
+                                                    </motion.div>
+                                                    <span className="text-xs text-purple-600 font-medium">
+                                                        Klik untuk memilih foto atau video
+                                                    </span>
+                                                    <input
+                                                        type="file"
+                                                        onChange={handleFileChange}
+                                                        accept="image/*,video/*"
+                                                        multiple
+                                                        className="hidden"
+                                                    />
+                                                </label>
+                                            </motion.div>
 
-                                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
-                                                {previewUrls.map((url, index) => (
-                                                    <div key={index} className="relative group animate-fadeIn">
-                                                        <img
-                                                            src={url}
-                                                            alt={`Preview ${index + 1}`} className="w-full h-32 object-cover rounded-lg ring-2 ring-purple-100"
-                                                        />
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemoveMedia(index)}
-                                                            className="absolute top-2 right-2 bg-red-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:scale-110"
+                                            <motion.div layout className="mt-2 grid grid-cols-3 gap-2">
+                                                <AnimatePresence>
+                                                    {previewUrls.map((url, index) => (
+                                                        <motion.div
+                                                            key={url}
+                                                            initial={{ opacity: 0, scale: 0.8 }}
+                                                            animate={{ opacity: 1, scale: 1 }}
+                                                            exit={{ opacity: 0, scale: 0.8 }}
+                                                            whileHover={{ scale: 1.05 }}
+                                                            className="relative group"
                                                         >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                                            <img
+                                                                src={url}
+                                                                alt={`Preview ${index + 1}`}
+                                                                className="w-full h-20 object-cover rounded-lg ring-1 ring-purple-100"
+                                                            />
+                                                            <motion.button
+                                                                type="button"
+                                                                onClick={() => handleRemoveMedia(index)}
+                                                                whileHover={{ scale: 1.1 }}
+                                                                whileTap={{ scale: 0.9 }}
+                                                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                                                            >
+                                                                <X className="w-3 h-3" />
+                                                            </motion.button>
+                                                        </motion.div>
+                                                    ))}
+                                                </AnimatePresence>
+                                            </motion.div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 </div>
+                            </div>
 
-                                <div className="flex justify-end gap-4 pt-6 border-t">
+                            {/* Footer */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 }}
+                                className="p-4 border-t flex justify-end gap-3"
+                            >
+                                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                                     <Button
+                                        type="button"
                                         variant="outline"
                                         onClick={onClose}
-                                        className="hover:bg-purple-50"
+                                        className="text-sm hover:bg-purple-50 cursor-pointer"
                                     >
                                         Batal
                                     </Button>
+                                </motion.div>
+                                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                                     <Button
                                         type="submit"
                                         disabled={loading}
-                                        className="bg-purple-600 hover:bg-purple-700"
+                                        className="text-sm bg-purple-600 hover:bg-purple-700 cursor-pointer"
                                     >
                                         {loading ? (
                                             <div className="flex items-center gap-2">
-                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <Loader2 className="w-3 h-3 animate-spin" />
                                                 Menyimpan...
                                             </div>
                                         ) : (
                                             'Simpan Perubahan'
                                         )}
                                     </Button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
+                                </motion.div>
+                            </motion.div>
+                        </form>
+                    </motion.div>
                 </div>
-            </div>
-        </div>
+            )}
+        </AnimatePresence>
     );
 };

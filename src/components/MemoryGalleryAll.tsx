@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { Search, Filter, X, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
+import { Search, Filter, X, ChevronDown, ChevronUp, AlertTriangle, Sparkles } from 'lucide-react';
 import { useQuery, useQueryClient } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import MemoryCard from './MemoryCardTerbaru';
 import { Memory } from '../types/Memory';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -13,9 +14,32 @@ const MemoryGalleryAll: React.FC = () => {
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [displayCount, setDisplayCount] = useState(8);
     const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+    // Responsive breakpoints
+    const isMobile = windowWidth < 768;
+    const isSmallMobile = windowWidth < 380;
 
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const { scrollYProgress } = useScroll();
+    const scaleX = useSpring(scrollYProgress, {
+        stiffness: 100,
+        damping: 30,
+        restDelta: 0.001
+    });
+
+    // Scroll progress indicator
+    useEffect(() => {
+        const handleScroll = () => {
+            const offset = window.scrollY;
+            setScrolled(offset > 100);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     // Enhanced error handling function
     const handleFetchError = useCallback((error: Error) => {
@@ -160,16 +184,75 @@ const MemoryGalleryAll: React.FC = () => {
         return () => clearTimeout(handler);
     }, [searchTerm]);
 
-    // Loading state
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
-                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-600">Memuat kenangan...</p>
-            </div>
-        </div>
-    );
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1,
+                delayChildren: 0.3
+            }
+        }
+    };
 
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+            }
+        }
+    };
+
+    const filterVariants = {
+        hidden: { height: 0, opacity: 0 },
+        visible: {
+            height: "auto",
+            opacity: 1,
+            transition: {
+                type: "spring",
+                damping: 20,
+                stiffness: 200
+            }
+        }
+    };
+
+    // Enhanced loading state
+    if (loading) return (
+        <motion.div
+            className="min-h-screen flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+        >
+            <motion.div
+                className="text-center"
+                animate={{
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 360]
+                }}
+                transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                }}
+            >
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full 
+                            animate-spin mx-auto mb-6 shadow-lg">
+                </div>
+                <motion.p
+                    className="text-gray-600 text-lg"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                    Memuat kenangan indah Anda...
+                </motion.p>
+            </motion.div>
+        </motion.div>
+    );
     // Error state
     if (error && !sortedMemories?.length) return (
         <div className="min-h-screen flex items-center justify-center">
@@ -188,147 +271,239 @@ const MemoryGalleryAll: React.FC = () => {
     );
 
     return (
-        <div className="container mx-auto px-0 py-8">
-            {/* Search and Filter Section */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 space-y-6">
-                <div className="flex flex-col lg:flex-row gap-4">
-                    {/* Search Input */}
-                    <div className="relative flex-grow">
-                        <input
-                            type="text"
-                            placeholder="Cari kenangan berdasarkan judul, deskripsi, atau tag..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-12 pr-12 py-4 border-2 border-gray-200 rounded-xl
-                                    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                                    transition-all duration-300 ease-in-out text-gray-700 bg-gray-50
-                                    placeholder:text-gray-400"
-                        />
-                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                        {searchTerm && (
-                            <button
-                                onClick={() => setSearchTerm('')}
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 
-                                        text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        )}
-                    </div>
+        <>
+            {/* Scroll Progress Indicator */}
+            <motion.div
+                className="fixed top-0 left-0 right-0 h-1 bg-blue-500 transform-origin-0 z-50"
+                style={{ scaleX }}
+            />
 
-                    {/* Filter Toggle Button */}
-                    <button
-                        onClick={() => setIsFilterExpanded(!isFilterExpanded)}
-                        className={`px-6 py-4 rounded-xl border-2 transition-all duration-300 cursor-pointer
-                                flex items-center justify-center gap-2 font-medium
-                                ${isFilterExpanded
-                                ? 'bg-blue-50 border-blue-500 text-blue-600'
-                                : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700 hover:text-blue-600'}`}
-                    >
-                        <Filter className={`w-5 h-5 ${isFilterExpanded ? 'text-blue-500' : ''}`} />
-                        Filter
-                        {isFilterExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-                    </button>
-                </div>
+            <motion.div
+                className="mx-auto"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                {/* Search and Filter Section - Updated for better mobile experience */}
+                <motion.div
+                    className={`bg-white rounded-lg shadow-lg px-3 py-3 mb-4 space-y-4 sticky 
+                ${isMobile ? 'top-20' : 'top-20'} z-10 mx-0
+                transition-all duration-300 ${scrolled ? 'shadow-xl' : ''}`}
+                    variants={itemVariants}
+                >
+                    <div className="flex flex-col lg:flex-row gap-3">
+                        {/* Search Input with optimized mobile padding */}
+                        <motion.div className="relative flex-grow">
+                            <input
+                                type="text"
+                                placeholder={isSmallMobile ? "Cari kenangan..." : "Cari kenangan berdasarkan judul, deskripsi, atau tag..."}
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg
+                            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                            transition-all duration-300 ease-in-out text-gray-700 bg-gray-50
+                            placeholder:text-gray-400 text-sm"
+                            />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
 
-                {/* Filter Tags Section */}
-                {isFilterExpanded && (
-                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-100 shadow-inner">
-                        <div className="flex flex-wrap justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold text-gray-800">Filter berdasarkan Tag</h3>
-                            {(searchTerm || selectedTags.length > 0) && (
-                                <button
-                                    onClick={clearAllFilters}
-                                    className="text-red-500 hover:text-red-700 transition-colors
-                                            flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-red-50"
+                            {searchTerm && (
+                                <motion.button
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    onClick={() => setSearchTerm('')}
+                                    className="absolute right-3 top-1/2 transform -translate-y-1/2 
+                                text-gray-400 hover:text-gray-600 transition-colors"
                                 >
-                                    <X className="w-4 h-4" />
-                                    Hapus Semua
-                                </button>
+                                    <X className="w-5 h-5" />
+                                </motion.button>
                             )}
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {allTags.map(tag => (
-                                <button
-                                    key={tag}
-                                    onClick={() => handleTagToggle(tag)}
-                                    className={`px-4 py-2 rounded-lg text-sm font-medium cursor-pointer
-                                            transition-all duration-300 ease-in-out hover:shadow-md transform hover:-translate-y-0.5
+                        </motion.div>
+
+                        {/* Filter Toggle Button - Optimized for mobile */}
+                        <motion.button
+                            onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+                            className={`px-4 py-3 rounded-lg border-2 transition-all duration-300
+                            flex items-center justify-center gap-2 text-sm font-medium
+                            ${isFilterExpanded
+                                    ? 'bg-blue-50 border-blue-500 text-blue-600'
+                                    : 'border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700'}`}
+                        >
+                            <Filter className={`w-5 h-5 ${isFilterExpanded ? 'text-blue-500' : ''}`} />
+                            {!isSmallMobile && "Filter"}
+                            <ChevronDown className={`w-5 h-5 transform transition-transform duration-300 
+                            ${isFilterExpanded ? 'rotate-180' : ''}`} />
+                        </motion.button>
+                    </div>
+
+                    {/* Filter Tags Section - Mobile optimized */}
+                    <AnimatePresence>
+                        {isFilterExpanded && (
+                            <motion.div
+                                variants={filterVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                                className="bg-gray-50 rounded-lg p-3 border border-gray-100"
+                            >
+                                <div className="flex flex-wrap justify-between items-center mb-3">
+                                    <h3 className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4 text-blue-500" />
+                                        Filter Tag
+                                    </h3>
+
+                                    {(searchTerm || selectedTags.length > 0) && (
+                                        <button
+                                            onClick={clearAllFilters}
+                                            className="text-red-500 text-sm hover:text-red-700 
+                                        flex items-center gap-1 px-2 py-1 rounded-md hover:bg-red-50"
+                                        >
+                                            <X className="w-4 h-4" />
+                                            Hapus
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Tag buttons with optimized spacing */}
+                                <div className="flex flex-wrap gap-2">
+                                    {allTags.map(tag => (
+                                        <button
+                                            key={tag}
+                                            onClick={() => handleTagToggle(tag)}
+                                            className={`px-3 py-1.5 rounded-md text-xs font-medium
+                                            transition-all duration-300 ease-in-out
                                             ${selectedTags.includes(tag)
-                                            ? 'bg-blue-500 text-white hover:bg-blue-600 shadow-blue-200'
-                                            : 'bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-600 border border-gray-200'
-                                        }`}
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                {/* Active Filters Display */}
-                {(selectedTags.length > 0 || searchTerm) && (
-                    <div className="flex flex-wrap gap-3 pt-4">
-                        {selectedTags.map(tag => (
-                            <div key={tag} className="flex items-center bg-blue-50 text-blue-700 px-4 py-2 
-                                                    rounded-lg text-sm font-medium shadow-sm border border-blue-100">
-                                {tag}
-                                <button onClick={() => handleTagToggle(tag)} className="ml-2 hover:text-blue-900">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
-                        ))}
-                        {searchTerm && (
-                            <div className="flex items-center bg-gray-50 text-gray-700 px-4 py-2 
-                                rounded-lg text-sm font-medium shadow-sm border border-gray-200">
-                                Pencarian: "{searchTerm}"
-                                <button onClick={() => setSearchTerm('')} className="ml-2 hover:text-gray-900">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </div>
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'bg-white text-gray-700 border border-gray-200'
+                                                }`}
+                                        >
+                                            {tag}
+                                        </button>
+                                    ))}
+                                </div>
+                            </motion.div>
                         )}
-                    </div>
-                )}
-            </div>
+                    </AnimatePresence>
 
-            {/* Memory Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {displayedMemories.length > 0 ? (
-                    displayedMemories.map(memory => (
-                        <MemoryCard
-                            key={memory.id}
-                            memory={memory}
-                            className="w-full transform transition-transform duration-300 md:hover:-translate-y-0.5"
-                        />
-                    ))
-                ) : (
-                    <div className="col-span-full text-center py-16 bg-gray-50 rounded-2xl">
-                        <Search className="w-12 h-12 mx-auto text-gray-400 mb-3" />
-                        <p className="text-xl font-semibold text-gray-700">Tidak ada kenangan ditemukan</p>
-                        <p className="text-gray-500 mt-2">Coba sesuaikan pencarian atau filter Anda</p>
-                    </div>
-                )}
-            </div>
+                    {/* Active Filters Display - Mobile optimized */}
+                    <AnimatePresence>
+                        {(selectedTags.length > 0 || searchTerm) && (
+                            <motion.div
+                                className="flex flex-wrap gap-2 pt-2"
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                            >
+                                {selectedTags.map(tag => (
+                                    <motion.div
+                                        key={tag}
+                                        className="flex items-center bg-blue-50 text-blue-700 px-2 py-1 
+                                            rounded-md text-xs font-medium border border-blue-100"
+                                    >
+                                        {tag}
+                                        <button
+                                            onClick={() => handleTagToggle(tag)}
+                                            className="ml-1 hover:text-blue-900"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </motion.div>
+                                ))}
 
-            {/* Load More Button */}
-            {displayedMemories.length < filteredMemories.length && (
-                <div className="flex justify-center mt-12">
-                    <button onClick={handleLoadMore}
-                        className="group relative px-8 py-4 font-semibold text-blue-600 bg-white 
-                        border-2 border-blue-600 rounded-xl transition-all duration-300
-                        hover:bg-blue-600 hover:text-white hover:shadow-lg
-                        active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 
-                        focus:ring-offset-2 flex items-center gap-3"
-                    >
-                        <span className="relative z-10">Muat Lebih Banyak Kenangan</span>
-                        <ChevronDown className="w-5 h-5 transition-transform duration-300 
-                                            group-hover:translate-y-1 relative z-10" />
-                        <div className="absolute inset-0 h-full w-0 bg-blue-600 
-                                    transition-all duration-300 ease-out group-hover:w-full rounded-xl" />
-                    </button>
+                                {searchTerm && (
+                                    <motion.div
+                                        className="flex items-center bg-gray-50 text-gray-700 px-2 py-1 
+                                    rounded-md text-xs font-medium border border-gray-200"
+                                    >
+                                        {isSmallMobile ? searchTerm : `Pencarian: "${searchTerm}"`}
+                                        <button
+                                            onClick={() => setSearchTerm('')}
+                                            className="ml-1 hover:text-gray-900"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </motion.div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.div>
+
+                {/* Memory Cards Grid - Optimized grid layout */}
+                <div className={`px-2 grid gap-3 ${isMobile
+                        ? 'grid-cols-1'
+                        : windowWidth < 1024
+                            ? 'grid-cols-2'
+                            : windowWidth < 1280
+                                ? 'grid-cols-3'
+                                : 'grid-cols-4'
+                    }`}>
+                    <AnimatePresence mode="wait">
+                        {displayedMemories.length > 0 ? (
+                            displayedMemories.map((memory) => (
+                                <motion.div
+                                    key={memory.id}
+                                    variants={itemVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="hidden"
+                                    className="w-full"
+                                >
+                                    <MemoryCard
+                                        memory={memory}
+                                        className="w-full h-full"
+                                    />
+                                </motion.div>
+                            ))
+                        ) : (
+                            <motion.div
+                                className="col-span-full text-center py-8 bg-gray-50 rounded-lg mx-2"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                            >
+                                <Search className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                                <p className="text-lg font-semibold text-gray-700">
+                                    Tidak ada kenangan ditemukan
+                                </p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Coba sesuaikan pencarian atau filter
+                                </p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
-            )}
-        </div>
+
+                {/* Load More Button - Mobile optimized */}
+                {displayedMemories.length < filteredMemories.length && (
+                    <motion.div className="flex justify-center mt-6 mb-4 px-2">
+                        <button
+                            onClick={handleLoadMore}
+                            className="w-full bg-white text-blue-600 border-2 border-blue-600 
+                                rounded-lg py-3 px-4 font-medium text-sm
+                                active:bg-blue-50 transition-colors"
+                        >
+                            Muat Lebih Banyak
+                        </button>
+                    </motion.div>
+                )}
+
+                {/* Scroll to Top Button - Mobile optimized */}
+                <AnimatePresence>
+                    {scrolled && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0 }}
+                            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                            className="fixed bottom-4 right-4 bg-blue-600 text-white p-2 
+                                rounded-full shadow-lg z-50"
+                        >
+                            <ChevronUp className="w-5 h-5" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+            </motion.div>
+        </>
     );
 };
 

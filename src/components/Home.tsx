@@ -20,7 +20,7 @@ const Home = () => {
                             <h2 className="text-lg sm:text-xl font-medium text-gray-800">
                                 Kenangan Terbaru
                             </h2>
-                            <Link to="galleryall"
+                            <Link to="/galleryall"
                                 className="text-blue-600 font-semibold underline cursor-pointer text-xs z-100">
                                 Lihat lebih banyak
                             </Link>

@@ -66,7 +66,7 @@ const ChatbotUI = () => {
     }, []);
 
     return (
-        <div className="max-w-7xl mx-auto py-3 md:py-8 px-0">
+        <div className="max-w-6xl mx-auto px-0">
             <div className="bg-gradient-to-br from-violet-50 to-pink-50 rounded-2xl shadow-xl overflow-hidden">
                 <div className="p-6 md:p-8">
                     {/* Header */}

@@ -47,7 +47,7 @@ const RelationshipStats: React.FC = () => {
     const najmitaBirthday = useMemo(() => getNextDate(5, 17), []);
 
     return (
-        <div className="max-w-7xl mx-auto px-0 sm:px-4 py-0 md:mb-0 sm:mb-0 mb-8 sm:py-8">
+        <div className="max-w-7xl mx-auto px-0 sm:px-4 py-0 md:mb-0 sm:mb-0 sm:py-0">
             <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl overflow-hidden">
                 {/* Profile Section */}
                 <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-4 sm:p-6 text-white">

@@ -54,7 +54,7 @@ const AlbumHeader: React.FC<AlbumHeaderProps> = ({ totalMemories }) => {
     }, [isMobileMenuOpen]);
 
     return (
-        <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-990">
+        <div className="bg-white shadow-lg rounded-xl sticky top-4 z-990">
             <div className="container mx-auto px-4 py-4">
                 <div className="flex items-center justify-between">
                     {/* Logo Section */}

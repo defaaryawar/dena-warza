@@ -4,6 +4,8 @@ import { Search, ArrowLeft, Calendar, Heart, Tag, GridIcon, List, Settings2, X, 
 import { useQuery, useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { Memory } from '../types/Memory';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '../hooks/isMobile'; // Import hook useIsMobile
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -17,6 +19,7 @@ const SearchMemories = () => {
     const [selectedDate, setSelectedDate] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const queryClient = useQueryClient();
+    const isMobile = useIsMobile(); // Gunakan hook useIsMobile
 
     // Enhanced error handling function
     const handleFetchError = (error: Error) => {
@@ -138,20 +141,30 @@ const SearchMemories = () => {
         });
     }, [memories, searchQuery, selectedDate, sortBy]);
 
-    // Loading state
+    // Loading state with Framer Motion
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-center"
+            >
                 <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                 <p className="text-gray-600">Memuat kenangan...</p>
-            </div>
+            </motion.div>
         </div>
     );
 
-    // Error state
+    // Error state with Framer Motion
     if (error) return (
         <div className="min-h-screen flex items-center justify-center">
-            <div className="text-center text-red-500">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="text-center text-red-500"
+            >
                 <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
                 <p className="text-xl font-semibold mb-2">Gagal Memuat Kenangan</p>
                 <p className="text-sm text-gray-600">{error.message}</p>
@@ -161,23 +174,30 @@ const SearchMemories = () => {
                 >
                     Coba Lagi
                 </button>
-            </div>
+            </motion.div>
         </div>
     );
 
     return (
-        <div className="container mx-auto max-w-7xl">
+        <div className="container mx-auto max-w-7xl md:px-6 px-4">
             {/* Search Bar and Filters */}
-            <div className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-50 overflow-hidden">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="bg-white shadow-lg rounded-xl mb-8 sticky top-4 z-50 overflow-hidden"
+            >
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 opacity-50"></div>
-                <div className="container mx-auto px-4 py-4 relative">
+                <div className="container mx-auto py-4 relative">
                     <div className="flex items-center gap-4">
-                        <button
+                        <motion.button
+                            whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                            whileTap={{ scale: 0.9 }}
                             onClick={() => navigate('/')}
                             className="p-2 hover:bg-white/50 rounded-full transition-all group cursor-pointer"
                         >
                             <ArrowLeft className="text-gray-600 group-hover:scale-110 transition-transform" size={24} />
-                        </button>
+                        </motion.button>
 
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -193,7 +213,9 @@ const SearchMemories = () => {
 
                         {/* View Toggle */}
                         <div className="bg-gray-100 p-1 rounded-full hidden md:flex">
-                            <button
+                            <motion.button
+                                whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                whileTap={{ scale: 0.9 }}
                                 onClick={() => setViewMode('grid')}
                                 className={`p-1.5 rounded-full transition-all cursor-pointer ${viewMode === 'grid'
                                     ? 'bg-white text-blue-600 shadow'
@@ -201,8 +223,10 @@ const SearchMemories = () => {
                                     }`}
                             >
                                 <GridIcon size={18} />
-                            </button>
-                            <button
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                whileTap={{ scale: 0.9 }}
                                 onClick={() => setViewMode('list')}
                                 className={`p-1.5 rounded-full transition-all cursor-pointer ${viewMode === 'list'
                                     ? 'bg-white text-blue-600 shadow'
@@ -210,12 +234,14 @@ const SearchMemories = () => {
                                     }`}
                             >
                                 <List size={18} />
-                            </button>
+                            </motion.button>
                         </div>
 
                         {/* Filter Button with Dropdown */}
                         <div className="relative dropdown-container">
-                            <button
+                            <motion.button
+                                whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                whileTap={{ scale: 0.9 }}
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className={`p-2 rounded-full cursor-pointer overflow-hidden transition-all duration-500 ${isDropdownOpen ? 'bg-blue-100 hover:bg-blue-200' : 'bg-gray-100 hover:bg-gray-200'}`}
                             >
@@ -227,105 +253,125 @@ const SearchMemories = () => {
                                         <Settings2 className="w-5 h-5 text-gray-600" />
                                     )}
                                 </span>
-                            </button>
+                            </motion.button>
 
-                            {isDropdownOpen && (
-                                <div
-                                    className="fixed mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden animate-in fade-in-0 zoom-in-95"
-                                    style={{
-                                        top: '4rem',
-                                        right: '1rem'
-                                    }}
-                                >
-                                    <div className="p-4 space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <h3 className="font-semibold text-gray-700">Filter & Sort</h3>
-                                        </div>
+                            <AnimatePresence>
+                                {isDropdownOpen && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="fixed mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+                                        style={{
+                                            top: '4rem',
+                                            right: '1rem'
+                                        }}
+                                    >
+                                        <div className="p-4 space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="font-semibold text-gray-700">Filter & Sort</h3>
+                                            </div>
 
-                                        {/* Filter by Date */}
-                                        <div>
-                                            <h3 className="font-medium mb-2 text-gray-700">Filter by Date</h3>
-                                            <div className="relative cursor-pointer">
-                                                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                                <input
-                                                    type="month"
-                                                    value={selectedDate}
-                                                    onChange={(e) => setSelectedDate(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all cursor-pointer"
-                                                />
+                                            {/* Filter by Date */}
+                                            <div>
+                                                <h3 className="font-medium mb-2 text-gray-700">Filter by Date</h3>
+                                                <div className="relative cursor-pointer">
+                                                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                                    <input
+                                                        type="month"
+                                                        value={selectedDate}
+                                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                                        className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all cursor-pointer"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            {/* Sort Order */}
+                                            <div>
+                                                <h3 className="font-medium mb-2 text-gray-700">Sort Order</h3>
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <motion.button
+                                                        whileHover={{ scale: isMobile ? 1 : 1.05 }} // Nonaktifkan hover di mobile
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => {
+                                                            setSortBy('newest');
+                                                            setIsDropdownOpen(false);
+                                                        }}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${sortBy === 'newest'
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                                            }`}
+                                                    >
+                                                        Terbaru
+                                                    </motion.button>
+                                                    <motion.button
+                                                        whileHover={{ scale: isMobile ? 1 : 1.05 }} // Nonaktifkan hover di mobile
+                                                        whileTap={{ scale: 0.95 }}
+                                                        onClick={() => {
+                                                            setSortBy('oldest');
+                                                            setIsDropdownOpen(false);
+                                                        }}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${sortBy === 'oldest'
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                                            }`}
+                                                    >
+                                                        Terlama
+                                                    </motion.button>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        {/* Sort Order */}
-                                        <div>
-                                            <h3 className="font-medium mb-2 text-gray-700">Sort Order</h3>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setSortBy('newest');
-                                                        setIsDropdownOpen(false);
-                                                    }}
-                                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${sortBy === 'newest'
-                                                        ? 'bg-blue-500 text-white'
-                                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                                                        }`}
-                                                >
-                                                    Terbaru
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setSortBy('oldest');
-                                                        setIsDropdownOpen(false);
-                                                    }}
-                                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${sortBy === 'oldest'
-                                                        ? 'bg-blue-500 text-white'
-                                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                                                        }`}
-                                                >
-                                                    Terlama
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Results Count */}
-            <div className="mb-6 text-center">
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-6 text-center"
+            >
                 <p className="text-gray-600">
                     {searchQuery ?
                         `Ditemukan ${filteredMemories.length} kenangan untuk "${searchQuery}"` :
                         `Menampilkan ${filteredMemories.length} kenangan`
                     }
                 </p>
-            </div>
+            </motion.div>
 
             {/* Search Results Grid/List View */}
-            <div className={`${viewMode === 'grid'
-                ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5'
-                : 'space-y-4'
-                }`}>
+            <motion.div
+                className={`${viewMode === 'grid'
+                    ? 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 md:gap-3.5 gap-2'
+                    : 'space-y-4'
+                    }`}
+            >
                 {filteredMemories.map((memory, index) => (
-                    <div
+                    <motion.div
                         key={memory.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1, duration: 0.5 }}
                         onClick={() => navigate(`/memory/${memory.id}`)}
-                        className={`group bg-white rounded-xl overflow-hidden shadow-sm md:hover:shadow-xl transition-all duration-300 cursor-pointer animate-fade-up ${viewMode === 'list' ? 'flex items-center' : ''
+                        className={`group bg-white rounded-xl overflow-hidden shadow-sm ${!isMobile ? 'md:hover:shadow-xl' : ''} transition-all duration-300 cursor-pointer ${viewMode === 'list' ? 'flex items-center' : ''
                             }`}
-                        style={{ animationDelay: `${index * 100}ms` }}
                     >
                         <div className={`relative overflow-hidden ${viewMode === 'list' ? 'w-48' : ''}`}>
                             {memory.media && memory.media[0] && (
-                                <img
+                                <motion.img
                                     src={memory.media[0].url}
                                     alt={memory.title}
                                     className={`${viewMode === 'grid'
                                         ? 'w-full md:h-48 h-32'
                                         : 'w-48 h-36'
-                                        } object-cover transform md:group-hover:scale-105 transition-transform duration-300`}
+                                        } object-cover transform ${!isMobile ? 'md:group-hover:scale-105' : ''} transition-transform duration-300`}
+                                    whileHover={{ scale: isMobile ? 1 : 1.05 }} // Nonaktifkan hover di mobile
                                 />
                             )}
                         </div>
@@ -339,23 +385,29 @@ const SearchMemories = () => {
                             <p className="text-gray-600 md:text-sm text-[9px] mb-3">{memory.description}</p>
                             <div className="flex flex-wrap gap-2">
                                 {memory.tags.map((tag, index) => (
-                                    <span
+                                    <motion.span
                                         key={index}
+                                        whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
                                         className="inline-flex items-center gap-1 md:px-2 md:py-1 px-1 py-0.5 md:text-xs text-[9px] rounded-full bg-blue-50 text-blue-600 transition-colors"
                                     >
                                         <Tag className='md:w-3 md:h-3 h-2 w-2' />
                                         {tag}
-                                    </span>
+                                    </motion.span>
                                 ))}
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
 
             {/* Empty State */}
             {filteredMemories.length === 0 && (
-                <div className="bg-white rounded-xl p-8 text-center shadow-sm">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-white rounded-xl p-8 text-center shadow-sm"
+                >
                     <div className="max-w-sm mx-auto">
                         <div className="mb-6 relative">
                             <div className="w-24 h-24 bg-blue-100 rounded-full mx-auto flex items-center justify-center">
@@ -372,7 +424,7 @@ const SearchMemories = () => {
                             Tidak ada memories yang cocok dengan "{searchQuery}". Coba kata kunci lain?
                         </p>
                     </div>
-                </div>
+                </motion.div>
             )}
         </div>
     );

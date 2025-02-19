@@ -22,7 +22,7 @@ const Home = () => {
                 </section>
 
                 {/* Memories Section */}
-                <section className="py-3 md:py-3">
+                <section className="py-5 md:py-5">
                     <div className="flex items-center justify-between mb-0">
                         <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
                             Kenangan Terbaru
@@ -38,7 +38,7 @@ const Home = () => {
                 </section>
 
                 {/* Story Section */}
-                <section className="py-3 md:py-3">
+                <section className="py-2 md:py-2">
                     <StorySection />
                 </section>
 

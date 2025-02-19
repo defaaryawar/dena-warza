@@ -3,7 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRight, Play, AlertTriangle } from 'lucide-react';
 import { useQuery, useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Memory, MediaItem } from '../types/Memory';
+import { useIsMobile } from '../hooks/isMobile';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -57,26 +59,36 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ media }) => {
 
     if (media.type === 'video') {
         return (
-            <div className="relative w-full h-[80vh]">
+            <motion.div
+                className="relative w-full h-[80vh]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
                 <video
                     controls
                     poster={videoThumbnail || media.thumbnail}
-                    className="absolute inset-0 w-full h-full object-contain bg-black/95"
+                    className="absolute inset-0 w-full h-full object-contain bg-black/95 rounded-lg"
                 >
                     <source src={media.url} type="video/mp4" />
                     <p>Your browser does not support the video tag.</p>
                 </video>
-            </div>
+            </motion.div>
         );
     }
     return (
-        <div className="relative w-full h-[80vh]">
+        <motion.div
+            className="relative w-full h-[80vh]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
             <img
                 src={media.url}
                 alt="media"
-                className="absolute inset-0 w-full h-full object-contain bg-black/95"
+                className="absolute inset-0 w-full h-full object-contain bg-black/95 rounded-lg"
             />
-        </div>
+        </motion.div>
     );
 };
 
@@ -87,6 +99,7 @@ const MemoryDetail: React.FC = () => {
     const [selectedMediaIndex, setSelectedMediaIndex] = useState(0);
     const [filter, setFilter] = useState<'all' | 'photo' | 'video'>('all');
     const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
+    const isMobile = useIsMobile();
 
     // Enhanced error handling function
     const handleFetchError = (error: Error) => {
@@ -188,30 +201,69 @@ const MemoryDetail: React.FC = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <motion.div
+                className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
                 <div className="text-center">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-gray-600">Memuat kenangan...</p>
+                    <motion.div
+                        className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    ></motion.div>
+                    <motion.p
+                        className="text-gray-600"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3 }}
+                    >
+                        Memuat kenangan...
+                    </motion.p>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
     if (error || !memory) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+            <motion.div
+                className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+            >
                 <div className="text-center px-4">
-                    <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
-                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">Kenangan tidak ditemukan</h2>
-                    <button
+                    <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 100 }}
+                    >
+                        <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                    </motion.div>
+                    <motion.h2
+                        className="text-2xl font-semibold text-gray-700 mb-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        Kenangan tidak ditemukan
+                    </motion.h2>
+                    <motion.button
                         onClick={() => navigate(-1)}
-                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full md:hover:bg-blue-700 transition-all transform md:hover:scale-105"
+                        className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full transition-all transform"
+                        whileHover={!isMobile ? { scale: 1.05, backgroundColor: "#2563EB" } : undefined}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Kembali
-                    </button>
+                    </motion.button>
                 </div>
-            </div>
+            </motion.div>
         );
     }
 
@@ -240,100 +292,224 @@ const MemoryDetail: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-            <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-200">
+        <motion.div
+            className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
+            <motion.div
+                className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-50 border-b border-gray-200"
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            >
                 <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-                    <button
+                    <motion.button
                         onClick={() => navigate('/')}
-                        className="inline-flex items-center px-4 py-2 text-gray-700 md:hover:bg-gray-100 rounded-full transition-all cursor-pointer"
+                        className="inline-flex items-center px-4 py-2 text-gray-700 rounded-full transition-all cursor-pointer"
+                        whileHover={!isMobile ? { backgroundColor: "rgba(243, 244, 246, 1)" } : undefined}
+                        whileTap={{ scale: 0.95 }}
                     >
                         <ArrowLeft className="w-5 h-5 mr-2" />
                         Kembali
-                    </button>
-                    <div className="flex items-center gap-4">
+                    </motion.button>
+                    <motion.div
+                        className="flex items-center gap-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                    >
                         <span className="flex items-center gap-2 text-sm text-gray-600">
                             <Calendar className="w-4 h-4" />
                             {formatDate(memory.date)}
                         </span>
-                    </div>
+                    </motion.div>
                 </div>
-            </div>
+            </motion.div>
 
             <div className="pt-16 pb-8">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center mb-6 pt-4">
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                    <motion.div
+                        className="text-center mb-6 pt-4"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <motion.h1
+                            className="text-3xl md:text-4xl font-bold text-gray-900 mb-3"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.3 }}
+                        >
                             {memory.title}
-                        </h1>
-                        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                        </motion.h1>
+                        <motion.p
+                            className="text-lg text-gray-600 max-w-2xl mx-auto"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                        >
                             {memory.description}
-                        </p>
-                    </div>
+                        </motion.p>
+                    </motion.div>
 
                     {memory.media && memory.media.length > 0 && (
-                        <div className="space-y-6">
+                        <motion.div
+                            className="space-y-6"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                        >
                             <div className="relative group">
-                                <div className="bg-black rounded-2xl overflow-hidden cursor-pointer">
-                                    <MediaDisplay media={memory.media[selectedMediaIndex]} />
-                                </div>
+                                <motion.div
+                                    className="bg-black rounded-2xl overflow-hidden cursor-pointer shadow-xl"
+                                    layoutId={`media-${selectedMediaIndex}`}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                >
+                                    <AnimatePresence mode="wait">
+                                        <MediaDisplay
+                                            key={selectedMediaIndex}
+                                            media={memory.media[selectedMediaIndex]}
+                                        />
+                                    </AnimatePresence>
+                                </motion.div>
 
-                                <button
-                                    onClick={() => navigateMedia('prev')}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 md:group-hover:opacity-100 transition-opacity md:hover:bg-white cursor-pointer"
-                                >
-                                    <ChevronLeft className="w-6 h-6" />
-                                </button>
-                                <button
-                                    onClick={() => navigateMedia('next')}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 md:group-hover:opacity-100 transition-opacity md:hover:bg-white cursor-pointer"
-                                >
-                                    <ChevronRight className="w-6 h-6" />
-                                </button>
+                                {!isMobile && (
+                                    <>
+                                        <motion.button
+                                            onClick={() => navigateMedia('prev')}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            <ChevronLeft className="w-6 h-6" />
+                                        </motion.button>
+                                        <motion.button
+                                            onClick={() => navigateMedia('next')}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            whileHover={{ backgroundColor: "rgba(255, 255, 255, 1)", scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            <ChevronRight className="w-6 h-6" />
+                                        </motion.button>
+                                    </>
+                                )}
+
+                                {isMobile && (
+                                    <>
+                                        <motion.button
+                                            onClick={() => navigateMedia('prev')}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center text-gray-800"
+                                            whileTap={{ scale: 0.9 }}
+                                        >
+                                            <ChevronLeft className="w-5 h-5" />
+                                        </motion.button>
+                                        <motion.button
+                                            onClick={() => navigateMedia('next')}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center text-gray-800"
+                                            whileTap={{ scale: 0.9 }}
+                                        >
+                                            <ChevronRight className="w-5 h-5" />
+                                        </motion.button>
+                                    </>
+                                )}
                             </div>
 
-                            <div className="flex justify-center gap-3">
-                                <button
-                                    onClick={() => setFilter('all')}
-                                    className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'all'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                        : 'bg-white text-gray-700 md:hover:bg-gray-50'
-                                        }`}
-                                >
-                                    <span className="md:text-xl text-xs">All ({memory.media.length})</span>
-                                </button>
-                                <button
-                                    onClick={() => setFilter('photo')}
-                                    className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'photo'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                        : 'bg-white text-gray-700 md:hover:bg-gray-50'
-                                        }`}
-                                >
-                                    <ImageIcon className="w-4 h-4" />
-                                    <span className="md:text-xl text-xs">Photos ({photoCount})</span>
-                                </button>
-                                <button
-                                    onClick={() => setFilter('video')}
-                                    className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'video'
-                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                        : 'bg-white text-gray-700 md:hover:bg-gray-50'
-                                        }`}
-                                >
-                                    <Video className="w-4 h-4" />
-                                    <span className="md:text-xl text-xs">Videos ({videoCount})</span>
-                                </button>
-                            </div>
+                            <motion.div
+                                className="flex justify-center gap-3"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.6 }}
+                            >
+                                <AnimatePresence mode="wait">
+                                    <motion.button
+                                        key={`all-${filter === 'all'}`}
+                                        onClick={() => setFilter('all')}
+                                        className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'all'
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                                : 'bg-white text-gray-700'
+                                            }`}
+                                        whileHover={!isMobile ? { scale: filter === 'all' ? 1 : 1.05 } : undefined}
+                                        whileTap={{ scale: 0.95 }}
+                                        layout
+                                    >
+                                        <motion.span
+                                            className="md:text-xl text-xs"
+                                            layout
+                                        >
+                                            All ({memory.media.length})
+                                        </motion.span>
+                                    </motion.button>
+                                </AnimatePresence>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                                <AnimatePresence mode="wait">
+                                    <motion.button
+                                        key={`photo-${filter === 'photo'}`}
+                                        onClick={() => setFilter('photo')}
+                                        className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'photo'
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                                : 'bg-white text-gray-700'
+                                            }`}
+                                        whileHover={!isMobile ? { scale: filter === 'photo' ? 1 : 1.05 } : undefined}
+                                        whileTap={{ scale: 0.95 }}
+                                        layout
+                                    >
+                                        <ImageIcon className="w-4 h-4" />
+                                        <motion.span
+                                            className="md:text-xl text-xs"
+                                            layout
+                                        >
+                                            Photos ({photoCount})
+                                        </motion.span>
+                                    </motion.button>
+                                </AnimatePresence>
+
+                                <AnimatePresence mode="wait">
+                                    <motion.button
+                                        key={`video-${filter === 'video'}`}
+                                        onClick={() => setFilter('video')}
+                                        className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'video'
+                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                                : 'bg-white text-gray-700'
+                                            }`}
+                                        whileHover={!isMobile ? { scale: filter === 'video' ? 1 : 1.05 } : undefined}
+                                        whileTap={{ scale: 0.95 }}
+                                        layout
+                                    >
+                                        <Video className="w-4 h-4" />
+                                        <motion.span
+                                            className="md:text-xl text-xs"
+                                            layout
+                                        >
+                                            Videos ({videoCount})
+                                        </motion.span>
+                                    </motion.button>
+                                </AnimatePresence>
+                            </motion.div>
+
+                            <motion.div
+                                className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ delay: 0.7, staggerChildren: 0.05 }}
+                            >
                                 {filteredMedia.map((item, index) => {
                                     const originalIndex = memory.media.indexOf(item);
                                     return (
-                                        <button
+                                        <motion.button
                                             key={index}
                                             onClick={() => setSelectedMediaIndex(originalIndex)}
-                                            className={`relative aspect-square rounded-xl overflow-hidden group transition-all md:hover:scale-105 ${originalIndex === selectedMediaIndex
-                                                ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
-                                                : ''
+                                            className={`relative aspect-square rounded-xl overflow-hidden group transition-all ${originalIndex === selectedMediaIndex
+                                                    ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
+                                                    : ''
                                                 }`}
+                                            layoutId={`thumbnail-${originalIndex}`}
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            whileHover={!isMobile ? { scale: 1.05, y: -5 } : undefined}
+                                            whileTap={{ scale: 0.95 }}
                                         >
                                             <img
                                                 src={item.type === 'video' ? thumbnails[item.url] || item.thumbnail || item.url : item.url}
@@ -341,34 +517,57 @@ const MemoryDetail: React.FC = () => {
                                                 className="w-full h-full object-cover cursor-pointer"
                                             />
                                             {item.type === 'video' && (
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 md:group-hover:bg-black/40 transition-colors cursor-pointer">
-                                                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                                                <motion.div
+                                                    className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors cursor-pointer"
+                                                    whileHover={!isMobile ? { backgroundColor: "rgba(0, 0, 0, 0.4)" } : undefined}
+                                                >
+                                                    <motion.div
+                                                        className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center"
+                                                        whileHover={!isMobile ? { scale: 1.1 } : undefined}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        initial={{ scale: 0.8, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                                                    >
                                                         <Play className="w-6 h-6 text-blue-600" />
-                                                    </div>
-                                                </div>
+                                                    </motion.div>
+                                                </motion.div>
                                             )}
-                                        </button>
+                                        </motion.button>
                                     );
                                 })}
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     )}
 
                     {memory.tags && memory.tags.length > 0 && (
-                        <div className="mt-8 flex flex-wrap gap-2 justify-center">
+                        <motion.div
+                            className="mt-8 flex flex-wrap gap-2 justify-center"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.8 }}
+                        >
                             {memory.tags.map((tag, index) => (
-                                <span
+                                <motion.span
                                     key={index}
                                     className="text-sm font-medium text-gray-600 border border-gray-300 rounded-full px-4 py-1"
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: 0.8 + index * 0.05 }}
+                                    whileHover={!isMobile ? {
+                                        scale: 1.05,
+                                        backgroundColor: "rgba(243, 244, 246, 1)",
+                                        borderColor: "rgba(209, 213, 219, 1)"
+                                    } : undefined}
                                 >
                                     {tag}
-                                </span>
+                                </motion.span>
                             ))}
-                        </div>
+                        </motion.div>
                     )}
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

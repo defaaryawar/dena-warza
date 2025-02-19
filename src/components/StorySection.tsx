@@ -54,7 +54,7 @@ const StorySection: React.FC = () => {
     ];
 
     return (
-        <section className="bg-white py-16">
+        <section className="bg-white">
             <div className="container mx-auto px-4">
                 <h2 className="text-4xl font-extrabold text-center mb-4 text-gray-900">
                     Cerita Cinta Kami

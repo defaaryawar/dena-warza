@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, XCircle, ArrowDown } from 'lucide-react';
+import { Send, Loader2, XCircle } from 'lucide-react';
 import { processMessage } from './utils/processMessage';
 
 interface Message {
@@ -59,6 +59,19 @@ const DenaWarzaChat = () => {
         }
     };
 
+    // Function to scroll to the bottom of the chat container
+    const scrollToBottom = () => {
+        if (chatContainerRef.current && messagesEndRef.current) {
+            // Scroll hanya di dalam chat container
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    };
+
+    // Automatically scroll to bottom when messages or streaming content changes
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, streamingContent]);
+
     useEffect(() => {
         if (isFirstMessage) {
             const welcomeMessage: Message = {
@@ -70,8 +83,6 @@ const DenaWarzaChat = () => {
             setIsFirstMessage(false);
         }
     }, []);
-
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,30 +115,48 @@ const DenaWarzaChat = () => {
             }
 
             // If no local response, call the API
-            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                    "HTTP-Referer": SITE_URL,
-                    "X-Title": SITE_NAME,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    "model": "deepseek/deepseek-chat:free",
-                    "messages": [
-                        { role: "system", content: systemContext },
-                        ...messages.map(({ role, content }) => ({ role, content })),
-                        { role: "user", content: input.trim() }
-                    ]
-                })
-            });
+            let responseContent = '';
+            let retryCount = 0;
+            const maxRetries = 3; // Maximum number of retries
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+            while (retryCount < maxRetries) {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                        "HTTP-Referer": SITE_URL,
+                        "X-Title": SITE_NAME,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "model": "deepseek/deepseek-chat:free",
+                        "messages": [
+                            { role: "system", content: systemContext },
+                            ...messages.map(({ role, content }) => ({ role, content })),
+                            { role: "user", content: input.trim() }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data: ChatResponse = await response.json();
+                responseContent = data.choices[0].message.content;
+
+                // If response is not empty, break the loop
+                if (responseContent.trim()) {
+                    break;
+                }
+
+                retryCount++;
             }
 
-            const data: ChatResponse = await response.json();
-            let responseContent = data.choices[0].message.content;
+            // If response is still empty after retries, provide a default response
+            if (!responseContent.trim()) {
+                responseContent = "Maaf, saya tidak bisa memberikan jawaban saat ini. Silakan coba lagi nanti.";
+            }
 
             // Add streaming message
             const streamingMessage: Message = {
@@ -283,7 +312,6 @@ const DenaWarzaChat = () => {
 
                     <div ref={messagesEndRef} />
                 </motion.div>
-
 
                 {/* Input Form */}
                 <motion.form

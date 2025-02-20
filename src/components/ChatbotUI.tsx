@@ -113,44 +113,33 @@ const ChatbotUI = () => {
     }, []);
 
     const handleQuestionSelect = (question: string) => {
-        // Clear any existing intervals
-        if (typingIntervalRef.current) {
-            clearInterval(typingIntervalRef.current);
-            typingIntervalRef.current = null;
-        }
-
-        // If clicking the same question again, reset everything
+        // Jika pertanyaan yang sama dipilih lagi, reset state
         if (selectedQuestion === question) {
-            // Reset to initial state with animation
             setIsThinking(false);
             setIsTyping(false);
             setDisplayedAnswer('');
             setAnswer('');
-
-            // Add a small delay before resetting selection to allow animation
-            setTimeout(() => {
-                setSelectedQuestion('');
-                setIsExpanded(false);
-            }, 300);
+            setSelectedQuestion('');
+            setIsExpanded(false);
             return;
         }
 
-        // Otherwise, proceed with new question
+        // Jika pertanyaan baru dipilih, set state untuk pertanyaan baru
         setSelectedQuestion(question);
         setIsThinking(true);
         setAnswer('');
         setDisplayedAnswer('');
         setIsExpanded(true);
 
-        // Thinking animation before typing
+        // Simulasikan proses berpikir sebelum menampilkan jawaban
         setTimeout(() => {
             setIsThinking(false);
             setIsTyping(true);
 
-            // Ensure we have a valid response from processQuestion
+            // Proses pertanyaan dan set jawaban
             const processedAnswer = processQuestion(question) || "Maaf, saya tidak bisa menjawab pertanyaan ini saat ini.";
             setAnswer(processedAnswer);
-        }, isMobile ? 1000 : 2500); // Shorter thinking time on mobile
+        }, isMobile ? 1000 : 2500); // Waktu berpikir lebih singkat di mobile
     };
 
     // Animation variants
@@ -219,7 +208,7 @@ const ChatbotUI = () => {
 
     return (
         <motion.div
-            className="max-w-5xl mx-auto p-3"
+            className="max-w-5xl mx-auto px-4 sm:px-6 py-6"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
@@ -290,7 +279,7 @@ const ChatbotUI = () => {
                                             key={idx}
                                             className="bg-white rounded-lg shadow-md p-3 space-y-2 h-[300px] md:h-[350px] overflow-y-auto custom-scrollbar"
                                         >
-                                            <AnimatePresence mode="wait">
+                                            <AnimatePresence mode="sync">
                                                 {questions.map((question, qIdx) => (
                                                     <motion.button
                                                         key={qIdx}
@@ -339,9 +328,10 @@ const ChatbotUI = () => {
                                     ref={answerContainerRef}
                                     className="flex-1 overflow-y-auto p-4 custom-scrollbar"
                                 >
-                                    <AnimatePresence mode="wait">
+                                    <AnimatePresence mode="sync"> {/* Ganti mode menjadi "sync" */}
                                         {isThinking ? (
                                             <motion.div
+                                                key="thinking"
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
@@ -400,6 +390,7 @@ const ChatbotUI = () => {
                                             </motion.div>
                                         ) : isTyping ? (
                                             <motion.div
+                                                key="typing"
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 exit={{ opacity: 0 }}
@@ -438,6 +429,7 @@ const ChatbotUI = () => {
                                             </motion.div>
                                         ) : answer ? (
                                             <motion.div
+                                                key="answer"
                                                 initial={{ opacity: 0, y: 10 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                                 transition={{ duration: 0.4 }}
@@ -476,6 +468,7 @@ const ChatbotUI = () => {
                                             </motion.div>
                                         ) : (
                                             <motion.div
+                                                key="empty"
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 className="h-full flex flex-col md:flex-row items-center justify-center text-gray-500 gap-3"

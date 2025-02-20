@@ -47,6 +47,16 @@ const DenaWarzaChat = () => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
+    // Scroll to bottom when messages change
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTo({
+                top: chatContainerRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [messages]);
+
     const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
     const SITE_URL = import.meta.env.VITE_SITE_URL;
     const SITE_NAME = import.meta.env.VITE_SITE_NAME;
@@ -415,8 +425,8 @@ const DenaWarzaChat = () => {
                                     initial={{ scale: 0.9 }}
                                     animate={{ scale: 1 }}
                                     className={`max-w-[85%] rounded-xl p-3 sm:p-4 ${message.role === 'user'
-                                            ? 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white ml-auto rounded-tr-none shadow-lg shadow-blue-500/20'
-                                            : 'bg-white border border-indigo-100 text-gray-800 rounded-tl-none shadow-md'
+                                        ? 'bg-gradient-to-r from-blue-600 to-indigo-700 text-white ml-auto rounded-tr-none shadow-lg shadow-blue-500/20'
+                                        : 'bg-white border border-indigo-100 text-gray-800 rounded-tl-none shadow-md'
                                         }`}
                                 >
                                     <p className="whitespace-pre-wrap text-sm sm:text-base leading-relaxed">

@@ -10,7 +10,7 @@ import ScrollToTop from './hooks/useScrollToTop';
 import Home from './components/Home';
 import TambahKenangan from './pages/AddMemoryPage';
 import EditMemoryPage from './pages/EditMemoryPage';
-import LovePopup from './components/LovePopup';
+// import LovePopup from './components/LovePopup';
 
 const queryClient = new QueryClient();
 
@@ -19,7 +19,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <ScrollToTop />
-        <LovePopup />
+        {/* <LovePopup /> */}
         
             <Routes>
               {/* Rute untuk Autentikasi PIN */}

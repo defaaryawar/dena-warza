@@ -19,6 +19,8 @@ export const personalData: Record<string, PersonalInfo> = {
             phoneNumber: "+62 858-9321-1201 📱", // Nomor telepon Najmita
             instagram: "namiiirra_ 📸", // Instagram Najmita
             nationality: "Indonesia 🇮🇩", // Kebangsaan Najmita
+            loveResponse: "Najmita, tentu saja Defano sayang sama kamu! 💖 Kamu adalah orang yang sangat spesial baginya. 😊",
+            default: "Najmita adalah pribadi yang ceria 😄 dan penuh perhatian 🥰. Ada yang ingin Anda tanyakan tentang dia? 🤗",
             favoriteFoods: "Mochi 🍡, es krim 🍦, Mixue 🥤, sate padang 🍢", // Makanan kesukaan Najmita
             allergies: "Kami belum tahu apa alergi Najmita 🤔❓", // Alergi Najmita
             fullDescription: `
@@ -45,6 +47,7 @@ export const personalData: Record<string, PersonalInfo> = {
             challenges: "Salah satu tantangan terbesar Najmita adalah kecenderungannya untuk terlalu emosional 😭😡. Dia sering kali merasa kesulitan untuk mengontrol emosinya 🌋, terutama saat dia merasa tidak diperhatikan 😞 atau diabaikan oleh Defano 💔.",
             favoriteFoods: "Najmita suka makan mochi 🍡, es krim 🍦, Mixue 🥤, dan sate padang 🍢. Yummy! 😋👅",
             allergies: "Kami belum tahu apa alergi Najmita 🤔❓ Masih misteri! 🕵️‍♀️",
+            loveQuestion: "Sebelum menjawab, boleh tahu kamu Defano atau Najmita? 😊",
             default: "Najmita adalah pribadi yang ceria 😄 dan penuh perhatian 🥰. Ada yang ingin Anda tanyakan tentang dia? 🤗"
         }
     },
@@ -61,6 +64,8 @@ export const personalData: Record<string, PersonalInfo> = {
             phoneNumber: "081219147116 📞", // Nomor telepon Defano
             instagram: "defaaryawar_13 📱", // Instagram Defano
             nationality: "Indonesia 🇮🇩", // Kebangsaan Defano
+            loveResponse: "Defano, tentu saja Najmita sayang sama kamu! 💕 Kamu adalah orang yang sangat berarti baginya. 😊",
+            default: "Defano adalah pribadi yang tenang 😌 dan mandiri 💪. Ada yang ingin Anda tanyakan tentang dia? 🤔",
             favoriteFoods: "Pecel lele 🐟, ayam 🍗", // Makanan kesukaan Defano
             allergies: "Defano alergi udang 🦐⚠️", // Alergi Defano
             fullDescription: `
@@ -87,6 +92,7 @@ export const personalData: Record<string, PersonalInfo> = {
             challenges: "Salah satu tantangan terbesar Defano adalah kemampuannya dalam berkomunikasi secara emosional 🗣️❤️. Dia cenderung lebih suka menyimpan perasaannya sendiri 🔒 daripada mengungkapkannya 🔓.",
             favoriteFoods: "Defano suka makan pecel lele 🐟 dan ayam 🍗. Tapi hati-hati, dia alergi udang! 🚫🦐 Bahaya! ⚠️",
             allergies: "Defano alergi udang 🦐⚠️. Jangan sampai dia makan ini ya! 🙅‍♂️",
+            loveQuestion: "Sebelum menjawab, boleh tahu kamu Defano atau Najmita? 😊",
             default: "Defano adalah pribadi yang tenang 😌 dan mandiri 💪. Ada yang ingin Anda tanyakan tentang dia? 🤔"
         }
     }

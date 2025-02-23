@@ -1,162 +1,101 @@
 import { getPersonResponse } from '../learning/dena';
 
+let currentUser: string | null = null; // Variabel untuk menyimpan identitas pengguna
+
 export const processMessage = (input: string): string => {
     const lowerInput = input.toLowerCase();
 
-    // Handle different names/nicknames
-    const isDefano = lowerInput.includes('defano') || lowerInput.includes('defa');
-    const isNajmita = lowerInput.includes('najmita') || lowerInput.includes('najmi') || lowerInput.includes('nami');
-
-    // Handle general "who is" questions
-    if (lowerInput.includes('siapa')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'aboutPersonality');
+    // Jika pengguna belum mengonfirmasi identitasnya
+    if (!currentUser) {
+        // Handle love-related questions (e.g., "kamu sayang aku ga?", "kamu cinta aku ga?")
+        if (lowerInput.includes('kamu sayang aku') || lowerInput.includes('kamu cinta aku') ||
+            lowerInput.includes('sayang ga') || lowerInput.includes('cinta ga')) {
+            return "Sebelum menjawab, boleh tahu kamu Defano atau Najmita? 😊";
         }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'aboutPersonality');
+
+        // Jika pengguna mengonfirmasi identitasnya
+        if (lowerInput.includes('defano') || lowerInput.includes('najmita')) {
+            currentUser = lowerInput.includes('defano') ? 'defano' : 'najmita';
+            return `Terima kasih sudah mengonfirmasi, ${currentUser === 'defano' ? 'Defano' : 'Najmita'}! 😊 Sekarang, apa yang bisa saya bantu?`;
         }
     }
 
-    // Handle food-related questions
-    if (lowerInput.includes('makan') || lowerInput.includes('suka makan')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'favoriteFoods');
+    // Jika pengguna sudah mengonfirmasi identitasnya
+    if (currentUser) {
+        // Handle love-related questions (e.g., "kamu sayang aku ga?", "kamu cinta aku ga?")
+        if (lowerInput.includes('kamu sayang aku') || lowerInput.includes('kamu cinta aku') ||
+            lowerInput.includes('sayang ga') || lowerInput.includes('cinta ga')) {
+            return getPersonResponse(currentUser, 'loveResponse');
         }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'favoriteFoods');
+
+        // Handle other questions based on the confirmed identity
+        if (lowerInput.includes('siapa')) {
+            return getPersonResponse(currentUser, 'aboutPersonality');
+        }
+
+        if (lowerInput.includes('makan') || lowerInput.includes('suka makan')) {
+            return getPersonResponse(currentUser, 'favoriteFoods');
+        }
+
+        if (lowerInput.includes('alergi')) {
+            return getPersonResponse(currentUser, 'allergies');
+        }
+
+        if (lowerInput.includes('hobi') || lowerInput.includes('kesukaan')) {
+            return getPersonResponse(currentUser, 'hobbies');
+        }
+
+        if (lowerInput.includes('hubungan') || lowerInput.includes('pasangan') ||
+            lowerInput.includes('suka') || lowerInput.includes('cinta') ||
+            lowerInput.includes('pacar') || lowerInput.includes('jadian')) {
+            return getPersonResponse(currentUser, 'aboutRelationship');
+        }
+
+        if (lowerInput.includes('keseharian') || lowerInput.includes('aktivitas') ||
+            lowerInput.includes('kegiatan') || lowerInput.includes('ngapain aja')) {
+            return getPersonResponse(currentUser, 'dailyLife');
+        }
+
+        if (lowerInput.includes('tantangan') || lowerInput.includes('kesulitan') ||
+            lowerInput.includes('masalah') || lowerInput.includes('kendala')) {
+            return getPersonResponse(currentUser, 'challenges');
+        }
+
+        if (lowerInput.includes('instagram') || lowerInput.includes('ig') ||
+            lowerInput.includes('sosmed') || lowerInput.includes('social media')) {
+            return getPersonResponse(currentUser, 'socialMedia');
+        }
+
+        if (lowerInput.includes('nomor') || lowerInput.includes('no hp') ||
+            lowerInput.includes('kontak') || lowerInput.includes('hubungi')) {
+            return getPersonResponse(currentUser, 'contactInfo');
+        }
+
+        if (lowerInput.includes('kebangsaan') || lowerInput.includes('asal') ||
+            lowerInput.includes('dari mana') || lowerInput.includes('tinggal')) {
+            return getPersonResponse(currentUser, 'origin');
+        }
+
+        if (lowerInput.includes('cantik') || lowerInput.includes('ganteng') ||
+            lowerInput.includes('tampan') || lowerInput.includes('penampilan')) {
+            return getPersonResponse(currentUser, 'appearance');
+        }
+
+        if (lowerInput.includes('suka sama') || lowerInput.includes('suka pada') ||
+            lowerInput.includes('cinta sama') || lowerInput.includes('perasaan')) {
+            return getPersonResponse(currentUser, 'personalFeelings');
+        }
+
+        if (lowerInput.includes('sifat') || lowerInput.includes('karakter') ||
+            lowerInput.includes('kepribadian') || lowerInput.includes('orangnya')) {
+            return getPersonResponse(currentUser, 'personality');
+        }
+
+        if (lowerInput.includes('deskripsi lengkap') || lowerInput.includes('ceritakan tentang') ||
+            lowerInput.includes('jelaskan tentang') || lowerInput.includes('info lengkap')) {
+            return getPersonResponse(currentUser, 'fullDescription');
         }
     }
 
-    // Handle allergy-related questions
-    if (lowerInput.includes('alergi')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'allergies');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'allergies');
-        }
-    }
-
-    // Handle hobby-related questions
-    if (lowerInput.includes('hobi') || lowerInput.includes('kesukaan')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'hobbies');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'hobbies');
-        }
-    }
-
-    // Handle relationship-related questions
-    if (lowerInput.includes('hubungan') || lowerInput.includes('pasangan') ||
-        lowerInput.includes('suka') || lowerInput.includes('cinta') ||
-        lowerInput.includes('pacar') || lowerInput.includes('jadian')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'aboutRelationship');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'aboutRelationship');
-        }
-    }
-
-    // Handle daily life-related questions
-    if (lowerInput.includes('keseharian') || lowerInput.includes('aktivitas') ||
-        lowerInput.includes('kegiatan') || lowerInput.includes('ngapain aja')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'dailyLife');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'dailyLife');
-        }
-    }
-
-    // Handle challenge-related questions
-    if (lowerInput.includes('tantangan') || lowerInput.includes('kesulitan') ||
-        lowerInput.includes('masalah') || lowerInput.includes('kendala')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'challenges');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'challenges');
-        }
-    }
-
-    // Handle social media questions
-    if (lowerInput.includes('instagram') || lowerInput.includes('ig') ||
-        lowerInput.includes('sosmed') || lowerInput.includes('social media')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'socialMedia');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'socialMedia');
-        }
-    }
-
-    // Handle contact information questions
-    if (lowerInput.includes('nomor') || lowerInput.includes('no hp') ||
-        lowerInput.includes('kontak') || lowerInput.includes('hubungi')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'contactInfo');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'contactInfo');
-        }
-    }
-
-    // Handle nationality/origin questions
-    if (lowerInput.includes('kebangsaan') || lowerInput.includes('asal') ||
-        lowerInput.includes('dari mana') || lowerInput.includes('tinggal')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'origin');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'origin');
-        }
-    }
-
-    // Handle appearance-related questions
-    if (lowerInput.includes('cantik') || lowerInput.includes('ganteng') ||
-        lowerInput.includes('tampan') || lowerInput.includes('penampilan')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'appearance');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'appearance');
-        }
-    }
-
-    // Handle personal feelings questions
-    if (lowerInput.includes('suka sama') || lowerInput.includes('suka pada') ||
-        lowerInput.includes('cinta sama') || lowerInput.includes('perasaan')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'personalFeelings');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'personalFeelings');
-        }
-    }
-
-    // Handle personality questions
-    if (lowerInput.includes('sifat') || lowerInput.includes('karakter') ||
-        lowerInput.includes('kepribadian') || lowerInput.includes('orangnya')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'personality');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'personality');
-        }
-    }
-
-    // Handle full description requests
-    if (lowerInput.includes('deskripsi lengkap') || lowerInput.includes('ceritakan tentang') ||
-        lowerInput.includes('jelaskan tentang') || lowerInput.includes('info lengkap')) {
-        if (isDefano) {
-            return getPersonResponse('defano', 'fullDescription');
-        }
-        if (isNajmita) {
-            return getPersonResponse('najmita', 'fullDescription');
-        }
-    }
-
-    return input;
+    return "Maaf, saya tidak mengerti pertanyaan Anda. 😅 Ada yang bisa saya bantu? 🤗";
 };

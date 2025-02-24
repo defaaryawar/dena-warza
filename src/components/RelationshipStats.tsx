@@ -1,5 +1,5 @@
 import React, { useState, useMemo, Suspense, lazy, useEffect } from 'react';
-import { Calendar, Gift, Heart, Book, Star, } from 'lucide-react';
+import { Calendar, Gift, Heart, Book, Star } from 'lucide-react';
 import ProfileCardModal from './relationShipUtils/ProfileCardModal';
 import GiftModal from './relationShipUtils/GiftModal';
 import Countdown from './relationShipUtils/Countdown';
@@ -89,7 +89,9 @@ const RelationshipStats: React.FC = () => {
             <div className={`bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-1000 transform 
                 ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 md:p-10 text-white">
+                <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 md:p-10 text-white relative">
+                    {/* Wave Divider */}
+
                     <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 relative">
                         ✨ Our Love Story ✨
                         <div className="text-base md:text-lg mt-2 opacity-80">Kisah cinta yang bikin baper~ 💕</div>
@@ -97,7 +99,7 @@ const RelationshipStats: React.FC = () => {
 
                     {/* Profile Pictures */}
                     <div className="flex justify-center gap-6 md:gap-12 items-center">
-                        <div className="relative">
+                        <div className="relative text-center">
                             <ProfileSnowEffect />
                             <div
                                 className="w-24 h-24 md:w-36 md:h-36 overflow-hidden rounded-full border-4 border-white/80 shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
@@ -122,7 +124,7 @@ const RelationshipStats: React.FC = () => {
                             <Heart className="w-10 h-10 md:w-14 md:h-14 text-pink-300 animate-pulse" />
                         </div>
 
-                        <div className="relative">
+                        <div className="relative text-center">
                             <ProfileSnowEffect />
                             <div
                                 className="w-24 h-24 md:w-36 md:h-36 overflow-hidden rounded-full border-4 border-white/80 shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"

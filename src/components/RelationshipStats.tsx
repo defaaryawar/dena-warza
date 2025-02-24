@@ -1,46 +1,14 @@
-import React, { useState, useMemo, Suspense, lazy, memo, useEffect } from 'react';
-import { Calendar, Gift, Heart, Book, Star, Sparkles, X, Mail } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useMemo, Suspense, lazy, useEffect } from 'react';
+import { Calendar, Gift, Heart, Book, Star, } from 'lucide-react';
+import ProfileCardModal from './relationShipUtils/ProfileCardModal';
+import GiftModal from './relationShipUtils/GiftModal';
+import Countdown from './relationShipUtils/Countdown';
+import ProfileSnowEffect from './relationShipUtils/ProfileSnowEffect';
+import { ProfileData, ProfileStats } from '../types/types';
+import { useIsMobile } from '../hooks/isMobile';
+import GlassIcons from './GlassIcons/GlassIcons';
 
-// Lazy load the NotebookModal
 const NotebookModal = lazy(() => import('./modal/NotebookModal'));
-
-// Define types
-interface ProfileStats {
-    birthday: string;
-    zodiac: string;
-    email: string;
-    bio: string;
-    image: string;
-}
-
-interface ProfileCardModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    name: string;
-    profileImage: string;
-    stats: ProfileStats;
-}
-
-interface GiftModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    name: string;
-}
-
-interface CountdownProps {
-    targetDate: string;
-    label: string;
-    delay: number;
-}
-
-interface ProfileSnowEffectProps {
-    className?: string;
-}
-
-interface ProfileData {
-    [key: string]: ProfileStats;
-}
 
 interface ProfileModalState {
     isOpen: boolean;
@@ -49,249 +17,10 @@ interface ProfileModalState {
     stats: ProfileStats | null;
 }
 
-interface GiftModalState {
-    isOpen: boolean;
-    name: string;
-}
-
-// Profile Card Modal Component
-const ProfileCardModal: React.FC<ProfileCardModalProps> = ({ isOpen, onClose, name, profileImage, stats }) => {
-    if (!isOpen) return null;
-
-    const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (e.target === e.currentTarget) {
-            onClose();
-        }
-    };
-
-    return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-996 p-4"
-                onClick={handleBackdropClick}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.9, y: 20 }}
-                    className="bg-white rounded-3xl shadow-xl w-full max-w-md transform transition-all"
-                >
-                    {/* Header with close button */}
-                    <div className="relative h-48">
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-t-3xl" />
-                        <button
-                            onClick={onClose}
-                            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"
-                        >
-                            <X className="w-5 h-5 text-white" />
-                        </button>
-
-                        {/* Profile Image */}
-                        <div className="absolute -bottom-16 left-1/2 -translate-x-1/2">
-                            <div className="w-54 h-54 rounded-full border-4 border-white overflow-hidden shadow-lg">
-                                <img
-                                    src={profileImage}
-                                    alt={name}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="pt-20 pb-8 px-6">
-                        <div className="text-center">
-                            <h3 className="text-2xl font-bold text-gray-800">{name}</h3>
-                            <p className="text-gray-500 mt-1">❤️ Forever Yours ❤️</p>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="mt-8 md:grid-cols-3 gap-2">
-                            <div className="bg-purple-50 p-4 rounded-2xl">
-                                <div className="flex items-center gap-2">
-                                    <Calendar className="w-5 h-5 text-purple-500" />
-                                    <span className="text-sm font-medium text-purple-700">Birthday</span>
-                                </div>
-                                <p className="mt-1 text-gray-600">{stats.birthday}</p>
-                            </div>
-
-                            <div className="bg-pink-50 p-4 rounded-2xl">
-                                <div className="flex items-center gap-2">
-                                    <Heart className="w-5 h-5 text-pink-500" />
-                                    <span className="text-sm font-medium text-pink-700">Status</span>
-                                </div>
-                                <p className="mt-1 text-gray-600">In Love 💑</p>
-                            </div>
-
-                            <div className="bg-blue-50 p-4 rounded-2xl">
-                                <div className="flex items-center gap-2">
-                                    <Star className="w-5 h-5 text-blue-500" />
-                                    <span className="text-sm font-medium text-blue-700">Zodiac</span>
-                                </div>
-                                <p className="mt-1 text-gray-600">{stats.zodiac}</p>
-                            </div>
-                        </div>
-
-                        {/* Bio */}
-                        <div className="mt-8 text-center">
-                            <p className="text-gray-600 italic">"{stats.bio}"</p>
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
-        </AnimatePresence>
-    );
-};
-
-// Enhanced Gift Modal Component
-const GiftModal: React.FC<GiftModalProps> = ({ isOpen, onClose, name }) => {
-    if (!isOpen) return null;
-
-    return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-999 p-4"
-                onClick={(e) => e.target === e.currentTarget && onClose()}
-            >
-                <motion.div
-                    initial={{ scale: 0.9, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.9, y: 20 }}
-                    className="bg-gradient-to-br from-pink-50 to-purple-50 rounded-3xl p-6 max-w-sm w-full relative overflow-hidden"
-                >
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white/90 transition-colors cursor-pointer z-996"
-                    >
-                        <X className="w-4 h-4 text-gray-600" />
-                    </button>
-
-                    <div className="text-center space-y-6">
-                        <div className="relative">
-                            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-pink-400 to-purple-500 rounded-2xl rotate-45 flex items-center justify-center">
-                                <Gift className="w-10 h-10 text-white -rotate-45" />
-                            </div>
-                        </div>
-
-                        <div className="space-y-3">
-                            <h3 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                                Surprise untuk {name}! ✨
-                            </h3>
-                            <p className="text-gray-600">
-                                {name === 'Defano' ?
-                                    'Konten akan tersedia saat hari H!' :
-                                    'Konten akan tersedia saat hari H! 💖'}
-                            </p>
-                        </div>
-
-                        <div className="flex justify-center space-x-2">
-                            {[...Array(3)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    animate={{
-                                        scale: [1, 1.2, 1],
-                                        rotate: [0, 360],
-                                    }}
-                                    transition={{
-                                        duration: 2,
-                                        repeat: Infinity,
-                                        delay: i * 0.3,
-                                    }}
-                                >
-                                    <Sparkles className="w-6 h-6 text-purple-500" />
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </motion.div>
-            </motion.div>
-        </AnimatePresence>
-    );
-};
-
-// Custom hook to detect mobile devices
-const useIsMobile = (): boolean => {
-    const [isMobile, setIsMobile] = useState(false);
-
-    useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth <= 768);
-        checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
-    }, []);
-
-    return isMobile;
-};
-
-// Countdown Component
-const Countdown: React.FC<CountdownProps> = memo(({ targetDate, label, delay }) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
-    const isMobile = useIsMobile(); // Gunakan hook useIsMobile
-
-    useEffect(() => {
-        const timer = setTimeout(() => setIsVisible(true), delay);
-        return () => clearTimeout(timer);
-    }, [delay]);
-
-    const timeLeft = useMemo(() => {
-        const difference = +new Date(targetDate) - +new Date();
-        const days = Math.ceil(difference / (1000 * 60 * 60 * 24));
-        return `${days} hari`;
-    }, [targetDate]);
-
-    return (
-        <div
-            className={`text-center flex-1 transition-all duration-700 transform cursor-pointer
-                ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}
-                ${!isMobile && isHovered ? 'scale-105' : 'scale-100'}`} // Matikan hover effect di mobile
-            onMouseEnter={() => !isMobile && setIsHovered(true)} // Hanya aktif di desktop
-            onMouseLeave={() => !isMobile && setIsHovered(false)} // Hanya aktif di desktop
-        >
-            <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                {timeLeft}
-            </div>
-            <div className="text-sm md:text-base text-gray-600">{label}</div>
-        </div>
-    );
-});
-
-// Snow Effect Component
-const ProfileSnowEffect: React.FC<ProfileSnowEffectProps> = ({ className }) => (
-    <div className={`absolute inset-0 pointer-events-none overflow-hidden ${className}`}>
-        {Array.from({ length: 15 }).map((_, index) => (
-            <motion.div
-                key={index}
-                className="absolute w-1 h-1 bg-white rounded-full shadow-lg"
-                initial={{ opacity: 0, scale: 0, y: -20 }}
-                animate={{
-                    opacity: [0, 1, 0],
-                    scale: [0, 1, 0],
-                    x: Math.random() * 100 - 50,
-                    y: 100,
-                }}
-                transition={{
-                    duration: Math.random() * 2 + 1,
-                    repeat: Infinity,
-                    ease: "linear",
-                    delay: Math.random() * 2,
-                }}
-            />
-        ))}
-    </div>
-);
-
-// Main Component
 const RelationshipStats: React.FC = () => {
     const [isNotebookOpen, setIsNotebookOpen] = useState(false);
     const [contentVisible, setContentVisible] = useState(false);
-    const [giftModal, setGiftModal] = useState<GiftModalState>({ isOpen: false, name: '' });
+    const [giftModal, setGiftModal] = useState<{ isOpen: boolean; name: string }>({ isOpen: false, name: '' });
     const [profileModal, setProfileModal] = useState<ProfileModalState>({
         isOpen: false,
         name: '',
@@ -308,6 +37,7 @@ const RelationshipStats: React.FC = () => {
             email: 'defano@example.com',
             bio: 'Living life with love and laughter',
             image: '/images/photo-profil/photo-profil-defa.webp',
+            location: 'Tangerang Selatan',
         },
         Najmita: {
             birthday: '17 May',
@@ -315,6 +45,7 @@ const RelationshipStats: React.FC = () => {
             email: 'najmita@example.com',
             bio: 'Spreading love and happiness everywhere',
             image: '/images/photo-profil/photo-profil-nami.webp',
+            location: 'Jakrta Timur',
         },
     };
 
@@ -336,6 +67,22 @@ const RelationshipStats: React.FC = () => {
     const anniversaryDate = useMemo(() => getNextDate(9, 27), []);
     const defanoBirthday = useMemo(() => getNextDate(10, 13), []);
     const najmitaBirthday = useMemo(() => getNextDate(5, 17), []);
+
+    const anniversaryItems = [
+        { icon: <Calendar />, color: 'blue' },
+    ];
+
+    const defanoItems = [
+        { icon: <Gift />, color: 'purple' },
+    ];
+
+    const najmitaItems = [
+        { icon: <Gift />, color: 'pink' },
+    ];
+
+    const handleGlassIconClick = (name: string) => {
+        setGiftModal({ isOpen: true, name });
+    };
 
     return (
         <div className="max-w-7xl mx-auto px-2 py-6 md:py-10">
@@ -403,9 +150,15 @@ const RelationshipStats: React.FC = () => {
                     {/* Countdown Cards */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {/* Anniversary Card */}
-                        <div className={`bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform ${!isMobile && 'hover:-translate-y-1'}`}>
-                            <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                                <Calendar className="w-7 h-7 text-white" />
+                        <div className={`bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform`}>
+                            <div className="w-0 h-0 md:ml-20 ml-6 flex items-center justify-center">
+                                <GlassIcons
+                                    items={anniversaryItems}
+                                    className=''
+                                    isModalOpen={giftModal.isOpen && giftModal.name === 'Anniversary'} // Hanya aktif jika name sesuai
+                                    onClick={handleGlassIconClick}
+                                    name="Anniversary" // Tambahkan name
+                                />
                             </div>
                             <Countdown
                                 targetDate={anniversaryDate}
@@ -415,12 +168,15 @@ const RelationshipStats: React.FC = () => {
                         </div>
 
                         {/* Defano's Birthday Card */}
-                        <div
-                            className={`bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform ${!isMobile && 'hover:-translate-y-1'} cursor-pointer`}
-                            onClick={() => setGiftModal({ isOpen: true, name: 'Defano' })}
-                        >
-                            <div className="w-14 h-14 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                                <Gift className="w-7 h-7 text-white" />
+                        <div className={`bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform`}>
+                            <div className="w-0 h-0 md:ml-20 ml-6 flex items-center justify-center">
+                                <GlassIcons
+                                    items={defanoItems}
+                                    className=''
+                                    isModalOpen={giftModal.isOpen && giftModal.name === 'Defano'} // Hanya aktif jika name sesuai
+                                    onClick={handleGlassIconClick}
+                                    name="Defano" // Tambahkan name
+                                />
                             </div>
                             <Countdown
                                 targetDate={defanoBirthday}
@@ -430,12 +186,15 @@ const RelationshipStats: React.FC = () => {
                         </div>
 
                         {/* Najmita's Birthday Card */}
-                        <div
-                            className={`bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform ${!isMobile && 'hover:-translate-y-1'} cursor-pointer`}
-                            onClick={() => setGiftModal({ isOpen: true, name: 'Najmita' })}
-                        >
-                            <div className="w-14 h-14 bg-gradient-to-r from-pink-500 to-rose-500 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-                                <Gift className="w-7 h-7 text-white" />
+                        <div className={`bg-gradient-to-br from-pink-50 to-rose-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform`}>
+                            <div className="w-0 h-0 md:ml-20 ml-6 flex items-center justify-center">
+                                <GlassIcons
+                                    items={najmitaItems}
+                                    className=''
+                                    isModalOpen={giftModal.isOpen && giftModal.name === 'Najmita'} // Hanya aktif jika name sesuai
+                                    onClick={handleGlassIconClick}
+                                    name="Najmita" // Tambahkan name
+                                />
                             </div>
                             <Countdown
                                 targetDate={najmitaBirthday}

@@ -31,6 +31,19 @@ export interface DrawingData {
     width: number;
 }
 
+export interface ProfileStats {
+    birthday: string;
+    zodiac: string;
+    email: string;
+    bio: string;
+    image: string;
+    location?: string;
+}
+
+export interface ProfileData {
+    [key: string]: ProfileStats;
+}
+
 export interface BaseGameProps {
     onExperienceGain: (amount: number) => void;
     onAddAlert: (type: AlertType, title: string, message: string) => void;

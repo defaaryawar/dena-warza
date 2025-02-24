@@ -32,9 +32,9 @@ const ProfileCardModal: React.FC<ProfileCardModalProps> = ({ isOpen, onClose, na
     const handleMessageClick = () => {
         let phoneNumber;
         if (name.toLowerCase().includes('defano')) {
-            phoneNumber = '081219147116';
+            phoneNumber = '6281219147116';
         } else if (name.toLowerCase().includes('najmita')) {
-            phoneNumber = '+62 858-9321-1201';
+            phoneNumber = '6285893211201';
         } else {
             phoneNumber = '081219147116';
         }

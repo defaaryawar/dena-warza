@@ -453,14 +453,14 @@ const StoryCard: React.FC<StoryCardProps> = React.memo(({ story, index, setSelec
                 <div>
                     <motion.h3 
                         variants={selectedTextVariant} 
-                        className="text-2xl font-bold text-gray-800"
+                        className="md:text-2xl text-lg font-bold text-gray-800"
                     >
                         {story.title}
                     </motion.h3>
                     <motion.span 
                         variants={selectedTextVariant}
                         custom={1}
-                        className="text-sm text-gray-600 inline-block"
+                        className="md:text-sm text-xs text-gray-600 inline-block"
                     >
                         {story.date}
                     </motion.span>
@@ -476,7 +476,7 @@ const StoryCard: React.FC<StoryCardProps> = React.memo(({ story, index, setSelec
                             variants={getDescriptionAnimation(i)}
                             initial="hidden"
                             animate={inView ? "visible" : "hidden"}
-                            className="mb-2"
+                            className="mb-2 md:text-base text-sm"
                         >
                             {sentence.trim() + (i < story.description.split('. ').length - 1 ? '.' : '')}
                         </motion.p>
@@ -492,7 +492,7 @@ const StoryCard: React.FC<StoryCardProps> = React.memo(({ story, index, setSelec
                 whileTap={!isMobile ? { scale: 0.98 } : undefined}
                 className="flex items-center space-x-2 absolute bottom-6 bg-white/40 text-gray-900 font-semibold py-2 px-4 rounded-full z-20"
             >
-                <span>Baca Selengkapnya</span>
+                <span className='md:text-base text-sm'>Baca Selengkapnya</span>
                 <motion.div
                     animate={isHovered && !isMobile ? { 
                         x: getVariantType(index, 3) === 0 ? 5 : getVariantType(index, 3) === 1 ? 3 : 4,

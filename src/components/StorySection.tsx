@@ -67,7 +67,7 @@ const StorySection: React.FC = () => {
     };
 
     return (
-        <section className="bg-white py-0 min-h-screen flex items-center">
+        <section className="bg-white py-4 flex items-center">
             <div className="container mx-auto px-4 max-w-7xl">
                 <div className="max-w-4xl mx-auto mb-16">
                     <motion.h2
@@ -75,7 +75,7 @@ const StorySection: React.FC = () => {
                         initial={{ opacity: 0, y: 50 }}
                         animate={titleInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
-                        className="text-5xl font-extrabold text-center mb-6 text-gray-900 leading-tight"
+                        className="md:text-5xl text-3xl font-extrabold text-center mb-6 text-gray-900 leading-tight"
                     >
                         Cerita Cinta Kami
                     </motion.h2>
@@ -85,7 +85,7 @@ const StorySection: React.FC = () => {
                         initial={{ opacity: 0, y: 50 }}
                         animate={descInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
-                        className="text-center text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed"
+                        className="text-center text-gray-600 md:text-lg text-sm max-w-2xl mx-auto leading-relaxed"
                     >
                         Perjalanan cinta Defano dan Najmita, dari pertemuan pertama hingga akhirnya bersatu. 
                         Sebuah kisah tentang kesabaran, kesetiaan, dan takdir yang mempertemukan.
@@ -126,7 +126,8 @@ const StorySection: React.FC = () => {
             {selectedStory && (
                 <Modal 
                     story={selectedStory} 
-                    onClose={() => setSelectedStory(null)} 
+                    onClose={() => setSelectedStory(null)}
+                    isOpen={true} 
                 />
             )}
         </section>

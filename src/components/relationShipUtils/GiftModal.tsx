@@ -590,6 +590,7 @@ const GiftModal: React.FC<GiftModalProps> = ({ isOpen, onClose, name }) => {
                                                             </motion.div>
                                                         </motion.div>
                                                         
+                                                        {/* ini ntuk hadiahnya ya bisa diganti */}
                                                         <div className="space-y-3">
                                                             <motion.h3 
                                                                 className="text-2xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent"

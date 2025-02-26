@@ -71,3 +71,10 @@ export interface FormFieldProps {
     error?: string;
     clearError: () => void;
 }
+
+export type GameHistoryDetails =
+    | { achievementId: string; title: string; message: string }
+    | { newLevel: number }
+    | { challenge: string; reward: number }
+    | { gameMode: string; score: any }
+    | { question: string; type: 'truth' | 'dare' }; // Tambahkan tipe baru

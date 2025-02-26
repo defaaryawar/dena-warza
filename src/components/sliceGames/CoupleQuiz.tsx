@@ -9,6 +9,7 @@ interface CoupleQuizProps extends Omit<BaseGameProps, 'onGameModeChange'> {
     onGameModeChange: (mode: GameMode) => void;
     onScoreUpdate: (score: number) => void;
     onStreakUpdate: (increment: boolean) => void;
+    onQuizComplete: (score: number) => void;
 }
 
 const CoupleQuiz: React.FC<CoupleQuizProps> = ({

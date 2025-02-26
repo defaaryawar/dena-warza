@@ -19,6 +19,7 @@ export const personalData: Record<string, PersonalInfo> = {
             phoneNumber: "+62 858-9321-1201 📱", // Nomor telepon Najmita
             instagram: "namiiirra_ 📸", // Instagram Najmita
             nationality: "Indonesia 🇮🇩", // Kebangsaan Najmita
+            tinggal: "Jakarta, Bekasi, jalan Lampiri Jaya",
             loveResponse: "Najmita, tentu saja Defano sayang sama kamu! 💖 Kamu adalah orang yang sangat spesial baginya. 😊",
             default: "Najmita adalah pribadi yang ceria 😄 dan penuh perhatian 🥰. Ada yang ingin Anda tanyakan tentang dia? 🤗",
             favoriteFoods: "Mochi 🍡, es krim 🍦, Mixue 🥤, sate padang 🍢", // Makanan kesukaan Najmita
@@ -64,6 +65,7 @@ export const personalData: Record<string, PersonalInfo> = {
             phoneNumber: "081219147116 📞", // Nomor telepon Defano
             instagram: "defaaryawar_13 📱", // Instagram Defano
             nationality: "Indonesia 🇮🇩", // Kebangsaan Defano
+            tinggal: "Tangerang Selatan, Ciputat, Jalan Musyawarah",
             loveResponse: "Defano, tentu saja Najmita sayang sama kamu! 💕 Kamu adalah orang yang sangat berarti baginya. 😊",
             default: "Defano adalah pribadi yang tenang 😌 dan mandiri 💪. Ada yang ingin Anda tanyakan tentang dia? 🤔",
             favoriteFoods: "Pecel lele 🐟, ayam 🍗", // Makanan kesukaan Defano

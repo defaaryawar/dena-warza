@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { X, Play, Maximize2, Minimize2, Film, Calendar, Search, ChevronDown, Heart, AlertTriangle } from 'lucide-react';
+import { X, Play, Maximize2, Minimize2, Film, Calendar, Search, ChevronDown, Heart, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { VideoWithMemoryInfo, MediaItem } from '../types/Memory';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import React from 'react';
 
 const API_URL = import.meta.env.VITE_API_BASE_URL;
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
@@ -78,6 +79,11 @@ const ModernVideoGallery = () => {
     const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
     const [selectedDate, setSelectedDate] = useState('');
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    
+    // Pagination states
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(6);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
     // Enhanced error handling for fetch
     const handleFetchError = (error: Error) => {
@@ -174,6 +180,27 @@ const ModernVideoGallery = () => {
         fetchVideos();
     }, [navigate]);
 
+    // Handle window resize for responsive pagination
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+            
+            // Update items per page based on screen size
+            if (window.innerWidth < 768) { // mobile
+                setItemsPerPage(4); // 2 columns x 2 rows
+            } else {
+                setItemsPerPage(8); // 4 columns x 2 rows for tablet and above
+            }
+        };
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Set initial values
+        
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     // Handle modal open/close
     useEffect(() => {
         if (selectedVideo) {
@@ -232,6 +259,30 @@ const ModernVideoGallery = () => {
         });
     }, [videos, searchQuery, selectedDate, sortBy]);
 
+    // Pagination logic
+    const totalPages = Math.ceil(filteredVideos.length / itemsPerPage);
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredVideos.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = (pageNumber: number) => {
+        setCurrentPage(pageNumber);
+        // Smooth scroll to top of gallery
+        document.getElementById('gallery-top')?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const goToNextPage = () => {
+        if (currentPage < totalPages) {
+            paginate(currentPage + 1);
+        }
+    };
+
+    const goToPrevPage = () => {
+        if (currentPage > 1) {
+            paginate(currentPage - 1);
+        }
+    };
+
     if (loading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-rose-50 to-teal-50 flex items-center justify-center">
@@ -262,10 +313,10 @@ const ModernVideoGallery = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50">
-            <div className="relative max-w-7xl mx-auto px-4 py-12">
+        <div className="bg-gradient-to-br from-violet-50 via-pink-50 to-blue-50 md:rounded-3xl rounded-xl md:mt-8">
+            <div id="gallery-top" className="relative max-w-7xl mx-auto md:px-6 px-3 md:py-8">
                 {/* Header Section */}
-                <div className="text-center mb-12">
+                <div className="text-center md:mb-12 mb-8">
                     <div className="inline-flex items-center justify-center p-2 bg-white/30 backdrop-blur-sm rounded-2xl mb-4">
                         <Film className="w-5 h-5 text-violet-500 mr-2" />
                         <span className="text-sm font-medium text-violet-700">Galeri Video</span>
@@ -279,7 +330,7 @@ const ModernVideoGallery = () => {
                 </div>
 
                 {/* Search and Filter Bar */}
-                <div className="bg-white/40 backdrop-blur-sm rounded-2xl p-4 mb-8 shadow-lg">
+                <div className="bg-white/40 md:rounded-2xl p-4 mb-8 md:shadow-lg shadow-md rounded-lg">
                     <div className="flex flex-col sm:flex-row gap-4">
                         <div className="relative flex-1">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -287,7 +338,10 @@ const ModernVideoGallery = () => {
                                 type="text"
                                 placeholder="Cari kenangan..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setCurrentPage(1); // Reset to first page on search
+                                }}
                                 className="w-full pl-12 pr-4 py-3 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
                             />
                         </div>
@@ -303,14 +357,17 @@ const ModernVideoGallery = () => {
 
                     {/* Filter Panel */}
                     {isFilterOpen && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="mt-4 pt-4 border-t border-gray-100 animate-fadeIn">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Pilih Bulan</label>
                                     <input
                                         type="month"
                                         value={selectedDate}
-                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                        onChange={(e) => {
+                                            setSelectedDate(e.target.value);
+                                            setCurrentPage(1); // Reset to first page on filter change
+                                        }}
                                         className="w-full px-4 py-2.5 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                                     />
                                 </div>
@@ -318,7 +375,10 @@ const ModernVideoGallery = () => {
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Urutkan</label>
                                     <select
                                         value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value as 'newest' | 'oldest')}
+                                        onChange={(e) => {
+                                            setSortBy(e.target.value as 'newest' | 'oldest');
+                                            setCurrentPage(1); // Reset to first page on sort change
+                                        }}
                                         className="w-full px-4 py-2.5 bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                                     >
                                         <option value="newest">Terbaru</option>
@@ -330,32 +390,44 @@ const ModernVideoGallery = () => {
                     )}
                 </div>
 
+                {/* Results Counter */}
+                <div className="flex justify-between items-center mb-6">
+                    <div className="text-gray-600 text-sm">
+                        Menampilkan <span className="font-semibold">{currentItems.length}</span> dari <span className="font-semibold">{filteredVideos.length}</span> video
+                    </div>
+                    
+                    {totalPages > 1 && (
+                        <div className="text-sm text-gray-600">
+                            Halaman <span className="font-semibold">{currentPage}</span> dari <span className="font-semibold">{totalPages}</span>
+                        </div>
+                    )}
+                </div>
+
                 {/* Video Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 md:gap-4 gap-3">
-                    {filteredVideos.map((video, index) => (
+                <div className="grid grid-cols-2 md:grid-cols-4 md:gap-6 gap-4">
+                    {currentItems.map((video, index) => (
                         <div
                             key={index}
-                            className="group relative transform transition-all duration-500 hover:z-10"
+                            className="group relative transform transition-all duration-500 hover:z-10 hover:scale-105"
                             style={{
-                                transform: `rotate(${Math.random() * 6 - 3}deg)`,
-                                marginTop: `${(index % 3) * 10}px`
+                                transform: `rotate(${Math.random() * 4 - 2}deg)`,
                             }}
                             onClick={() => handleVideoClick(video)}
                         >
                             <div className="relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 cursor-pointer group-hover:rotate-0">
-                                {/* Thumbnail Container */}
-                                <div className="aspect-video relative overflow-hidden">
+                                {/* Thumbnail Container with Polaroid Effect */}
+                                <div className="aspect-video relative overflow-hidden border-b-8 border-white">
                                     {thumbnails[video.url] ? (
                                         <img
                                             src={thumbnails[video.url]}
                                             alt={video.memoryTitle}
-                                            className="w-full h-full object-cover transform transition-all duration-700 group-hover:scale-110"
+                                            className="w-full h-full object-cover transform transition-all duration-700 md:group-hover:scale-110"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-gray-200 animate-pulse" />
                                     )}
 
-                                    {/* Overlay */}
+                                    {/* Play Button Overlay */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <div className="bg-white/20 backdrop-blur-sm rounded-full p-3 transform scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-500">
@@ -363,10 +435,15 @@ const ModernVideoGallery = () => {
                                             </div>
                                         </div>
                                     </div>
+                                    
+                                    {/* Duration Badge */}
+                                    <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+                                        {Math.floor(Math.random() * 3) + 1}:{Math.floor(Math.random() * 60).toString().padStart(2, '0')}
+                                    </div>
                                 </div>
 
                                 {/* Video Info */}
-                                <div className="p-4">
+                                <div className="md:px-4 md:py-4 px-2.5 py-1.5">
                                     <h3 className="font-medium text-gray-800 line-clamp-1 group-hover:text-violet-600 transition-colors">
                                         {video.memoryTitle}
                                     </h3>
@@ -382,9 +459,76 @@ const ModernVideoGallery = () => {
                                     </div>
                                 </div>
                             </div>
+                            
+                            {/* Tape/Sticker Effect */}
+                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-12 h-3 bg-yellow-200 rotate-6 opacity-80"></div>
                         </div>
                     ))}
                 </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="mt-12 flex justify-center">
+                        <div className="inline-flex rounded-lg bg-white/50 backdrop-blur-sm p-1 shadow-md">
+                            <button
+                                onClick={goToPrevPage}
+                                disabled={currentPage === 1}
+                                className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+                                    currentPage === 1 
+                                    ? 'text-gray-400 cursor-not-allowed' 
+                                    : 'text-violet-600 hover:bg-violet-100'
+                                } transition-colors`}
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+                            
+                            <div className="hidden sm:flex">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .filter(page => {
+                                        // Show first page, last page, current page, and pages around current
+                                        return page === 1 || 
+                                            page === totalPages || 
+                                            (page >= currentPage - 1 && page <= currentPage + 1);
+                                    })
+                                    .map((page, index, array) => (
+                                        <React.Fragment key={page}>
+                                            {index > 0 && array[index - 1] !== page - 1 && (
+                                                <span className="flex items-center justify-center w-10 h-10 text-gray-500">...</span>
+                                            )}
+                                            <button
+                                                onClick={() => paginate(page)}
+                                                className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+                                                    currentPage === page
+                                                    ? 'bg-violet-600 text-white'
+                                                    : 'text-gray-700 hover:bg-violet-100'
+                                                } transition-all`}
+                                            >
+                                                {page}
+                                            </button>
+                                        </React.Fragment>
+                                    ))
+                                }
+                            </div>
+                            
+                            {/* Mobile pagination display */}
+                            <div className="flex sm:hidden items-center justify-center w-20 h-10 text-gray-700">
+                                <span>{currentPage} / {totalPages}</span>
+                            </div>
+                            
+                            <button
+                                onClick={goToNextPage}
+                                disabled={currentPage === totalPages}
+                                className={`flex items-center justify-center w-10 h-10 rounded-lg ${
+                                    currentPage === totalPages
+                                    ? 'text-gray-400 cursor-not-allowed'
+                                    : 'text-violet-600 hover:bg-violet-100'
+                                } transition-colors`}
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Video Modal */}
                 {selectedVideo && (

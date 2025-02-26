@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, XCircle, Heart, Sparkles, MessageCircle } from 'lucide-react';
-import { processMessage } from './utils/processMessage';
+import { Send, Loader2, XCircle, Heart, Sparkles, MessageCircle, RefreshCw } from 'lucide-react';
+import { personalData } from './learning/dena';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -22,22 +22,6 @@ interface ChatResponse {
 
 const generateMessageId = () => `msg_${Math.random().toString(36).substr(2, 9)}`;
 
-const systemContext = `
-You are Dena-Warza, an AI assistant with specific knowledge about Najmita Zahira Dirgantoro and Defano Arya Wardhana. 
-You primarily communicate in Indonesian, mixing in English when appropriate. 
-When asked about Najmita or Defano, use the provided personal information to give accurate responses.
-If you don't have specific information about what's being asked, politely ask for clarification.
-
-Assume you are Defano Arya Wardhana or Najmita Zahira Dirgantoro. If someone asks you to use "I" in front of them, you must ask whether you are Defano or Najmita.
-
-Key characteristics:
-- Friendly and professional tone 😊
-- Occasionally uses emoticons to add warmth
-- Prefers Indonesian but is comfortable using English
-- Deep knowledge about tech and design topics
-- Always maintains respectful and polite boundaries
-`;
-
 const DenaWarzaChat = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
@@ -45,6 +29,7 @@ const DenaWarzaChat = () => {
     const [error, setError] = useState<string | null>(null);
     const [isFirstMessage, setIsFirstMessage] = useState(true);
     const [typingIndicator, setTypingIndicator] = useState(false);
+    const [failedMessage, setFailedMessage] = useState<Message | null>(null); // State untuk menyimpan pesan yang gagal
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -113,6 +98,42 @@ const DenaWarzaChat = () => {
         }
     }, []);
 
+    // Build the full story about Defano and Najmita
+    const buildFullStory = (): string => {
+        const najmitaData = personalData.najmita;
+        const defanoData = personalData.defano;
+
+        const fullStory = `
+            Berikut adalah informasi lengkap tentang Najmita Zahira Dirgantoro dan Defano Arya Wardhana:
+
+            1. Tentang Najmita:
+            - Nama Lengkap: ${najmitaData.details.fullName}
+            - Bio: ${najmitaData.bio}
+            - tinggal: ${najmitaData.details.tinggal}
+            - Kepribadian: ${najmitaData.details.personality}
+            - Kehidupan Sehari-hari: ${najmitaData.details.dailyLife}
+            - Hubungan dengan Defano: ${najmitaData.details.relationshipWithDefano}
+            - Tantangan: ${najmitaData.details.challenges}
+            - Makanan Favorit: ${najmitaData.details.favoriteFoods}
+            - Alergi: ${najmitaData.details.allergies}
+            - Deskripsi Lengkap: ${najmitaData.details.fullDescription}
+
+            2. Tentang Defano:
+            - Nama Lengkap: ${defanoData.details.fullName}
+            - Bio: ${defanoData.bio}
+            - tinggal: ${defanoData.details.tinggal}
+            - Kepribadian: ${defanoData.details.personality}
+            - Kehidupan Sehari-hari: ${defanoData.details.dailyLife}
+            - Hubungan dengan Najmita: ${defanoData.details.relationshipWithNajmita}
+            - Tantangan: ${defanoData.details.challenges}
+            - Makanan Favorit: ${defanoData.details.favoriteFoods}
+            - Alergi: ${defanoData.details.allergies}
+            - Deskripsi Lengkap: ${defanoData.details.fullDescription}
+        `;
+
+        return fullStory;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!input.trim() || isLoading) return;
@@ -133,62 +154,41 @@ const DenaWarzaChat = () => {
         setTimeout(() => setTypingIndicator(true), 300);
 
         try {
-            // Process the message locally first
-            let localResponse = processMessage(input.trim());
+            const fullStory = buildFullStory();
 
-            // If the local response is different from the input, use it
-            if (localResponse !== input.trim()) {
-                setTimeout(() => {
-                    setTypingIndicator(false);
-                    const assistantMessage: Message = {
-                        role: 'assistant',
-                        content: localResponse,
-                        timestamp: new Date(),
-                        id: generateMessageId()
-                    };
-                    setMessages(prev => [...prev, assistantMessage]);
-                    setIsLoading(false);
-                }, 1000);
-                return;
+            // Siapkan pesan untuk dikirim ke API
+            const apiMessages = [
+                { role: "system", content: fullStory }, // Kirim cerita lengkap sebagai konteks
+                ...messages.map(({ role, content }) => ({ role, content })), // Riwayat percakapan
+                { role: "user", content: input.trim() } // Pesan terbaru dari pengguna
+            ];
+
+            // Kirim ke API
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "HTTP-Referer": SITE_URL,
+                    "X-Title": SITE_NAME,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "model": "deepseek/deepseek-chat:free",
+                    "messages": apiMessages
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            // If no local response, call the API
-            let responseContent = '';
-            let retryCount = 0;
-            const maxRetries = 3;
+            const data: ChatResponse = await response.json();
+            const responseContent = data.choices[0].message.content;
 
-            while (retryCount < maxRetries) {
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-                        "HTTP-Referer": SITE_URL,
-                        "X-Title": SITE_NAME,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        "model": "deepseek/deepseek-chat:free",
-                        "messages": [
-                            { role: "system", content: systemContext },
-                            ...messages.map(({ role, content }) => ({ role, content })),
-                            { role: "user", content: input.trim() }
-                        ]
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data: ChatResponse = await response.json();
-                responseContent = data.choices[0].message.content;
-
-                if (responseContent.trim()) break;
-                retryCount++;
-            }
-
+            // Jika respons kosong, tampilkan pesan error
             if (!responseContent.trim()) {
-                responseContent = "Maaf, saya tidak bisa memberikan jawaban saat ini. Silakan coba lagi nanti.";
+                setFailedMessage(userMessage); // Simpan pesan yang gagal
+                throw new Error("Server sedang sibuk. Sabara ya cantikuuu.");
             }
 
             setTypingIndicator(false);
@@ -231,6 +231,98 @@ const DenaWarzaChat = () => {
                 return [...newMessages];
             });
 
+        } catch (err) {
+            setTypingIndicator(false);
+            setError(err instanceof Error ? err.message : 'An error occurred');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Fungsi untuk mengirim ulang pesan yang gagal
+    const handleRetry = async () => {
+        if (!failedMessage) return;
+
+        setError(null);
+        setIsLoading(true);
+
+        try {
+            const fullStory = buildFullStory();
+
+            // Siapkan pesan untuk dikirim ke API
+            const apiMessages = [
+                { role: "system", content: fullStory }, // Kirim cerita lengkap sebagai konteks
+                ...messages.map(({ role, content }) => ({ role, content })), // Riwayat percakapan
+                { role: "user", content: failedMessage.content } // Pesan yang gagal
+            ];
+
+            // Kirim ke API
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "HTTP-Referer": SITE_URL,
+                    "X-Title": SITE_NAME,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "model": "deepseek/deepseek-chat:free",
+                    "messages": apiMessages
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data: ChatResponse = await response.json();
+            const responseContent = data.choices[0].message.content;
+
+            if (!responseContent.trim()) {
+                throw new Error("Server sedang sibuk. Silakan coba lagi nanti.");
+            }
+
+            setTypingIndicator(false);
+
+            // Add streaming message
+            const messageId = generateMessageId();
+            const streamingMessage: Message = {
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+                isStreaming: true,
+                id: messageId
+            };
+
+            setMessages(prev => [...prev, streamingMessage]);
+
+            // Simulate streaming effect
+            await streamText(responseContent, (streamedText) => {
+                setMessages(prev => {
+                    const newMessages = [...prev];
+                    const lastMessage = newMessages.find(msg => msg.id === messageId);
+                    if (lastMessage && lastMessage.isStreaming) {
+                        lastMessage.content = streamedText;
+                    }
+                    return [...newMessages];
+                });
+            });
+
+            // Update final message
+            setMessages(prev => {
+                const newMessages = [...prev];
+                const messageIndex = newMessages.findIndex(msg => msg.id === messageId);
+                if (messageIndex !== -1 && newMessages[messageIndex].isStreaming) {
+                    newMessages[messageIndex] = {
+                        ...newMessages[messageIndex],
+                        content: responseContent,
+                        isStreaming: false
+                    };
+                }
+                return [...newMessages];
+            });
+
+            setFailedMessage(null); // Reset pesan yang gagal
         } catch (err) {
             setTypingIndicator(false);
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -289,12 +381,12 @@ const DenaWarzaChat = () => {
     };
 
     return (
-        <div className='max-w-5xl mx-auto px-4 sm:px-6 py-6'>
+        <div className='max-w-5xl mx-auto px-4 sm:px-6 py-6 '>
             <motion.div
                 initial="hidden"
                 animate="visible"
                 variants={containerVariants}
-                className="w-full bg-white rounded-2xl shadow-xl overflow-hidden relative"
+                className="w-full bg-white rounded-2xl shadow-xl overflow-hidden relative min-h-screen"
             >
                 {/* Enhanced Gradient Header */}
                 <motion.div
@@ -518,6 +610,18 @@ const DenaWarzaChat = () => {
                             >
                                 <XCircle className="w-4 h-4" />
                                 <span>{error}</span>
+                                {failedMessage && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                                        onClick={handleRetry}
+                                        className="flex items-center gap-1 text-sm bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition-all"
+                                    >
+                                        <RefreshCw size={14} />
+                                        <span>Kirim Ulang</span>
+                                    </motion.button>
+                                )}
                             </motion.div>
                         )}
                     </AnimatePresence>

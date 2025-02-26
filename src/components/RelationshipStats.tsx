@@ -85,11 +85,11 @@ const RelationshipStats: React.FC = () => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-2 py-6 md:py-10">
-            <div className={`bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-1000 transform 
+        <div className="max-w-7xl mx-auto px-0 py-2 md:py-10">
+            <div className={`bg-white md:rounded-3xl rounded-lg md:shadow-2xl shadow-md overflow-hidden transition-all duration-1000 transform 
                 ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-6 md:p-10 text-white relative">
+                <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 p-4 md:p-10 text-white relative">
                     {/* Wave Divider */}
 
                     <h2 className="text-2xl md:text-4xl font-bold text-center mb-8 relative">
@@ -148,9 +148,9 @@ const RelationshipStats: React.FC = () => {
                 </div>
 
                 {/* Content Section */}
-                <div className="p-6 md:p-10 space-y-8">
+                <div className="p-4 md:p-10 md:space-y-8 space-y-4">
                     {/* Countdown Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:gap-6 gap-3">
                         {/* Anniversary Card */}
                         <div className={`bg-gradient-to-br from-blue-50 to-purple-50 p-6 rounded-2xl flex items-center gap-4 shadow-lg ${!isMobile && 'hover:shadow-xl'} transition-all duration-300 transform`}>
                             <div className="w-0 h-0 md:ml-20 ml-6 flex items-center justify-center">
@@ -217,7 +217,7 @@ const RelationshipStats: React.FC = () => {
                                 </h3>
                                 <button
                                     onClick={() => setIsNotebookOpen(true)}
-                                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl hover:from-amber-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-300 text-sm sm:text-base w-full sm:w-auto shadow-md hover:shadow-lg"
+                                    className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl md:hover:from-amber-600 md:hover:to-orange-600 transform md:hover:scale-105 transition-all duration-300 text-sm sm:text-base w-full sm:w-auto shadow-md hover:shadow-lg"
                                 >
                                     Buka Catatan Cinta
                                 </button>

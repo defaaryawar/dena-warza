@@ -69,13 +69,13 @@ const StorySection: React.FC = () => {
     return (
         <section className="bg-white py-4 flex items-center">
             <div className="container mx-auto px-4 max-w-7xl">
-                <div className="max-w-4xl mx-auto mb-16">
+                <div className="max-w-4xl mx-auto md:mb-16 mb-6">
                     <motion.h2
                         ref={setTitleRef}
                         initial={{ opacity: 0, y: 50 }}
                         animate={titleInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
-                        className="md:text-5xl text-3xl font-extrabold text-center mb-6 text-gray-900 leading-tight"
+                        className="md:text-5xl text-3xl font-extrabold text-center md:mb-6 mb-2 text-gray-900 leading-tight"
                     >
                         Cerita Cinta Kami
                     </motion.h2>
@@ -96,7 +96,7 @@ const StorySection: React.FC = () => {
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    className={`grid gap-8 ${
+                    className={`grid md:gap-8 gap-5 ${
                         isMobile 
                             ? 'grid-cols-1' 
                             : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'

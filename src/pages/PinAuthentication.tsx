@@ -407,7 +407,7 @@ const PinAuthentication = () => {
     }, [pin.length]);
 
     const handleBackspace = useCallback(() => {
-        setPin(prev => prev.slice(0, -1));
+        setPin(prev => prev.slice(0, -1)); 
     }, []); 
 
     const handlePinSubmit = async () => {

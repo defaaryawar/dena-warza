@@ -408,7 +408,7 @@ const PinAuthentication = () => {
 
     const handleBackspace = useCallback(() => {
         setPin(prev => prev.slice(0, -1));
-    }, []);
+    }, []); 
 
     const handlePinSubmit = async () => {
         if (pin.length !== 6 || isLoading) return;

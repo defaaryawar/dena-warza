@@ -8,12 +8,12 @@ import { Memory, MediaItem } from '../types/Memory';
 import { useIsMobile } from '../hooks/isMobile';
 import { supabase } from '../services/supabaseClient';
 
+const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
+
 const generateThumbnail = async (videoUrl: string): Promise<string> => {
     try {
-        // Define the base Cloudinary URL
-        const cloudinaryBaseUrl = "https://res.cloudinary.com/your-cloud-name/image/fetch/";
-        // Format URL Cloudinary for thumbnail generation
-        const cloudinaryUrl = `${cloudinaryBaseUrl}w_300,h_200,c_fill/${videoUrl}`;
+        // Format URL Cloudinary untuk menghasilkan thumbnail
+        const cloudinaryUrl = `${CLOUDINARY_BASE_URL}w_300,h_200,c_fill/${videoUrl}`;
         return cloudinaryUrl;
     } catch (error) {
         console.error('Error generating thumbnail with Cloudinary:', error);

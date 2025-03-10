@@ -1,6 +1,6 @@
-import { useState, useCallback, memo, useEffect } from 'react';
-import { Check, Delete, Heart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useCallback, memo, useEffect, useMemo, useRef } from 'react';
+import { Check, Delete, Heart, Calendar, Lock, Unlock } from 'lucide-react';
+import { replace, useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '../components/ui/Alert';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -38,7 +38,7 @@ const PhotoGallery = memo(() => {
 
     return (
         <div
-            className="relative w-full h-full overflow-hidden rounded-l-2xl bg-gradient-to-br from-pink-900 to-purple-900"
+            className="relative w-full h-full overflow-hidden rounded-l-2xl bg-gradient-to-br from-blue-900 to-indigo-900"
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
         >
@@ -63,7 +63,7 @@ const PhotoGallery = memo(() => {
                             repeat: Infinity,
                             ease: 'linear'
                         }}
-                        className="absolute text-pink-200"
+                        className="absolute text-blue-200"
                     >
                         <Heart size={16} />
                     </motion.div>
@@ -118,7 +118,7 @@ const PhotoGallery = memo(() => {
             {/* Hover Message */}
             <motion.div
                 initial={{ opacity: 0 }}
-                animate={{ opacity: isHovered ? 0.5 : 0 }} // Mengurangi opacity overlay hover
+                animate={{ opacity: isHovered ? 0.5 : 0 }}
                 className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm pointer-events-none"
             >
                 <p className="text-white text-xl font-medium">Our Beautiful Moments ❤️</p>
@@ -149,7 +149,7 @@ const NumPad = memo(({ onNumClick, onBackspace, disabled }: {
                             onClick={onBackspace}
                             disabled={disabled}
                             className="bg-gray-100 hover:bg-gray-200 rounded-lg p-3 flex items-center justify-center 
-                       disabled:opacity-50 transition-colors group"
+                        disabled:opacity-50 transition-colors group"
                         >
                             <Delete className="w-6 h-6 text-gray-600 group-hover:text-red-500" />
                         </motion.button>
@@ -163,10 +163,10 @@ const NumPad = memo(({ onNumClick, onBackspace, disabled }: {
                         whileTap={{ scale: 0.95 }}
                         onClick={() => onNumClick(btn)}
                         disabled={disabled}
-                        className="bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-pink-50 
-                     rounded-lg p-3 text-xl font-semibold text-gray-800 
-                     transition-colors hover:border-pink-300 disabled:opacity-50
-                     focus:outline-none focus:ring-2 focus:ring-pink-500"
+                        className="bg-white/80 backdrop-blur-sm border border-gray-200 hover:bg-blue-50 
+                        rounded-lg p-3 text-xl font-semibold text-gray-800 
+                        transition-colors hover:border-blue-300 disabled:opacity-50
+                        focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                         {btn}
                     </motion.button>
@@ -185,7 +185,7 @@ const PinDots = memo(({ length }: { length: number }) => (
                 initial={false}
                 animate={{
                     scale: index < length ? 1.1 : 1,
-                    backgroundColor: index < length ? '#EC4899' : '#D1D5DB'
+                    backgroundColor: index < length ? '#3B82F6' : '#D1D5DB'
                 }}
                 className="w-3 h-3 rounded-full"
             />
@@ -202,7 +202,7 @@ const StatusAlert = memo(({ type, message, onClose }: {
     useEffect(() => {
         const timer = setTimeout(() => {
             onClose();
-        }, 2000); // Alert akan hilang setelah 2 detik
+        }, 2000);
         return () => clearTimeout(timer);
     }, [onClose]);
 
@@ -214,10 +214,10 @@ const StatusAlert = memo(({ type, message, onClose }: {
             className="fixed top-4 left-1/2 -translate-x-1/2 z-50"
         >
             <Alert
-                className={`${type === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+                className={`${type === 'success' ? 'bg-blue-50 border-blue-200' : 'bg-red-50 border-red-200'
                     } shadow-lg min-w-[320px] backdrop-blur-sm`}
             >
-                <div className={`${type === 'success' ? 'text-green-800' : 'text-red-800'
+                <div className={`${type === 'success' ? 'text-blue-800' : 'text-red-800'
                     } flex items-center justify-between`}>
                     <AlertDescription>
                         {message}
@@ -229,6 +229,166 @@ const StatusAlert = memo(({ type, message, onClose }: {
     );
 });
 
+const BirthdayVerification = memo(({ onSubmit, onCancel, person }: {
+    onSubmit: (isCorrect: boolean) => void;
+    onCancel: () => void;
+    person: 'Defano' | 'Najmita';
+}) => {
+    const [answer, setAnswer] = useState('');
+    const [hintUsed, setHintUsed] = useState(false);
+    const [attempts, setAttempts] = useState(0);
+
+    // Fetch these from env in a real app
+    const birthdayMap: Record<'Najmita' | 'Defano', { id: string, en: string }> = {
+        'Najmita': {
+            id: "17 Mei 2004",
+            en: "17 May 2004"
+        },
+        'Defano': {
+            id: "13 Oktober 2002",
+            en: "13 October 2002"
+        }
+    };
+
+    const correctBirthdayID = birthdayMap[person].id;
+    const correctBirthdayEN = birthdayMap[person].en;
+
+    // Convert to Date object for math calculations
+    const birthdayDate = useMemo(() => {
+        const [day, month, year] = correctBirthdayEN.split(' ');
+        return new Date(
+            parseInt(year), // Year
+            getMonthNumber(month), // Month
+            parseInt(day) // Day
+        );
+    }, [correctBirthdayEN]);
+
+    // Get month number from name (English months)
+    function getMonthNumber(monthName: string): number {
+        const months = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        return months.findIndex(m => m === monthName);
+    }
+
+    // Map from Indonesian to English month names
+    const monthMap: Record<string, string> = {
+        'Januari': 'January',
+        'Februari': 'February',
+        'Maret': 'March',
+        'April': 'April',
+        'Mei': 'May',
+        'Juni': 'June',
+        'Juli': 'July',
+        'Agustus': 'August',
+        'September': 'September',
+        'Oktober': 'October',
+        'November': 'November',
+        'Desember': 'December'
+    };
+
+    // Generate question based on quiz type
+    const question = useMemo(() => {
+        return `Kapan ulang tahun ${person}? (Format: DD MMMM YYYY)`;
+    }, [person]);
+
+    const normalizeAnswer = (input: string): string => {
+        // Split the input into parts (day, month, year)
+        const parts = input.trim().split(' ');
+        if (parts.length !== 3) return input.trim();
+
+        const [day, monthInput, year] = parts;
+
+        // Check if the month is in Indonesian, if so, convert to English
+        // Use type assertion for safer access
+        const normalizedMonth = (monthMap as Record<string, string>)[monthInput] || monthInput;
+
+        return `${day} ${normalizedMonth} ${year}`;
+    };
+
+    const handleSubmit = () => {
+        const normalizedAnswer = normalizeAnswer(answer);
+        const isCorrect = normalizedAnswer === correctBirthdayEN;
+
+        if (!isCorrect) {
+            setAttempts(prev => prev + 1);
+            if (attempts >= 2 && !hintUsed) {
+                setHintUsed(true);
+            }
+        }
+
+        onSubmit(isCorrect);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="space-y-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-100"
+        >
+            <div className="flex justify-center">
+                <Calendar className="text-blue-500 w-10 h-10" />
+            </div>
+
+            <h3 className="text-lg font-semibold text-blue-800 text-center">Verifikasi Kedua</h3>
+
+            <div className="text-sm text-blue-700 bg-blue-50 p-3 rounded-lg">
+                {question}
+            </div>
+
+            {hintUsed && (
+                <div className="text-xs text-blue-600 italic">
+                    Hint: Bulan lahir {person} adalah {correctBirthdayID.split(' ')[1]}
+                </div>
+            )}
+
+            <input
+                type="text"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                placeholder="Contoh: 13 November 2002"
+                className="w-full p-3 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+            />
+
+            <div className="flex space-x-3">
+                <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={onCancel}
+                    className="flex-1 py-2 border border-blue-300 text-blue-700 rounded-lg"
+                >
+                    Kembali
+                </motion.button>
+
+                <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSubmit}
+                    disabled={!answer.trim()}
+                    className={`flex-1 py-2 rounded-lg text-white font-medium
+                              ${answer.trim() ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gray-400'}`}
+                >
+                    Verifikasi
+                </motion.button>
+            </div>
+        </motion.div>
+    );
+});
+
+// Function to set authentication token
+const setAuthToken = (value: string) => {
+    sessionStorage.setItem('authToken', value);
+};
+
+// Generate a secure token
+const generateAuthToken = () => {
+    const randomPart = Math.random().toString(36).substring(2, 15);
+    const timestamp = new Date().getTime().toString(36);
+    return `defnaj-${randomPart}-${timestamp}`;
+};
+
 // Main PinAuthentication Component
 const PinAuthentication = () => {
     const [pin, setPin] = useState('');
@@ -237,6 +397,7 @@ const PinAuthentication = () => {
         message: string | null;
     }>({ type: null, message: null });
     const [isLoading, setIsLoading] = useState(false);
+    const [authStep, setAuthStep] = useState<'pin' | 'defano' | 'najmita' | 'success'>('pin');
     const navigate = useNavigate();
 
     const handleNumClick = useCallback((num: string) => {
@@ -254,20 +415,63 @@ const PinAuthentication = () => {
 
         setIsLoading(true);
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/users/authenticate`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin }),
+            const correctPin = import.meta.env.VITE_PIN;
+            if (pin !== correctPin) {
+                setStatus({
+                    type: 'error',
+                    message: 'PIN salah. Silakan coba lagi.'
+                });
+                setPin('');
+                return;
+            }
+
+            // PIN benar, lanjut ke verifikasi ulang tahun Defano
+            setAuthStep('defano');
+            setStatus({
+                type: 'success',
+                message: 'PIN benar! Mohon verifikasi ulang tahun Defano.'
             });
 
-            const data = await response.json();
+        } catch (error) {
+            setStatus({
+                type: 'error',
+                message: 'Terjadi kesalahan. Silakan coba lagi.'
+            });
+            setPin('');
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-            if (response.ok) {
+    const handleBirthdayVerification = async (isCorrect: boolean, step: 'defano' | 'najmita') => {
+        setIsLoading(true);
+
+        if (!isCorrect) {
+            setStatus({
+                type: 'error',
+                message: 'Jawaban salah. Silakan coba lagi.'
+            });
+            setIsLoading(false);
+            return;
+        }
+
+        try {
+            if (step === 'defano') {
+                setAuthStep('najmita');
                 setStatus({
                     type: 'success',
-                    message: 'Autentikasi berhasil! Mengalihkan...'
+                    message: 'Verifikasi Defano berhasil! Silakan verifikasi Najmita.'
                 });
-                sessionStorage.setItem('authToken', data.token);
+            } else if (step === 'najmita') {
+                // Generate and set auth token
+                const authToken = generateAuthToken();
+                setAuthToken(authToken);
+
+                setAuthStep('success');
+                setStatus({
+                    type: 'success',
+                    message: 'Verifikasi Najmita berhasil! Mengalihkan...'
+                });
 
                 // Konfeti dengan bentuk hati
                 const confetti = (await import('canvas-confetti')).default;
@@ -317,26 +521,24 @@ const PinAuthentication = () => {
 
                 // Gunakan replace: true untuk menghapus halaman PIN dari history
                 setTimeout(() => navigate('/', { replace: true }), 2000);
-            } else {
-                setStatus({
-                    type: 'error',
-                    message: data.message || 'PIN salah. Silakan coba lagi.'
-                });
-                setPin('');
             }
         } catch (error) {
             setStatus({
                 type: 'error',
                 message: 'Terjadi kesalahan. Silakan coba lagi.'
             });
-            setPin('');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleBackToPinStep = () => {
+        setAuthStep('pin');
+        setPin('');
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-indigo-50">
             <AnimatePresence>
                 {status.type && (
                     <StatusAlert
@@ -357,58 +559,141 @@ const PinAuthentication = () => {
                     <PhotoGallery />
                 </div>
 
-                {/* PIN Input Section */}
+                {/* Authentication Section */}
                 <div className="w-full md:w-1/2 p-8 space-y-8 flex flex-col justify-center 
-                      bg-white bg-opacity-90 backdrop-blur-sm">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-center space-y-4"
-                    >
-                        <motion.div
-                            animate={{
-                                scale: [1, 1.1, 1],
-                                rotate: [0, -10, 10, 0]
-                            }}
-                            transition={{
-                                duration: 2,
-                                repeat: Infinity,
-                                repeatType: "reverse"
-                            }}
-                        >
-                            <Heart className="mx-auto w-12 h-12 text-pink-500 fill-pink-500" />
-                        </motion.div>
-                        <h2 className="text-2xl font-bold text-gray-800">Welcome Back!</h2>
-                        <p className="text-sm text-gray-600">Enter your 6-digit PIN</p>
-                    </motion.div>
+                        bg-gradient-to-br from-white via-blue-50 to-indigo-100 bg-opacity-90 backdrop-blur-sm">
 
-                    <PinDots length={pin.length} />
+                    <AnimatePresence mode="wait">
+                        {authStep === 'pin' && (
+                            <motion.div
+                                key="pin-section"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="space-y-8"
+                            >
+                                <motion.div
+                                    className="text-center space-y-4"
+                                >
+                                    <motion.div
+                                        animate={{
+                                            scale: [1, 1.1, 1],
+                                            rotate: [0, -10, 10, 0]
+                                        }}
+                                        transition={{
+                                            duration: 2,
+                                            repeat: Infinity,
+                                            repeatType: "reverse"
+                                        }}
+                                    >
+                                        <Lock className="mx-auto w-12 h-12 text-blue-500" />
+                                    </motion.div>
+                                    <h2 className="text-2xl font-bold text-gray-800">Welcome Back!</h2>
+                                    <p className="text-sm text-gray-600">Enter your 6-digit PIN</p>
+                                </motion.div>
 
-                    <NumPad
-                        onNumClick={handleNumClick}
-                        onBackspace={handleBackspace}
-                        disabled={isLoading}
-                    />
+                                <PinDots length={pin.length} />
 
-                    <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handlePinSubmit}
-                        disabled={pin.length !== 6 || isLoading}
-                        className={`w-full py-3 rounded-lg text-white font-semibold 
-                      transition-colors flex items-center justify-center
-                      ${pin.length === 6 && !isLoading
-                                ? 'bg-pink-500 hover:bg-pink-600'
-                                : 'bg-gray-400 cursor-not-allowed'}`}
-                    >
-                        {isLoading ? (
-                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : status.type === 'success' ? (
-                            <Check className="w-6 h-6" />
-                        ) : (
-                            'Verify PIN'
+                                <NumPad
+                                    onNumClick={handleNumClick}
+                                    onBackspace={handleBackspace}
+                                    disabled={isLoading}
+                                />
+
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={handlePinSubmit}
+                                    disabled={pin.length !== 6 || isLoading}
+                                    className={`w-full py-3 rounded-lg text-white font-semibold 
+                                            transition-colors flex items-center justify-center
+                                            ${pin.length === 6 && !isLoading
+                                            ? 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                                            : 'bg-gray-400 cursor-not-allowed'}`}
+                                >
+                                    {isLoading ? (
+                                        <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                        'Verify PIN'
+                                    )}
+                                </motion.button>
+                            </motion.div>
                         )}
-                    </motion.button>
+
+                        {authStep === 'defano' && (
+                            <motion.div
+                                key="defano-section"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="w-full"
+                            >
+                                <BirthdayVerification
+                                    onSubmit={(isCorrect) => handleBirthdayVerification(isCorrect, 'defano')}
+                                    onCancel={handleBackToPinStep}
+                                    person="Defano"
+                                />
+                            </motion.div>
+                        )}
+
+                        {authStep === 'najmita' && (
+                            <motion.div
+                                key="najmita-section"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                className="w-full"
+                            >
+                                <BirthdayVerification
+                                    onSubmit={(isCorrect) => handleBirthdayVerification(isCorrect, 'najmita')}
+                                    onCancel={handleBackToPinStep}
+                                    person="Najmita"
+                                />
+                            </motion.div>
+                        )}
+
+                        {authStep === 'success' && (
+                            <motion.div
+                                key="success-section"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="text-center space-y-6"
+                            >
+                                <motion.div
+                                    animate={{
+                                        scale: [1, 1.2, 1],
+                                        rotate: [0, 0, 0]
+                                    }}
+                                    transition={{
+                                        duration: 1.5,
+                                        repeat: Infinity,
+                                        repeatType: "reverse"
+                                    }}
+                                    className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center"
+                                >
+                                    <Unlock className="w-10 h-10 text-white" />
+                                </motion.div>
+
+                                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                                    Authentication Success!
+                                </h2>
+
+                                <p className="text-blue-700">
+                                    Redirecting you to our special moments...
+                                </p>
+
+                                <div className="w-full max-w-xs mx-auto h-2 bg-blue-100 rounded-full overflow-hidden">
+                                    <motion.div
+                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600"
+                                        initial={{ width: "0%" }}
+                                        animate={{ width: "100%" }}
+                                        transition={{ duration: 2 }}
+                                    />
+                                </div>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </motion.div>
         </div>

@@ -1,13 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Search, Filter, X, ChevronDown, ChevronUp, AlertTriangle, Sparkles } from 'lucide-react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import MemoryCard from './MemoryCardTerbaru';
 import { Memory } from '../types/Memory';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { supabase } from '../services/supabaseClient';
 
 const MemoryGalleryAll: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -16,12 +15,11 @@ const MemoryGalleryAll: React.FC = () => {
     const [isFilterExpanded, setIsFilterExpanded] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
+
     // Responsive breakpoints
     const isMobile = windowWidth < 768;
     const isSmallMobile = windowWidth < 380;
 
-    const queryClient = useQueryClient();
     const navigate = useNavigate();
     const { scrollYProgress } = useScroll();
     const scaleX = useSpring(scrollYProgress, {
@@ -41,104 +39,89 @@ const MemoryGalleryAll: React.FC = () => {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    // Enhanced error handling function
-    const handleFetchError = useCallback((error: Error) => {
-        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
-            sessionStorage.removeItem('authToken');
-            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
-            navigate('/pin', { replace: true });
-            return null;
-        }
+    // Window resize handler
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
 
-        if (error.message.includes('500')) {
-            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
-            return null;
-        }
-
-        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
-            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return null;
-        }
-
-        toast.error(`Gagal memuat kenangan: ${error.message}`);
-        return null;
-    }, [navigate]);
-
-    // Fungsi untuk membandingkan data cache dengan data baru
-    const compareMemories = useCallback((cachedData: Memory[], newData: Memory[]): boolean => {
-        if (cachedData.length !== newData.length) return true;
-        return newData.some((memory, index) => memory.updatedAt !== cachedData[index]?.updatedAt);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Fetch memories with comprehensive error handling
     const {
         data: memories,
         isLoading: loading,
         error,
         refetch: refresh
     } = useQuery<Memory[], Error>(
-        ['memories', API_URL],
+        ['memories'],
         async () => {
-            const token = sessionStorage.getItem('authToken');
-
-            if (!token) {
-                throw new Error('No authentication token found');
+            console.log('Attempting to fetch memories...');
+            const { data, error } = await supabase
+                .from('Memory')
+                .select('*')
+                .order('date', { ascending: false });
+    
+            if (error) {
+                console.error('Supabase error:', error);
+                throw new Error(`Fetch error: ${error.message}`);
             }
-
-            try {
-                const response = await fetch(`${API_URL}/api/memories`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                }
-
-                return response.json();
-            } catch (err) {
-                return handleFetchError(err as Error);
+    
+            if (!data) {
+                throw new Error('No data returned from Supabase');
             }
+    
+            return data;
         },
         {
-            staleTime: 120 * 60 * 1000, // 2 hours
-            cacheTime: 120 * 60 * 1000, // 2 hours
+            retry: 1,
             refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            refetchOnMount: false,
             onError: (err: Error) => {
-                handleFetchError(err);
-            },
-            select: (newData) => {
-                const cachedData = queryClient.getQueryData<Memory[]>(['memories', API_URL]);
-
-                if (!cachedData) return newData;
-
-                const isDataChanged = compareMemories(cachedData, newData);
-
-                return isDataChanged ? newData : cachedData;
+                console.error('Query error:', err);
+                toast.error(`Gagal memuat data: ${err.message}`);
             }
         }
     );
 
-    // Urutkan data berdasarkan tanggal terbaru
+    useEffect(() => {
+        const testConnection = async () => {
+            console.log('Testing Supabase connection...');
+            try {
+                const { data, error } = await supabase
+                    .from('Memory')
+                    .select('*')
+                    .limit(1);
+    
+                if (error) {
+                    console.error('Supabase connection error:', error);
+                } else {
+                    console.log('Supabase connection successful:', data);
+                }
+            } catch (e) {
+                console.error('Connection test error:', e);
+            }
+        };
+    
+        testConnection();
+    }, []);
+
+    // Sort memories by date
     const sortedMemories = useMemo(() => {
-        if (!memories) return [];
-        return memories.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        if (!memories || !memories.length) return [];
+        return [...memories].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     }, [memories]);
 
-    // Mendapatkan semua tags yang unik dan diurutkan
+    // Get unique and sorted tags
     const allTags = useMemo(() => {
-        if (!sortedMemories) return [];
+        if (!sortedMemories.length) return [];
         const tags = Array.from(new Set(sortedMemories.flatMap(memory => memory.tags || [])));
         return tags.sort((a, b) => a.localeCompare(b));
     }, [sortedMemories]);
 
-    // Filter memories berdasarkan search term dan selected tags
+    // Filter memories based on search term and selected tags
     const filteredMemories = useMemo(() => {
-        if (!sortedMemories) return [];
+        if (!sortedMemories.length) return [];
         return sortedMemories.filter(memory => {
             const normalizedSearchTerm = searchTerm.toLowerCase().trim();
             const matchesSearch =
@@ -155,7 +138,7 @@ const MemoryGalleryAll: React.FC = () => {
         });
     }, [sortedMemories, searchTerm, selectedTags]);
 
-    // Memories yang ditampilkan berdasarkan display count
+    // Memories to display based on display count
     const displayedMemories = useMemo(() =>
         filteredMemories.slice(0, displayCount),
         [filteredMemories, displayCount]
@@ -253,6 +236,7 @@ const MemoryGalleryAll: React.FC = () => {
             </motion.div>
         </motion.div>
     );
+
     // Error state
     if (error && !sortedMemories?.length) return (
         <div className="min-h-screen flex items-center justify-center">
@@ -284,7 +268,7 @@ const MemoryGalleryAll: React.FC = () => {
                 initial="hidden"
                 animate="visible"
             >
-                {/* Search and Filter Section - Updated for better mobile experience */}
+                {/* Search and Filter Section */}
                 <motion.div
                     className={`bg-white rounded-lg shadow-lg px-3 py-3 mb-4 space-y-4 sticky 
                 ${isMobile ? 'top-20' : 'top-20'} z-10 mx-0
@@ -292,7 +276,7 @@ const MemoryGalleryAll: React.FC = () => {
                     variants={itemVariants}
                 >
                     <div className="flex flex-col lg:flex-row gap-3">
-                        {/* Search Input with optimized mobile padding */}
+                        {/* Search Input */}
                         <motion.div className="relative flex-grow">
                             <input
                                 type="text"
@@ -320,7 +304,7 @@ const MemoryGalleryAll: React.FC = () => {
                             )}
                         </motion.div>
 
-                        {/* Filter Toggle Button - Optimized for mobile */}
+                        {/* Filter Toggle Button */}
                         <motion.button
                             onClick={() => setIsFilterExpanded(!isFilterExpanded)}
                             className={`px-4 py-3 rounded-lg border-2 transition-all duration-300
@@ -336,7 +320,7 @@ const MemoryGalleryAll: React.FC = () => {
                         </motion.button>
                     </div>
 
-                    {/* Filter Tags Section - Mobile optimized */}
+                    {/* Filter Tags Section */}
                     <AnimatePresence>
                         {isFilterExpanded && (
                             <motion.div
@@ -364,7 +348,7 @@ const MemoryGalleryAll: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Tag buttons with optimized spacing */}
+                                {/* Tag buttons */}
                                 <div className="flex flex-wrap gap-2">
                                     {allTags.map(tag => (
                                         <button
@@ -385,7 +369,7 @@ const MemoryGalleryAll: React.FC = () => {
                         )}
                     </AnimatePresence>
 
-                    {/* Active Filters Display - Mobile optimized */}
+                    {/* Active Filters Display */}
                     <AnimatePresence>
                         {(selectedTags.length > 0 || searchTerm) && (
                             <motion.div
@@ -429,14 +413,14 @@ const MemoryGalleryAll: React.FC = () => {
                     </AnimatePresence>
                 </motion.div>
 
-                {/* Memory Cards Grid - Optimized grid layout */}
+                {/* Memory Cards Grid */}
                 <div className={`px-2 grid gap-3 ${isMobile
-                        ? 'grid-cols-1'
-                        : windowWidth < 1024
-                            ? 'grid-cols-2'
-                            : windowWidth < 1280
-                                ? 'grid-cols-3'
-                                : 'grid-cols-4'
+                    ? 'grid-cols-1'
+                    : windowWidth < 1024
+                        ? 'grid-cols-2'
+                        : windowWidth < 1280
+                            ? 'grid-cols-3'
+                            : 'grid-cols-4'
                     }`}>
                     <AnimatePresence mode="wait">
                         {displayedMemories.length > 0 ? (
@@ -473,7 +457,7 @@ const MemoryGalleryAll: React.FC = () => {
                     </AnimatePresence>
                 </div>
 
-                {/* Load More Button - Mobile optimized */}
+                {/* Load More Button */}
                 {displayedMemories.length < filteredMemories.length && (
                     <motion.div className="flex justify-center mt-6 mb-4 px-2">
                         <button
@@ -487,7 +471,7 @@ const MemoryGalleryAll: React.FC = () => {
                     </motion.div>
                 )}
 
-                {/* Scroll to Top Button - Mobile optimized */}
+                {/* Scroll to Top Button */}
                 <AnimatePresence>
                     {scrolled && (
                         <motion.button

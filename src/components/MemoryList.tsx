@@ -4,46 +4,28 @@ import { motion, AnimatePresence } from 'framer-motion';
 import MemoryCard from './MemoryCardTerbaru';
 import { useNavigate } from 'react-router-dom';
 import { Memory } from '../types/Memory';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQuery } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { useIsMobile } from '../hooks/isMobile';
-
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { supabase } from '../services/supabaseClient';
 
 const MemoryList: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(false);
-    const queryClient = useQueryClient();
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
     const handleFetchError = (error: Error) => {
-        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
-            sessionStorage.removeItem('authToken');
-            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
-            navigate('/login');
-            return null;
-        }
-
-        if (error.message.includes('500')) {
-            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
-            return null;
-        }
-
         if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
             toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return null;
+            return [];
         }
-
+    
         toast.error(`Gagal memuat kenangan: ${error.message}`);
-        return null;
+        return [];
     };
-
-    const compareMemories = (cachedData: Memory[], newData: Memory[]): boolean => {
-        if (cachedData.length !== newData.length) return true;
-        return newData.some((memory, index) => memory.updatedAt !== cachedData[index]?.updatedAt);
-    };
+    
 
     const {
         data: memories,
@@ -51,30 +33,27 @@ const MemoryList: React.FC = () => {
         error,
         refetch
     } = useQuery<Memory[], Error>(
-        ['latest_memories', API_URL],
+        ['latest_memories'],
         async () => {
-            const token = sessionStorage.getItem('authToken');
-
-            if (!token) {
-                toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
-                navigate('/pin', { replace: true });
-                return null;
-            }
-
             try {
-                const response = await fetch(`${API_URL}/api/memories`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                console.log('Fetching memories from Supabase');
+                
+                // Directly query the Memory table from Supabase
+                const { data, error } = await supabase
+                    .from('Memory')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                // Log the results for debugging
+                console.log('Supabase response:', { data, error });
+                
+                if (error) {
+                    throw new Error(error.message);
                 }
-
-                return response.json();
+                
+                return data || [];
             } catch (err) {
+                console.error('Error fetching memories:', err);
                 return handleFetchError(err as Error);
             }
         },
@@ -86,15 +65,6 @@ const MemoryList: React.FC = () => {
             refetchOnMount: false,
             onError: (err: Error) => {
                 handleFetchError(err);
-            },
-            select: (newData) => {
-                const cachedData = queryClient.getQueryData<Memory[]>(['latest_memories', API_URL]);
-
-                if (!cachedData) return newData;
-
-                const isDataChanged = compareMemories(cachedData, newData);
-
-                return isDataChanged ? newData : cachedData;
             }
         }
     );
@@ -213,8 +183,6 @@ const MemoryList: React.FC = () => {
             </div>
         </div>
     );
-
-
 
     // Error state with improved typography
     if (error) return (

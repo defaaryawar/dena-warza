@@ -1,12 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Search, Filter, X, ChevronDown, ChevronUp, AlertTriangle, Sparkles } from 'lucide-react';
-import { useQuery } from 'react-query';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
 import MemoryCard from './MemoryCardTerbaru';
 import { Memory } from '../types/Memory';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
-import { supabase } from '../services/supabaseClient';
+import { useFetchMemories } from '../hooks/useFetchMemories'; // Import the custom hook
 
 const MemoryGalleryAll: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -28,6 +26,14 @@ const MemoryGalleryAll: React.FC = () => {
         restDelta: 0.001
     });
 
+    // Using the custom hook instead of direct useQuery
+    const {
+        data: memories,
+        isLoading: loading,
+        error,
+        refetch: refresh
+    } = useFetchMemories();
+
     // Scroll progress indicator
     useEffect(() => {
         const handleScroll = () => {
@@ -47,63 +53,6 @@ const MemoryGalleryAll: React.FC = () => {
 
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const {
-        data: memories,
-        isLoading: loading,
-        error,
-        refetch: refresh
-    } = useQuery<Memory[], Error>(
-        ['memories'],
-        async () => {
-            console.log('Attempting to fetch memories...');
-            const { data, error } = await supabase
-                .from('Memory')
-                .select('*')
-                .order('date', { ascending: false });
-    
-            if (error) {
-                console.error('Supabase error:', error);
-                throw new Error(`Fetch error: ${error.message}`);
-            }
-    
-            if (!data) {
-                throw new Error('No data returned from Supabase');
-            }
-    
-            return data;
-        },
-        {
-            retry: 1,
-            refetchOnWindowFocus: false,
-            onError: (err: Error) => {
-                console.error('Query error:', err);
-                toast.error(`Gagal memuat data: ${err.message}`);
-            }
-        }
-    );
-
-    useEffect(() => {
-        const testConnection = async () => {
-            console.log('Testing Supabase connection...');
-            try {
-                const { data, error } = await supabase
-                    .from('Memory')
-                    .select('*')
-                    .limit(1);
-    
-                if (error) {
-                    console.error('Supabase connection error:', error);
-                } else {
-                    console.log('Supabase connection successful:', data);
-                }
-            } catch (e) {
-                console.error('Connection test error:', e);
-            }
-        };
-    
-        testConnection();
     }, []);
 
     // Sort memories by date

@@ -3,11 +3,8 @@ import { ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MemoryCard from './MemoryCardTerbaru';
 import { useNavigate } from 'react-router-dom';
-import { Memory } from '../types/Memory';
-import { useQuery } from 'react-query';
-import { toast } from 'react-hot-toast';
 import { useIsMobile } from '../hooks/isMobile';
-import { supabase } from '../services/supabaseClient';
+import { useFetchMemories } from '../hooks/useFetchMemories'; // Import the custom hook
 
 const MemoryList: React.FC = () => {
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -16,65 +13,20 @@ const MemoryList: React.FC = () => {
     const navigate = useNavigate();
     const isMobile = useIsMobile();
 
-    const handleFetchError = (error: Error) => {
-        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
-            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return [];
-        }
-    
-        toast.error(`Gagal memuat kenangan: ${error.message}`);
-        return [];
-    };
-    
-
+    // Use the custom hook
     const {
-        data: memories,
+        data: memoriesWithMedia,
         isLoading: loading,
         error,
         refetch
-    } = useQuery<Memory[], Error>(
-        ['latest_memories'],
-        async () => {
-            try {
-                console.log('Fetching memories from Supabase');
-                
-                // Directly query the Memory table from Supabase
-                const { data, error } = await supabase
-                    .from('Memory')
-                    .select('*')
-                    .order('date', { ascending: false });
-                
-                // Log the results for debugging
-                console.log('Supabase response:', { data, error });
-                
-                if (error) {
-                    throw new Error(error.message);
-                }
-                
-                return data || [];
-            } catch (err) {
-                console.error('Error fetching memories:', err);
-                return handleFetchError(err as Error);
-            }
-        },
-        {
-            staleTime: 120 * 60 * 1000,
-            cacheTime: 120 * 60 * 1000,
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            refetchOnMount: false,
-            onError: (err: Error) => {
-                handleFetchError(err);
-            }
-        }
-    );
+    } = useFetchMemories();
 
     const latestMemories = useMemo(() => {
-        if (!memories) return [];
-        return memories
+        if (!memoriesWithMedia) return [];
+        return memoriesWithMedia
             .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
             .slice(0, 10);
-    }, [memories]);
+    }, [memoriesWithMedia]);
 
     const checkScrollability = () => {
         if (scrollRef.current) {
@@ -104,7 +56,7 @@ const MemoryList: React.FC = () => {
                 currentScrollRef.removeEventListener('scroll', checkScrollability);
             }
         };
-    }, [memories]);
+    }, [memoriesWithMedia]);
 
     const scroll = (direction: 'left' | 'right') => {
         if (!scrollRef.current) return;

@@ -1,45 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Image as ImageIcon, Video, Calendar, ChevronLeft, ChevronRight, Play, AlertTriangle } from 'lucide-react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Memory, MediaItem } from '../types/Memory';
 import { useIsMobile } from '../hooks/isMobile';
+import { supabase } from '../services/supabaseClient';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
-
-const generateVideoThumbnail = (videoUrl: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const video = document.createElement('video');
-        video.crossOrigin = 'anonymous';
-        video.src = videoUrl;
-        video.currentTime = 1; // Set to 1 second
-
-        video.addEventListener('loadeddata', () => {
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    throw new Error('Could not get canvas context');
-                }
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                const thumbnailUrl = canvas.toDataURL('image/webp');
-                video.remove();
-                resolve(thumbnailUrl);
-            } catch (error) {
-                reject(error);
-            }
-        });
-
-        video.addEventListener('error', (error) => {
-            reject(error);
-        });
-
-        video.load();
-    });
+const generateThumbnail = async (videoUrl: string): Promise<string> => {
+    try {
+        // Define the base Cloudinary URL
+        const cloudinaryBaseUrl = "https://res.cloudinary.com/your-cloud-name/image/fetch/";
+        // Format URL Cloudinary for thumbnail generation
+        const cloudinaryUrl = `${cloudinaryBaseUrl}w_300,h_200,c_fill/${videoUrl}`;
+        return cloudinaryUrl;
+    } catch (error) {
+        console.error('Error generating thumbnail with Cloudinary:', error);
+        throw error;
+    }
 };
 
 interface MediaDisplayProps {
@@ -51,9 +30,9 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({ media }) => {
 
     useEffect(() => {
         if (media.type === 'video') {
-            generateVideoThumbnail(media.url)
+            generateThumbnail(media.url)
                 .then((thumbnail: string) => setVideoThumbnail(thumbnail))
-                .catch(err => console.error('Error generating thumbnail:', err));
+                .catch((err: any) => console.error('Error generating thumbnail:', err));
         }
     }, [media.url, media.type]);
 
@@ -100,20 +79,13 @@ const MemoryDetail: React.FC = () => {
     const [filter, setFilter] = useState<'all' | 'photo' | 'video'>('all');
     const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
     const isMobile = useIsMobile();
+    const [loading, setLoading] = useState(true);
+    const [memory, setMemory] = useState<Memory | null>(null);
+    const [error, setError] = useState<Error | null>(null);
 
     // Enhanced error handling function
     const handleFetchError = (error: Error) => {
-        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
-            sessionStorage.removeItem('authToken');
-            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
-            navigate('/pin', { replace: true });
-            return null;
-        }
-
-        if (error.message.includes('500')) {
-            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
-            return null;
-        }
+        console.error('Error fetching memory:', error);
 
         if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
             toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
@@ -124,59 +96,62 @@ const MemoryDetail: React.FC = () => {
         return null;
     };
 
-    // Fetch memory with comprehensive error handling
-    const {
-        data: memory,
-        isLoading: loading,
-        error,
-    } = useQuery<Memory, Error>(
-        ['memory', id],
-        async () => {
-            const token = sessionStorage.getItem('authToken');
-
-            if (!id) throw new Error('No memory ID provided');
-
-            if (!token) {
-                throw new Error('No authentication token found');
+    useEffect(() => {
+        const fetchMemory = async () => {
+            if (!id) {
+                setError(new Error('No memory ID provided'));
+                setLoading(false);
+                return;
             }
 
             try {
-                const response = await fetch(`${API_URL}/api/memories/${id}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+                console.log('Fetching memory detail from Supabase:', id);
 
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                // Fetch the memory with its associated media
+                const { data, error } = await supabase
+                    .from('Memory')
+                    .select(`
+                        *,
+                        Media (*)
+                    `)
+                    .eq('id', id)
+                    .single();
+
+                if (error) {
+                    throw new Error(error.message);
                 }
 
-                return response.json();
-            } catch (err) {
-                return handleFetchError(err as Error);
-            }
-        },
-        {
-            staleTime: 120 * 60 * 1000,
-            cacheTime: 120 * 60 * 1000,
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            refetchOnMount: false,
-            onError: (err: Error) => {
-                handleFetchError(err);
-            },
-            select: (newData) => {
+                if (!data) {
+                    throw new Error('Memory not found');
+                }
+
+                // Format the data to match the Memory interface
+                const formattedMemory: Memory = {
+                    ...data,
+                    media: data.Media || []
+                };
+
+                console.log('Retrieved memory:', formattedMemory);
+
+                // Update cached data if needed
                 const cachedData = queryClient.getQueryData<Memory>(['memory', id]);
+                const isDataChanged = !cachedData || JSON.stringify(cachedData) !== JSON.stringify(formattedMemory);
 
-                if (!cachedData) return newData;
+                if (isDataChanged) {
+                    queryClient.setQueryData(['memory', id], formattedMemory);
+                }
 
-                const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
-
-                return isDataChanged ? newData : cachedData;
+                setMemory(formattedMemory);
+            } catch (err) {
+                setError(err as Error);
+                handleFetchError(err as Error);
+            } finally {
+                setLoading(false);
             }
-        }
-    );
+        };
+
+        fetchMemory();
+    }, [id, queryClient]);
 
     useEffect(() => {
         if (memory) {
@@ -185,7 +160,7 @@ const MemoryDetail: React.FC = () => {
                 .filter((item): item is MediaItem & { type: 'video' } => item.type === 'video')
                 .map(async video => {
                     try {
-                        const thumbnail = await generateVideoThumbnail(video.url);
+                        const thumbnail = await generateThumbnail(video.url);
                         setThumbnails(prev => ({
                             ...prev,
                             [video.url]: thumbnail
@@ -427,8 +402,8 @@ const MemoryDetail: React.FC = () => {
                                         key={`all-${filter === 'all'}`}
                                         onClick={() => setFilter('all')}
                                         className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'all'
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                                : 'bg-white text-gray-700'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                            : 'bg-white text-gray-700'
                                             }`}
                                         whileHover={!isMobile ? { scale: filter === 'all' ? 1 : 1.05 } : undefined}
                                         whileTap={{ scale: 0.95 }}
@@ -448,8 +423,8 @@ const MemoryDetail: React.FC = () => {
                                         key={`photo-${filter === 'photo'}`}
                                         onClick={() => setFilter('photo')}
                                         className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'photo'
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                                : 'bg-white text-gray-700'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                            : 'bg-white text-gray-700'
                                             }`}
                                         whileHover={!isMobile ? { scale: filter === 'photo' ? 1 : 1.05 } : undefined}
                                         whileTap={{ scale: 0.95 }}
@@ -470,8 +445,8 @@ const MemoryDetail: React.FC = () => {
                                         key={`video-${filter === 'video'}`}
                                         onClick={() => setFilter('video')}
                                         className={`md:px-6 md:py-2.5 px-4 py-2.5 gap-1 rounded-full flex items-center md:gap-2 transition-all cursor-pointer ${filter === 'video'
-                                                ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
-                                                : 'bg-white text-gray-700'
+                                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                            : 'bg-white text-gray-700'
                                             }`}
                                         whileHover={!isMobile ? { scale: filter === 'video' ? 1 : 1.05 } : undefined}
                                         whileTap={{ scale: 0.95 }}
@@ -501,8 +476,8 @@ const MemoryDetail: React.FC = () => {
                                             key={index}
                                             onClick={() => setSelectedMediaIndex(originalIndex)}
                                             className={`relative aspect-square rounded-xl overflow-hidden group transition-all ${originalIndex === selectedMediaIndex
-                                                    ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
-                                                    : ''
+                                                ? 'ring-4 ring-blue-500 ring-offset-4 ring-offset-gray-50'
+                                                : ''
                                                 }`}
                                             layoutId={`thumbnail-${originalIndex}`}
                                             initial={{ opacity: 0, y: 20 }}

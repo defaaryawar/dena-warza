@@ -4,34 +4,10 @@ import { VideoWithMemoryInfo, MediaItem } from '../types/Memory';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import React from 'react';
+import { useFetchMemories } from '../hooks/useFetchMemories';
 
-const API_URL = import.meta.env.VITE_API_BASE_URL;
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
-const VIDEOS_CACHE_KEY = 'video_gallery_cache';
 const THUMBNAILS_CACHE_KEY = 'video_thumbnails_cache';
-
-// Fungsi untuk mendapatkan video dari cache
-const getVideosFromCache = (): VideoWithMemoryInfo[] | null => {
-    try {
-        const cached = localStorage.getItem(VIDEOS_CACHE_KEY);
-        if (cached) {
-            return JSON.parse(cached);
-        }
-        return null;
-    } catch (error) {
-        console.error('Error reading videos cache:', error);
-        return null;
-    }
-};
-
-// Fungsi untuk menyimpan video ke cache
-const saveVideosToCache = (data: VideoWithMemoryInfo[]) => {
-    try {
-        localStorage.setItem(VIDEOS_CACHE_KEY, JSON.stringify(data));
-    } catch (error) {
-        console.error('Error saving videos to cache:', error);
-    }
-};
 
 // Fungsi untuk mendapatkan thumbnails dari cache
 const getThumbnailsFromCache = (): Record<string, string> => {
@@ -72,8 +48,6 @@ const ModernVideoGallery = () => {
     const navigate = useNavigate();
     const [selectedVideo, setSelectedVideo] = useState<VideoWithMemoryInfo | null>(null);
     const [isFullScreen, setIsFullScreen] = useState(false);
-    const [videos, setVideos] = useState<VideoWithMemoryInfo[]>([]);
-    const [loading, setLoading] = useState(true);
     const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
@@ -85,100 +59,51 @@ const ModernVideoGallery = () => {
     const [itemsPerPage, setItemsPerPage] = useState(6);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-    // Enhanced error handling for fetch
-    const handleFetchError = (error: Error) => {
-        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
-            sessionStorage.removeItem('authToken');
-            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
-            navigate('/pin', { replace: true });
-            return null;
-        }
+    // Fetching data using the useFetchMemories hook
+    const { data: memories, isLoading, error } = useFetchMemories();
+    
+    // Extract videos from memories
+    const videos = useMemo(() => {
+        if (!memories) return [];
+        
+        return memories.flatMap((memory) =>
+            memory.media
+                .filter((item): item is (MediaItem & { type: 'video' }) => item.type === 'video')
+                .map((video: any) => ({
+                    ...video,
+                    memoryTitle: memory.title,
+                    memoryDate: memory.date
+                }))
+        );
+    }, [memories]);
 
-        if (error.message.includes('500')) {
-            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
-            return null;
-        }
-
-        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
-            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return null;
-        }
-
-        toast.error(`Gagal memuat video: ${error.message}`);
-        return null;
-    };
-
-    // Fetch videos from API
+    // Generate thumbnails for videos
     useEffect(() => {
-        const fetchVideos = async () => {
-            try {
-                const token = sessionStorage.getItem('authToken');
-                if (!token) {
-                    throw new Error('No authentication token found');
-                }
-
-                // Cek cache untuk video
-                const cachedVideos = getVideosFromCache();
-                const cachedThumbnails = getThumbnailsFromCache();
-
-                if (cachedVideos) {
-                    console.log('Using cached videos');
-                    setVideos(cachedVideos);
-                    setThumbnails(cachedThumbnails);
-                    setLoading(false);
-                    return;
-                }
-
-                console.log('Fetching videos from API');
-                const response = await fetch(`${API_URL}/api/memories`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                }
-
-                const memories = await response.json();
-
-                const allVideos = memories.flatMap((memory: { media: any[]; title: any; date: any; }) =>
-                    memory.media
-                        .filter((item): item is (MediaItem & { type: 'video' }) => item.type === 'video')
-                        .map((video: any) => ({
-                            ...video,
-                            memoryTitle: memory.title,
-                            memoryDate: memory.date
-                        }))
-                );
-
-                saveVideosToCache(allVideos);
-                setVideos(allVideos);
-
-                // Generate thumbnails for new videos
-                const newThumbnails = { ...cachedThumbnails };
-                for (const video of allVideos) {
-                    if (!newThumbnails[video.url]) {
-                        try {
-                            const thumbnailUrl = await generateThumbnail(video.url);
-                            newThumbnails[video.url] = thumbnailUrl;
-                        } catch (error) {
-                            console.error('Failed to generate thumbnail:', error);
-                        }
+        const generateThumbnails = async () => {
+            if (!videos || videos.length === 0) return;
+            
+            // Get cached thumbnails
+            const cachedThumbnails = getThumbnailsFromCache();
+            const newThumbnails = { ...cachedThumbnails };
+            
+            // Generate missing thumbnails
+            for (const video of videos) {
+                if (!newThumbnails[video.url]) {
+                    try {
+                        const thumbnailUrl = await generateThumbnail(video.url);
+                        newThumbnails[video.url] = thumbnailUrl;
+                    } catch (error) {
+                        console.error('Failed to generate thumbnail:', error);
                     }
                 }
-                setThumbnails(newThumbnails);
-                saveThumbnailsToCache(newThumbnails);
-            } catch (error) {
-                handleFetchError(error as Error);
-            } finally {
-                setLoading(false);
             }
+            
+            setThumbnails(newThumbnails);
+            saveThumbnailsToCache(newThumbnails);
         };
-
-        fetchVideos();
-    }, [navigate]);
+        
+        generateThumbnails();
+    }, [videos]);
 
     // Handle window resize for responsive pagination
     useEffect(() => {
@@ -283,12 +208,30 @@ const ModernVideoGallery = () => {
         }
     };
 
-    if (loading) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-rose-50 to-teal-50 flex items-center justify-center">
                 <div className="text-center">
                     <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600">Memuat video...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-rose-50 to-teal-50 flex items-center justify-center">
+                <div className="text-center">
+                    <AlertTriangle className="w-16 h-16 mx-auto mb-4 text-red-500" />
+                    <h2 className="text-2xl font-semibold text-gray-700 mb-4">Terjadi kesalahan</h2>
+                    <p className="text-gray-600 mb-6">{error.message}</p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+                    >
+                        Muat Ulang
+                    </button>
                 </div>
             </div>
         );

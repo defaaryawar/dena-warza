@@ -1,13 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Search, ArrowLeft, Calendar, Heart, Tag, GridIcon, List, Settings2, X, AlertTriangle } from 'lucide-react';
-import { useQuery, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { toast } from 'react-hot-toast';
 import { Memory } from '../types/Memory';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useIsMobile } from '../hooks/isMobile'; // Import hook useIsMobile
-
-const API_URL = import.meta.env.VITE_API_BASE_URL;
+import { useIsMobile } from '../hooks/isMobile';
+import { useFetchMemories } from '../hooks/useFetchMemories'; // Import the custom hook
 
 const SearchMemories = () => {
     const [searchParams] = useSearchParams();
@@ -19,83 +18,15 @@ const SearchMemories = () => {
     const [selectedDate, setSelectedDate] = useState('');
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const queryClient = useQueryClient();
-    const isMobile = useIsMobile(); // Gunakan hook useIsMobile
+    const isMobile = useIsMobile();
 
-    // Enhanced error handling function
-    const handleFetchError = (error: Error) => {
-        if (error.message.includes('401') || error.message.toLowerCase().includes('unauthorized')) {
-            sessionStorage.removeItem('authToken');
-            toast.error('Sesi Anda telah berakhir. Silakan login kembali.');
-            navigate('/login');
-            return null;
-        }
-
-        if (error.message.includes('500')) {
-            toast.error('Terjadi kesalahan server. Silakan coba lagi nanti.');
-            return null;
-        }
-
-        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
-            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return null;
-        }
-
-        toast.error(`Gagal memuat kenangan: ${error.message}`);
-        return null;
-    };
-
-    // Fetch memories with comprehensive error handling
+    // Use the custom hook for fetching memories
     const {
         data: memories,
         isLoading: loading,
         error,
         refetch
-    } = useQuery<Memory[], Error>(
-        ['search_memories', API_URL],
-        async () => {
-            const token = sessionStorage.getItem('authToken');
-
-            if (!token) {
-                throw new Error('No authentication token found');
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/api/memories`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-                }
-
-                return response.json();
-            } catch (err) {
-                return handleFetchError(err as Error);
-            }
-        },
-        {
-            staleTime: 120 * 60 * 1000,
-            cacheTime: 120 * 60 * 1000,
-            refetchOnWindowFocus: false,
-            refetchOnReconnect: false,
-            refetchOnMount: false,
-            onError: (err: Error) => {
-                handleFetchError(err);
-            },
-            select: (newData) => {
-                const cachedData = queryClient.getQueryData<Memory[]>(['search_memories', API_URL]);
-
-                if (!cachedData) return newData;
-
-                const isDataChanged = JSON.stringify(cachedData) !== JSON.stringify(newData);
-
-                return isDataChanged ? newData : cachedData;
-            }
-        }
-    );
+    } = useFetchMemories();
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -113,7 +44,7 @@ const SearchMemories = () => {
         return () => document.removeEventListener('mousedown', closeDropdown);
     }, [isDropdownOpen]);
 
-    // Filter dan sort data
+    // Filter and sort data
     const filteredMemories = useMemo(() => {
         if (!memories) return [];
 
@@ -191,7 +122,7 @@ const SearchMemories = () => {
                 <div className="container mx-auto py-4 relative">
                     <div className="flex items-center gap-4">
                         <motion.button
-                            whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                            whileHover={{ scale: isMobile ? 1 : 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => navigate('/')}
                             className="p-2 hover:bg-white/50 rounded-full transition-all group cursor-pointer"
@@ -214,7 +145,7 @@ const SearchMemories = () => {
                         {/* View Toggle */}
                         <div className="bg-gray-100 p-1 rounded-full hidden md:flex">
                             <motion.button
-                                whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                whileHover={{ scale: isMobile ? 1 : 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => setViewMode('grid')}
                                 className={`p-1.5 rounded-full transition-all cursor-pointer ${viewMode === 'grid'
@@ -225,7 +156,7 @@ const SearchMemories = () => {
                                 <GridIcon size={18} />
                             </motion.button>
                             <motion.button
-                                whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                whileHover={{ scale: isMobile ? 1 : 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => setViewMode('list')}
                                 className={`p-1.5 rounded-full transition-all cursor-pointer ${viewMode === 'list'
@@ -240,7 +171,7 @@ const SearchMemories = () => {
                         {/* Filter Button with Dropdown */}
                         <div className="relative dropdown-container">
                             <motion.button
-                                whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                whileHover={{ scale: isMobile ? 1 : 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className={`p-2 rounded-full cursor-pointer overflow-hidden transition-all duration-500 ${isDropdownOpen ? 'bg-blue-100 hover:bg-blue-200' : 'bg-gray-100 hover:bg-gray-200'}`}
@@ -292,7 +223,7 @@ const SearchMemories = () => {
                                                 <h3 className="font-medium mb-2 text-gray-700">Sort Order</h3>
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <motion.button
-                                                        whileHover={{ scale: isMobile ? 1 : 1.05 }} // Nonaktifkan hover di mobile
+                                                        whileHover={{ scale: isMobile ? 1 : 1.05 }}
                                                         whileTap={{ scale: 0.95 }}
                                                         onClick={() => {
                                                             setSortBy('newest');
@@ -306,7 +237,7 @@ const SearchMemories = () => {
                                                         Terbaru
                                                     </motion.button>
                                                     <motion.button
-                                                        whileHover={{ scale: isMobile ? 1 : 1.05 }} // Nonaktifkan hover di mobile
+                                                        whileHover={{ scale: isMobile ? 1 : 1.05 }}
                                                         whileTap={{ scale: 0.95 }}
                                                         onClick={() => {
                                                             setSortBy('oldest');
@@ -371,7 +302,7 @@ const SearchMemories = () => {
                                         ? 'w-full md:h-48 h-32'
                                         : 'w-48 h-36'
                                         } object-cover transform ${!isMobile ? 'md:group-hover:scale-105' : ''} transition-transform duration-300`}
-                                    whileHover={{ scale: isMobile ? 1 : 1.05 }} // Nonaktifkan hover di mobile
+                                    whileHover={{ scale: isMobile ? 1 : 1.05 }}
                                 />
                             )}
                         </div>
@@ -387,7 +318,7 @@ const SearchMemories = () => {
                                 {memory.tags.map((tag, index) => (
                                     <motion.span
                                         key={index}
-                                        whileHover={{ scale: isMobile ? 1 : 1.1 }} // Nonaktifkan hover di mobile
+                                        whileHover={{ scale: isMobile ? 1 : 1.1 }}
                                         className="inline-flex items-center gap-1 md:px-2 md:py-1 px-1 py-0.5 md:text-xs text-[9px] rounded-full bg-blue-50 text-blue-600 transition-colors"
                                     >
                                         <Tag className='md:w-3 md:h-3 h-2 w-2' />
@@ -429,4 +360,5 @@ const SearchMemories = () => {
         </div>
     );
 };
+
 export default SearchMemories;

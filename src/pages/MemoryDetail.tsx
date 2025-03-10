@@ -12,8 +12,11 @@ const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
 
 const generateThumbnail = async (videoUrl: string): Promise<string> => {
     try {
-        // Format URL Cloudinary untuk menghasilkan thumbnail
-        const cloudinaryUrl = `${CLOUDINARY_BASE_URL}w_300,h_200,c_fill/${videoUrl}`;
+        // Ekstrak public ID dari URL video
+        const publicId = videoUrl.split('/').pop()?.split('.')[0] || '';
+
+        // Format URL Cloudinary untuk menghasilkan thumbnail dari video
+        const cloudinaryUrl = `${CLOUDINARY_BASE_URL}w_300,h_200,c_fill/${publicId}.jpg`;
         return cloudinaryUrl;
     } catch (error) {
         console.error('Error generating thumbnail with Cloudinary:', error);
@@ -25,14 +28,23 @@ interface MediaDisplayProps {
     media: MediaItem;
 }
 
+const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/300x200'; 
+
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ media }) => {
     const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
 
     useEffect(() => {
         if (media.type === 'video') {
+            console.log('Generating thumbnail for video:', media.url);
             generateThumbnail(media.url)
-                .then((thumbnail: string) => setVideoThumbnail(thumbnail))
-                .catch((err: any) => console.error('Error generating thumbnail:', err));
+                .then((thumbnail: string) => {
+                    console.log('Generated thumbnail URL:', thumbnail);
+                    setVideoThumbnail(thumbnail);
+                })
+                .catch((err: any) => {
+                    console.error('Error generating thumbnail:', err);
+                    setVideoThumbnail(DEFAULT_THUMBNAIL); // Fallback ke thumbnail default
+                });
         }
     }, [media.url, media.type]);
 

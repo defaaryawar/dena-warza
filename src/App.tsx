@@ -10,6 +10,7 @@ import ScrollToTop from './hooks/useScrollToTop';
 import Home from './components/Home';
 import TambahKenangan from './pages/AddMemoryPage';
 import EditMemoryPage from './pages/EditMemoryPage';
+import NotebookComponent from './components/NotebookComponent';
 // import LovePopup from './components/LovePopup';
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ function App() {
                 <Route path="/galleryall" element={<MemoriesPage />} />
                 <Route path="/add-memory" element={<TambahKenangan />} />
                 <Route path="/edit-memory" element={<EditMemoryPage />} />
+                <Route path="/notebook" element={<NotebookComponent />} />
               </Route>
 
               {/* Redirect ke halaman PIN jika tidak ada rute yang cocok */}

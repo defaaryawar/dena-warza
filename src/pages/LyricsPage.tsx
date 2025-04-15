@@ -666,7 +666,7 @@ export const EnhancedLyricsPage = () => {
                                     <div className="mb-2 flex justify-center">
                                         {/* Ganti dengan QR code asli kamu */}
                                         <img
-                                            src="/images/qr/qr_code_haidah.png"  // Ganti dengan path QR code kamu
+                                            src="/images/qr/qr_code_hadiah.png"  // Ganti dengan path QR code kamu
                                             alt="QR Code Hadiah"
                                             className="w-48 h-48 object-contain border-2 border-pink-200 rounded"
                                             onClick={() => window.open('https://najmita-s-terminal.vercel.app/', '_blank')} // Auto redirect ketika diklik

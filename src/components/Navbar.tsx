@@ -102,7 +102,7 @@ const AlbumHeader: React.FC<AlbumHeaderProps> = ({ totalMemories }) => {
                         </span>
 
                         {/* Desktop Dropdown */}
-                        <div className="relative dropdown-container">
+                        {/* <div className="relative dropdown-container">
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                                 className="bg-gradient-to-r from-blue-500 to-purple-600 cursor-pointer text-white px-4 py-2 rounded-full flex items-center gap-2 text-sm hover:from-blue-600 hover:to-purple-700 transition-all"
@@ -131,7 +131,7 @@ const AlbumHeader: React.FC<AlbumHeaderProps> = ({ totalMemories }) => {
                                     </div>
                                 </div>
                             )}
-                        </div>
+                        </div> */}
 
                         {/* Search Bar */}
                         <div

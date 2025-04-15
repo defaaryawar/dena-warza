@@ -7,6 +7,7 @@ import ProfileSnowEffect from './relationShipUtils/ProfileSnowEffect';
 import { ProfileData, ProfileStats } from '../types/types';
 import { useIsMobile } from '../hooks/isMobile';
 import GlassIcons from './GlassIcons/GlassIcons';
+import { PersonConfig } from './relationShipUtils/GiftModal';
 
 const NotebookModal = lazy(() => import('./modal/NotebookModal'));
 
@@ -17,10 +18,40 @@ interface ProfileModalState {
     stats: ProfileStats | null;
 }
 
+// Person configs for different celebrations
+const defanoConfig: PersonConfig = {
+    name: 'Defano',
+    birthday: new Date(2025, 9, 13), // October 13, 2025
+    color: '#8b5cf6', // purple
+    secondaryColor: '#a78bfa', // lighter purple
+    imageUrl: '/images/photo-profil/photo-profil-defa.webp',
+    specialMessage: 'Selamat ulang tahun, sayang! Wish you all the best! 💜'
+};
+
+const najmitaConfig: PersonConfig = {
+    name: 'Najmita',
+    birthday: new Date(2025, 4, 17), //
+    color: '#ec4899', // pink
+    secondaryColor: '#f472b6', // lighter pink
+    imageUrl: '/images/photo-profil/photo-profil-nami.webp',
+    specialMessage: 'Semoga hari spesialmu penuh kebahagiaan dan cinta! ❤️'
+};
+
+const anniversaryConfig: PersonConfig = {
+    name: 'Anniversary',
+    birthday: new Date(2025, 8, 27), // September 27, 2025
+    color: '#3b82f6', // blue
+    secondaryColor: '#60a5fa', // lighter blue
+    specialMessage: 'Happy Anniversary! Satu tahun penuh cinta, semoga tahun-tahun berikutnya lebih indah lagi! 💙'
+};
+
 const RelationshipStats: React.FC = () => {
     const [isNotebookOpen, setIsNotebookOpen] = useState(false);
     const [contentVisible, setContentVisible] = useState(false);
-    const [giftModal, setGiftModal] = useState<{ isOpen: boolean; name: string }>({ isOpen: false, name: '' });
+    const [giftModal, setGiftModal] = useState<{ isOpen: boolean; config: PersonConfig | null }>({ 
+        isOpen: false, 
+        config: null 
+    });
     const [profileModal, setProfileModal] = useState<ProfileModalState>({
         isOpen: false,
         name: '',
@@ -45,7 +76,7 @@ const RelationshipStats: React.FC = () => {
             email: 'najmita@example.com',
             bio: 'Spreading love and happiness everywhere',
             image: '/images/photo-profil/photo-profil-nami.webp',
-            location: 'Jakrta Timur',
+            location: 'Jakarta Timur',
         },
     };
 
@@ -81,7 +112,24 @@ const RelationshipStats: React.FC = () => {
     ];
 
     const handleGlassIconClick = (name: string) => {
-        setGiftModal({ isOpen: true, name });
+        // Select the appropriate config based on the name
+        let selectedConfig: PersonConfig;
+        
+        switch (name) {
+            case 'Defano':
+                selectedConfig = defanoConfig;
+                break;
+            case 'Najmita':
+                selectedConfig = najmitaConfig;
+                break;
+            case 'Anniversary':
+                selectedConfig = anniversaryConfig;
+                break;
+            default:
+                selectedConfig = najmitaConfig; // Default fallback
+        }
+        
+        setGiftModal({ isOpen: true, config: selectedConfig });
     };
 
     return (
@@ -157,9 +205,9 @@ const RelationshipStats: React.FC = () => {
                                 <GlassIcons
                                     items={anniversaryItems}
                                     className=''
-                                    isModalOpen={giftModal.isOpen && giftModal.name === 'Anniversary'} // Hanya aktif jika name sesuai
-                                    onClick={handleGlassIconClick}
-                                    name="Anniversary" // Tambahkan name
+                                    isModalOpen={giftModal.isOpen && giftModal.config?.name === 'Anniversary'}
+                                    onClick={() => handleGlassIconClick('Anniversary')}
+                                    name="Anniversary"
                                 />
                             </div>
                             <Countdown
@@ -175,9 +223,9 @@ const RelationshipStats: React.FC = () => {
                                 <GlassIcons
                                     items={defanoItems}
                                     className=''
-                                    isModalOpen={giftModal.isOpen && giftModal.name === 'Defano'} // Hanya aktif jika name sesuai
-                                    onClick={handleGlassIconClick}
-                                    name="Defano" // Tambahkan name
+                                    isModalOpen={giftModal.isOpen && giftModal.config?.name === 'Defano'}
+                                    onClick={() => handleGlassIconClick('Defano')}
+                                    name="Defano"
                                 />
                             </div>
                             <Countdown
@@ -193,9 +241,9 @@ const RelationshipStats: React.FC = () => {
                                 <GlassIcons
                                     items={najmitaItems}
                                     className=''
-                                    isModalOpen={giftModal.isOpen && giftModal.name === 'Najmita'} // Hanya aktif jika name sesuai
-                                    onClick={handleGlassIconClick}
-                                    name="Najmita" // Tambahkan name
+                                    isModalOpen={giftModal.isOpen && giftModal.config?.name === 'Najmita'}
+                                    onClick={() => handleGlassIconClick('Najmita')}
+                                    name="Najmita"
                                 />
                             </div>
                             <Countdown
@@ -267,11 +315,13 @@ const RelationshipStats: React.FC = () => {
                 />
             </Suspense>
 
-            <GiftModal
-                isOpen={giftModal.isOpen}
-                onClose={() => setGiftModal({ isOpen: false, name: '' })}
-                name={giftModal.name}
-            />
+            {giftModal.config && (
+                <GiftModal
+                    isOpen={giftModal.isOpen}
+                    onClose={() => setGiftModal({ isOpen: false, config: null })}
+                    person={giftModal.config}
+                />
+            )}
 
             {profileModal.stats && (
                 <ProfileCardModal

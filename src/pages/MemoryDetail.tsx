@@ -6,7 +6,7 @@ import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Memory, MediaItem } from '../types/Memory';
 import { useIsMobile } from '../hooks/isMobile';
-import { supabase } from '../services/supabaseClient';
+import { memories as localMemories } from '../data/dataImage';
 
 const CLOUDINARY_BASE_URL = import.meta.env.VITE_CLOUDINARY_BASE_URL;
 
@@ -28,7 +28,7 @@ interface MediaDisplayProps {
     media: MediaItem;
 }
 
-const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/300x200'; 
+const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/300x200';
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ media }) => {
     const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
@@ -91,78 +91,40 @@ const MemoryDetail: React.FC = () => {
     const [filter, setFilter] = useState<'all' | 'photo' | 'video'>('all');
     const [thumbnails, setThumbnails] = useState<Record<string, string>>({});
     const isMobile = useIsMobile();
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false); // Set to false since we're using local data
     const [memory, setMemory] = useState<Memory | null>(null);
     const [error, setError] = useState<Error | null>(null);
 
     // Enhanced error handling function
     const handleFetchError = (error: Error) => {
         console.error('Error fetching memory:', error);
-
-        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
-            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return null;
-        }
-
         toast.error(`Gagal memuat kenangan: ${error.message}`);
         return null;
     };
 
     useEffect(() => {
-        const fetchMemory = async () => {
-            if (!id) {
-                setError(new Error('No memory ID provided'));
-                setLoading(false);
-                return;
+        if (!id) {
+            setError(new Error('No memory ID provided'));
+            return;
+        }
+
+        try {
+            console.log('Fetching memory detail from local data:', id);
+
+            // Find the memory in local data ONLY - no Supabase calls
+            const foundMemory = localMemories.find(m => m.id === id);
+
+            if (!foundMemory) {
+                throw new Error('Memory not found');
             }
 
-            try {
-                console.log('Fetching memory detail from Supabase:', id);
-
-                // Fetch the memory with its associated media
-                const { data, error } = await supabase
-                    .from('Memory')
-                    .select(`
-                        *,
-                        Media (*)
-                    `)
-                    .eq('id', id)
-                    .single();
-
-                if (error) {
-                    throw new Error(error.message);
-                }
-
-                if (!data) {
-                    throw new Error('Memory not found');
-                }
-
-                // Format the data to match the Memory interface
-                const formattedMemory: Memory = {
-                    ...data,
-                    media: data.Media || []
-                };
-
-                console.log('Retrieved memory:', formattedMemory);
-
-                // Update cached data if needed
-                const cachedData = queryClient.getQueryData<Memory>(['memory', id]);
-                const isDataChanged = !cachedData || JSON.stringify(cachedData) !== JSON.stringify(formattedMemory);
-
-                if (isDataChanged) {
-                    queryClient.setQueryData(['memory', id], formattedMemory);
-                }
-
-                setMemory(formattedMemory);
-            } catch (err) {
-                setError(err as Error);
-                handleFetchError(err as Error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchMemory();
+            // Process and set the memory data
+            setMemory(foundMemory);
+            queryClient.setQueryData(['memory', id], foundMemory);
+        } catch (err) {
+            setError(err as Error);
+            handleFetchError(err as Error);
+        }
     }, [id, queryClient]);
 
     useEffect(() => {

@@ -25,9 +25,9 @@ export type MediaType = 'photo' | 'video';
 // }
 
 export interface MediaItem {
-    id: string;
     type: 'photo' | 'video';
     url: string;
+    id: string;
     thumbnail?: string;
 }
 
@@ -36,10 +36,10 @@ export interface Memory {
     title: string;
     description: string;
     date: string;
-    tags: string[];
     media: MediaItem[];
+    tags: string[];
+    updatedAt: string; // or make optional with updatedAt?: string
     createdAt: string;
-    updatedAt: string;
 }
 
 export type MemoryFormData = {

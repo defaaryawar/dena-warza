@@ -10,55 +10,68 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date.webp'
+                url: '/images/ngedate/pantai-date/pantai-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date2.webp'
+                url: '/images/ngedate/pantai-date/pantai-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date3.webp'
+                url: '/images/ngedate/pantai-date/pantai-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date4.webp'
+                url: '/images/ngedate/pantai-date/pantai-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date5.webp'
+                url: '/images/ngedate/pantai-date/pantai-date5.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date6.webp'
+                url: '/images/ngedate/pantai-date/pantai-date6.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date7.webp'
+                url: '/images/ngedate/pantai-date/pantai-date7.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date8.webp'
+                url: '/images/ngedate/pantai-date/pantai-date8.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date9.webp'
+                url: '/images/ngedate/pantai-date/pantai-date9.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date10.webp'
+                url: '/images/ngedate/pantai-date/pantai-date10.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date11.webp'
+                url: '/images/ngedate/pantai-date/pantai-date11.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pantai-date/pantai-date12.webp'
+                url: '/images/ngedate/pantai-date/pantai-date12.webp',
+                id: ''
             }
         ],
         tags: ['romantis', 'sunset-date', 'beach-love', 'moment-indah', 'kenangan'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '2',
@@ -68,27 +81,33 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/first-date/first-date.webp'
+                url: '/images/ngedate/first-date/first-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/first-date/first-date2.webp'
+                url: '/images/ngedate/first-date/first-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/first-date/first-date3.webp'
+                url: '/images/ngedate/first-date/first-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/first-date/first-date4.webp'
+                url: '/images/ngedate/first-date/first-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/first-date/first-date5.webp'
+                url: '/images/ngedate/first-date/first-date5.webp',
+                id: ''
             }
         ],
         tags: ['romantis', 'date-pertama', 'mall-adventure', 'sweet-moment', 'kenangan'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '3',
@@ -98,23 +117,28 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/mini-market-date/mini-market-date.webp'
+                url: '/images/ngedate/mini-market-date/mini-market-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/mini-market-date/mini-market-date2.webp'
+                url: '/images/ngedate/mini-market-date/mini-market-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/mini-market-date/mini-market-date3.webp'
+                url: '/images/ngedate/mini-market-date/mini-market-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/mini-market-date/mini-market-date4.webp'
+                url: '/images/ngedate/mini-market-date/mini-market-date4.webp',
+                id: ''
             }
         ],
         tags: ['random-date', 'snack-hunting', 'moment-unik', 'love-story', 'adventure'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '4',
@@ -124,27 +148,33 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/pecel-lele-date/pecel-lele-date.webp'
+                url: '/images/ngedate/pecel-lele-date/pecel-lele-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pecel-lele-date/pecel-lele-date2.webp'
+                url: '/images/ngedate/pecel-lele-date/pecel-lele-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pecel-lele-date/pecel-lele-date3.webp'
+                url: '/images/ngedate/pecel-lele-date/pecel-lele-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pecel-lele-date/pecel-lele-date4.webp'
+                url: '/images/ngedate/pecel-lele-date/pecel-lele-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/pecel-lele-date/pecel-lele-date5.webp'
+                url: '/images/ngedate/pecel-lele-date/pecel-lele-date5.webp',
+                id: ''
             }
         ],
         tags: ['date', 'indonesian-food', 'food-adventure', 'quality-time', 'love'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '5',
@@ -154,7 +184,8 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/mall-date/mall-date.webp'
+                url: '/images/ngedate/mall-date/mall-date.webp',
+                id: ''
             },
             // {
             //     type: 'video',
@@ -168,7 +199,8 @@ export const memories: Memory[] = [
             // }
         ],
         tags: ['spontan', 'mall', 'quality-time', 'shopping', 'fun'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '6',
@@ -178,23 +210,28 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/photo-both/photo-both.webp'
+                url: '/images/ngedate/photo-both/photo-both.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/photo-both/photo-both2.webp'
+                url: '/images/ngedate/photo-both/photo-both2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/photo-both/photo-both3.webp'
+                url: '/images/ngedate/photo-both/photo-both3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/photo-both/photo-both4.webp'
+                url: '/images/ngedate/photo-both/photo-both4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/photo-both/photo-both5.webp'
+                url: '/images/ngedate/photo-both/photo-both5.webp',
+                id: ''
             },
             // {
             //     type: 'video',
@@ -203,7 +240,8 @@ export const memories: Memory[] = [
             // }
         ],
         tags: ['photo-both', 'memory', 'fun', 'quality-time', 'love'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '7',
@@ -213,19 +251,23 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/cafe-date/cafe-date.webp'
+                url: '/images/ngedate/cafe-date/cafe-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/cafe-date/cafe-date2.webp'
+                url: '/images/ngedate/cafe-date/cafe-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/cafe-date/cafe-date3.webp'
+                url: '/images/ngedate/cafe-date/cafe-date3.webp',
+                id: ''
             },
         ],
         tags: ['cafe', 'coffee', 'quality-time', 'intimate', 'love'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '8',
@@ -235,28 +277,34 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/ragunan-date/ragunan-date.webp'
+                url: '/images/ngedate/ragunan-date/ragunan-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/ragunan-date/ragunan-date2.webp'
+                url: '/images/ngedate/ragunan-date/ragunan-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/ragunan-date/ragunan-date3.webp'
+                url: '/images/ngedate/ragunan-date/ragunan-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/ragunan-date/ragunan-date4.webp'
+                url: '/images/ngedate/ragunan-date/ragunan-date4.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738698962/vidio-1_hppfxg.mp4',
-                thumbnail: '/images/ngedate/ragunan-date/ragunan-date.webp'
+                thumbnail: '/images/ngedate/ragunan-date/ragunan-date.webp',
+                id: ''
             }
         ],
         tags: ['adventure', 'zoo', 'quality-time', 'fun', 'love'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '9',
@@ -266,27 +314,33 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/bioskop-date/bioskop-date2.webp'
+                url: '/images/ngedate/bioskop-date/bioskop-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/bioskop-date/bioskop-date.webp'
+                url: '/images/ngedate/bioskop-date/bioskop-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/bioskop-date/bioskop-date3.webp'
+                url: '/images/ngedate/bioskop-date/bioskop-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/bioskop-date/bioskop-date4.webp'
+                url: '/images/ngedate/bioskop-date/bioskop-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/bioskop-date/bioskop-date5.webp'
+                url: '/images/ngedate/bioskop-date/bioskop-date5.webp',
+                id: ''
             }
         ],
         tags: ['movie', 'cinema', 'date', 'fun', 'adventure'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '10',
@@ -296,71 +350,87 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date.webp'
+                url: '/images/ngedate/nako-date/nako-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date2.webp'
+                url: '/images/ngedate/nako-date/nako-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date3.webp'
+                url: '/images/ngedate/nako-date/nako-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date4.webp'
+                url: '/images/ngedate/nako-date/nako-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date5.webp'
+                url: '/images/ngedate/nako-date/nako-date5.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date6.webp'
+                url: '/images/ngedate/nako-date/nako-date6.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date7.webp'
+                url: '/images/ngedate/nako-date/nako-date7.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date8.webp'
+                url: '/images/ngedate/nako-date/nako-date8.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date9.webp'
+                url: '/images/ngedate/nako-date/nako-date9.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date10.webp'
+                url: '/images/ngedate/nako-date/nako-date10.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/nako-date/nako-date11.webp'
+                url: '/images/ngedate/nako-date/nako-date11.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699100/vidio-1_dv180e.mp4',
-                thumbnail: '/images/ngedate/nako-date/nako-date.webp'
+                thumbnail: '/images/ngedate/nako-date/nako-date.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699101/vidio-2_atuwm4.mp4',
-                thumbnail: '/images/ngedate/nako-date/nako-date6.webp'
+                thumbnail: '/images/ngedate/nako-date/nako-date6.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699099/vidio-3_oug9xl.mp4',
-                thumbnail: '/images/ngedate/nako-date/nako-date10.webp'
+                thumbnail: '/images/ngedate/nako-date/nako-date10.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699099/vidio-4_rfe16e.mp4',
-                thumbnail: '/images/ngedate/nako-date/nako-date11.webp'
+                thumbnail: '/images/ngedate/nako-date/nako-date11.webp',
+                id: ''
             },
         ],
         tags: ['coffee', 'relax', 'date', 'quality-time', 'love'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '11',
@@ -370,74 +440,90 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date2.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date3.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date4.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date5.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date5.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date6.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date6.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date7.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date7.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                url: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699022/vidio-1_a24fkc.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699021/vidi0-2_lpyagv.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699021/vidi0-2_lpyagv.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699027/vidi0-4_jkyqzu.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699091/vidi0-5_liew8b.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699057/vidi0-6_xzghhi.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699080/vidi0-7_qhsk60.mp4',
-                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp'
+                thumbnail: '/images/ngedate/kopi-kembali-ke-alam-date/kopi-kembali-ke-alam-date8.webp',
+                id: ''
             },
         ],
         tags: ['coffee', 'nature', 'relax', 'quality-time', 'love'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '12',
@@ -447,23 +533,28 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/wisudaan/wisudaan.webp'
+                url: '/images/ngedate/wisudaan/wisudaan.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/wisudaan/wisudaan2.webp'
+                url: '/images/ngedate/wisudaan/wisudaan2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/wisudaan/wisudaan3.webp'
+                url: '/images/ngedate/wisudaan/wisudaan3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/wisudaan/wisudaan4.webp'
+                url: '/images/ngedate/wisudaan/wisudaan4.webp',
+                id: ''
             }
         ],
         tags: ['graduation', 'achievement', 'love', 'memory', 'success'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '13',
@@ -473,27 +564,33 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/roti-buaya-date/roti-buaya-date.webp'
+                url: '/images/ngedate/roti-buaya-date/roti-buaya-date.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/roti-buaya-date/roti-buaya-date2.webp'
+                url: '/images/ngedate/roti-buaya-date/roti-buaya-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/roti-buaya-date/roti-buaya-date3.webp'
+                url: '/images/ngedate/roti-buaya-date/roti-buaya-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/roti-buaya-date/roti-buaya-date4.webp'
+                url: '/images/ngedate/roti-buaya-date/roti-buaya-date4.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/roti-buaya-date/roti-buaya-date5.webp'
+                url: '/images/ngedate/roti-buaya-date/roti-buaya-date5.webp',
+                id: ''
             }
         ],
         tags: ['tradition', 'love', 'food', 'moment', 'culture'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     },
     {
         id: '14',
@@ -503,23 +600,28 @@ export const memories: Memory[] = [
         media: [
             {
                 type: 'photo',
-                url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date3.webp'
+                url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date3.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date2.webp'
+                url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date2.webp',
+                id: ''
             },
             {
                 type: 'photo',
-                url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date.webp'
+                url: '/images/ngedate/jalan-jalan-date/jalan-jalan-date.webp',
+                id: ''
             },
             {
                 type: 'video',
                 url: 'https://res.cloudinary.com/dfejmfqgt/video/upload/v1738699015/vidio-1_ius321.mp4',
-                thumbnail: '/images/ngedate/jalan-jalan-date/jalan-jalan-date2.webp'
+                thumbnail: '/images/ngedate/jalan-jalan-date/jalan-jalan-date2.webp',
+                id: ''
             },
         ],
         tags: ['tradition', 'love', 'food', 'moment', 'culture'],
-        updatedAt: undefined
+        updatedAt: '',
+        createdAt: ''
     }
 ];

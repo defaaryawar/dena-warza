@@ -1,58 +1,45 @@
+// src/hooks/useFetchMemories.ts
 import { useQuery } from 'react-query';
-import { supabase } from '../services/supabaseClient';
 import { Memory, MediaItem } from '../types/Memory';
 import { toast } from 'react-hot-toast';
+import { memories as localMemories } from '../data/dataImage'; // Import local data
 
 export const useFetchMemories = () => {
     const handleFetchError = (error: Error) => {
-        if (error.message.toLowerCase().includes('network') || error.message.toLowerCase().includes('fetch')) {
-            toast.error('Gagal terhubung ke server. Periksa koneksi internet Anda.');
-            return [];
-        }
-
         toast.error(`Gagal memuat kenangan: ${error.message}`);
         return [];
     };
 
-    return useQuery<(Memory & { media: MediaItem[] })[], Error>(
-        ['latest_memories_with_media'],
+    return useQuery<Memory[], Error>(
+        ['local_memories'],
         async () => {
             try {
-                console.log('Fetching memories with media from Supabase');
+                console.log('Using local memories data');
 
-                // Fetch memories with their associated media
-                const { data, error } = await supabase
-                    .from('Memory')
-                    .select(`
-                        *,
-                        Media (*)
-                    `)
-                    .order('date', { ascending: false });
-
-                if (error) {
-                    throw new Error(error.message);
-                }
-
-                if (!data) {
-                    return [];
-                }
-
-                // Map the data to match the Memory interface
-                const combinedData = data.map(memory => ({
+                // Transform and sort the local data
+                const processedMemories = localMemories.map(memory => ({
                     ...memory,
-                    media: memory.Media || [] // Ensure media is always an array
-                }));
+                    // Ensure media items have IDs
+                    media: memory.media.map((item, index) => ({
+                        ...item,
+                        id: item.id || `media-${memory.id}-${index}` // Generate ID if missing
+                    })),
+                    // Set createdAt/updatedAt using the memory date if not provided
+                    createdAt: memory.createdAt || `${memory.date}T00:00:00.000Z`,
+                    updatedAt: memory.updatedAt || `${memory.date}T00:00:00.000Z`
+                })).sort((a, b) =>
+                    new Date(b.date).getTime() - new Date(a.date).getTime()
+                );
 
-                console.log('Combined memories with media:', combinedData);
-                return combinedData;
+                return processedMemories;
             } catch (err) {
-                console.error('Error fetching memories with media:', err);
-                return handleFetchError(err as Error);
+                console.error('Error processing local memories:', err);
+                throw new Error('Failed to process local memories data');
             }
         },
         {
-            staleTime: 120 * 60 * 1000,
-            cacheTime: 120 * 60 * 1000,
+            staleTime: Infinity, // Local data never becomes stale
+            cacheTime: Infinity, // Cache forever
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
             refetchOnMount: false,

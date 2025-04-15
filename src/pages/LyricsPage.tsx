@@ -490,7 +490,7 @@ export const EnhancedLyricsPage = () => {
                             whileTap={{ scale: 0.95 }}
                         >
                             <span className="mr-2">❤️</span>
-                            <span className="text-sm md:text-base">Pesan Cinta</span>
+                            <span className="text-sm md:text-base">Baca ya cantik</span>
                         </motion.button>
 
                         {/* Gift button */}
